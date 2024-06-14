@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!-- Ayuda con edici�n html https://www.w3schools.com/howto/default.asp -->
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title th:text="#{tasks.title}"></title>
+<link rel="stylesheet" href="/form-styles.css">
+</head>
+<body>
+<div th:include="navbar.html"></div>
+
+<table class="table" id="EPTable" style="margin-left: auto; margin-right: auto;">
+		<thead>
+			<tr>
+				<th scope="row" th:text="#{eps.resource}">Resource</th>
+				<th scope="row" th:text="#{eps.interaction}">Interaction</th>
+				<th scope="row" th:text="#{eps.signalName}">SignalName</th>
+							
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="ep : ${eps}">
+				<td th:text="${ep.resource}">Error</td>
+				<td th:text="${ep.interaction}">Error</td>
+				<td th:text="${ep.signalName}">Error</td>
+					
+			</tr>
+		</tbody>
+		</table>
+</body>
+</html>

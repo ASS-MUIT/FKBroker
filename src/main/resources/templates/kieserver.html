@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<!-- Ayuda con edici�n html https://www.w3schools.com/howto/default.asp -->
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title th:text="#{tasks.title}"></title>
+<link rel="stylesheet" href="/form-styles.css">
+</head>
+<body>
+
+<table class="table" id="serverTable" style="margin-left: auto; margin-right: auto;">
+	
+		<tbody>
+			<tr>
+			
+				<td th:text="${server.url}">Error</td>
+				<td th:text="${server.usu}">Error</td>
+				<td th:text="${server.pwd}">Error</td>				
+			</tr>
+		</tbody>
+		</table>
+</body>
+</html>
