@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Gestión de subscripciones</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/form-styles.css">
+</head>
+<body>
+<div th:include="topnav.html"></div>
+<div class="container">
+    <div class="jumbotron" style="background-image: url('img/bgimage.png'); background-size: cover; color: #000000;">
+        <div class="card topbackground">
+            <h1 class="text-center"><strong>Bienvenido a Gestión de Subscripciones</strong></h1>
+            <h5 class="text-center"><strong>Aplicación iniciada correctamente</strong></h5>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Listado de Subscription Topics -->
+        <div class="col-12 mb-3" th:include="subscriptiontopics :: content"></div>
+
+        <!-- Listado de Suscripciones -->
+        <div class="col-12 mb-3" th:include="subscriptions :: content"></div>
+
+        <!-- Formulario para crear suscripción -->
+        <div class="col-12 mb-3" th:include="createSubscription :: content"></div>
+    </div>
+</div>
+</body>
+</html>

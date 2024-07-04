@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lista de Kie Servers</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/form-styles.css">
+</head>
+<body>
+<div th:include="topnav.html"></div>
+<div class="container">
+    <div class="jumbotron">
+        <div class="card topbackground">
+            <h1 class="text-center"><strong>Gestión de Kie Servers</strong></h1>
+            <h5 class="text-center"><strong>Administración de Servidores Kie</strong></h5>
+        </div>
+    </div>
+    <h2>Kie Servers</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>URL</th>
+                <th>Usuario</th>
+                <th>Contraseña</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="kieServer : ${kieServers}">
+                <td th:text="${kieServer.url}"></td>
+                <td th:text="${kieServer.usu}"></td>
+                <td th:text="${kieServer.pwd}"></td>
+                <td>
+                    <!-- Botón para eliminar el servidor Kie -->
+                    <form th:action="@{/kieServers/delete}" method="post">
+                        <input type="hidden" name="url" th:value="${kieServer.url}">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Formulario para agregar un nuevo servidor Kie -->
+    <h2>Agregar Kie Server</h2>
+    <form th:action="@{/kieServers/add}" method="post">
+        <div class="form-group">
+            <label for="url">URL</label>
+            <input type="text" class="form-control" id="url" name="url" required>
+        </div>
+        <div class="form-group">
+            <label for="usu">Usuario</label>
+            <input type="text" class="form-control" id="usu" name="usu" required>
+        </div>
+        <div class="form-group">
+            <label for="pwd">Contraseña</label>
+            <input type="password" class="form-control" id="pwd" name="pwd" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Agregar</button>
+    </form>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+</body>
+</html>

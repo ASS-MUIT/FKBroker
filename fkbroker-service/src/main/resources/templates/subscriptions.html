@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Subscriptions</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div th:fragment="content">
+        <h2>Subscriptions</h2>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#subscriptionsTable" aria-expanded="false" aria-controls="subscriptionsTable">
+            Ocultar/Mostrar Subscripciones
+        </button>
+        <div id="subscriptionsTable" class="collapse show">
+            <table class="table mt-3">
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Topic</th>
+                        <th>ID</th>
+                        <th>Filters</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="subscription : ${subscriptions}">
+                        <td th:text="${subscription.endpoint}">Endpoint</td>
+                        <td th:text="${subscription.topic}">Topic</td>
+                        <td th:text="${subscription.id}">ID</td>
+                        <td>
+                            <ul>
+                                <li th:each="filter : ${subscription.filters}">
+                                    <span th:text="'Parameter: ' + ${filter.filterParameter}"></span>
+                                    <span th:if="${filter.comparator != null}" th:text="', Comparator: ' + ${filter.comparator}"></span>
+                                    <span th:if="${filter.modifier != null}" th:text="', Modifier: ' + ${filter.modifier}"></span>
+                                    <span th:text="', Value: ' + ${filter.value}"></span>
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            <form th:action="@{/delete-subscription}" method="post">
+                                <input type="hidden" name="subscriptionId" th:value="${subscription.id}">
+                                <input type="hidden" name="fhirUrl" th:value="${fhirUrl}">
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#subscriptionsTable').collapse({
+                toggle: false
+            });
+        });
+    </script>
+</body>
+</html>

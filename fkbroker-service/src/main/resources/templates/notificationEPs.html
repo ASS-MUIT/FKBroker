@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Notification EPs</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/form-styles.css">
+</head>
+<body>
+<div th:include="topnav.html"></div>
+<div class="container">
+    <div class="jumbotron">
+        <div class="card topbackground">
+            <h1 class="text-center"><strong>Notification EPs</strong></h1>
+            <h5 class="text-center"><strong>Gestión de Notification EPs</strong></h5>
+        </div>
+    </div>
+    <h2>Notification EPs</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Resource</th>
+                <th>Interaction</th>
+                <th>Signal Name</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="notificationEP : ${notificationEPs}">
+                <td th:text="${notificationEP.id}">ID</td>
+                <td th:text="${notificationEP.resource}">Resource</td>
+                <td th:text="${notificationEP.interaction}">Interaction</td>
+                <td th:text="${notificationEP.signalName}">Signal Name</td>
+                <td>
+                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#editModal" 
+                            th:attr="data-id=${notificationEP.id},data-signalname=${notificationEP.signalName}">Editar</button>
+                    <form th:action="@{/notificationEPs/delete}" method="post" style="display:inline;">
+                        <input type="hidden" name="id" th:value="${notificationEP.id}" />
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Agregar Notification EP</h2>
+    <form th:action="@{/notificationEPs/add}" method="post">
+        <div class="form-group">
+            <label for="resource">Resource:</label>
+            <input type="text" class="form-control" id="resource" name="resource" required>
+        </div>
+        <div class="form-group">
+            <label for="interaction">Interaction:</label>
+            <input type="text" class="form-control" id="interaction" name="interaction" required>
+        </div>
+        <div class="form-group">
+            <label for="signalName">Signal Name:</label>
+            <input type="text" class="form-control" id="signalName" name="signalName" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Agregar</button>
+    </form>
+</div>
+
+<!-- Modal para editar Signal Name -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form th:action="@{/notificationEPs/edit}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar Signal Name</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editId" name="id">
+                    <div class="form-group">
+                        <label for="editSignalName">Signal Name:</label>
+                        <input type="text" class="form-control" id="editSignalName" name="signalName" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+<script>
+    $('#editModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        var signalName = button.data('signalname');
+
+        var modal = $(this);
+        modal.find('#editId').val(id);
+        modal.find('#editSignalName').val(signalName);
+    });
+</script>
+</body>
+</html>

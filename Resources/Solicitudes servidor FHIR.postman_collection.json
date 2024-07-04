@@ -1,0 +1,211 @@
+{
+	"info": {
+		"_postman_id": "53a06675-07d9-4d76-bb8c-16db6710f751",
+		"name": "Solicitudes servidor FHIR",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29390100"
+	},
+	"item": [
+		{
+			"name": "1. SubscriptionTopic",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sa",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"resourceType\" : \"SubscriptionTopic\",\r\n  \"id\" : \"1\",\r\n  \"url\" : \"http://localhost:8080/fhir/SubscriptionTopic/1\",\r\n  \"title\" : \"Creación de ServiceRequest\",\r\n  \"status\" : \"active\",\r\n  \"description\" : \"Creación de ServiceRequest\",\r\n  \"resourceTrigger\" : [{\r\n    \"description\" : \"Creación de ServiceRequest\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"supportedInteraction\" : [\"create\"]}],\r\n  \"canFilterBy\" : [{\r\n    \"description\" : \"filtrado por status.\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"filterParameter\" : \"status\",\r\n    \"comparator\" : [\"eq\"]\r\n  }]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/fhir/SubscriptionTopic",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"fhir",
+						"SubscriptionTopic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. SubscriptionTopic",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sa",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"resourceType\" : \"SubscriptionTopic\",\r\n  \"id\" : \"2\",\r\n  \"url\" : \"http://localhost:8080/fhir/SubscriptionTopic/2\",\r\n  \"title\" : \"Modificación de ServiceRequest\",\r\n  \"status\" : \"active\",\r\n  \"description\" : \"Modificación de ServiceRequest\",\r\n  \"resourceTrigger\" : [{\r\n    \"description\" : \"Update de ServiceRequest\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"supportedInteraction\" : [\"update\"]}],\r\n  \"canFilterBy\" : [{\r\n    \"description\" : \"filtrado por status.\",\r\n    \"resource\" : \"Encounter\",\r\n    \"filterParameter\" : \"status\",\r\n    \"comparator\" : [\"eq\"]\r\n  }]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/fhir/SubscriptionTopic",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"fhir",
+						"SubscriptionTopic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. ServiceRequest",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sa",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"resourceType\": \"ServiceRequest\",\r\n  \"id\": \"service-request-1\",\r\n  \"status\": \"active\",\r\n  \"intent\": \"order\",\r\n  \"code\": {\r\n    \"coding\": [\r\n      {\r\n        \"system\": \"http://loinc.org\",\r\n        \"code\": \"12345-6\",\r\n        \"display\": \"Example Service Request\"\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/fhir/ServiceRequest",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"fhir",
+						"ServiceRequest"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Mod ServiceRequest",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sa",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"resourceType\": \"ServiceRequest\",\r\n  \"id\": \"5\",\r\n  \"status\": \"draft\",\r\n  \"intent\": \"order\",\r\n  \"code\": {\r\n    \"coding\": [\r\n      {\r\n        \"system\": \"http://loinc.org\",\r\n        \"code\": \"12345-6\",\r\n        \"display\": \"Example Service Request\"\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/fhir/ServiceRequest/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"fhir",
+						"ServiceRequest",
+						"5"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

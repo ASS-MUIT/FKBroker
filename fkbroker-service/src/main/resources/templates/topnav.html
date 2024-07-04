@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/form-styles.css">
+</head>
+<body>
+<div class="topnav">
+    <div class="d-flex justify-content-between">
+        <div>
+            <a href="/" th:text="#{navbar.home}">Gestión de suscripciones</a>
+            <a href="/kieServers">Gestión de Servidores Kie</a>
+            <a href="/notificationEPs">Gestión de Endpoints</a>
+        </div>
+        <div>
+            <a href="/logout" class="float-right" th:text="#{navbar.logout}">Cerrar sesión</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Subscription Topics</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        ul {
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .filter-detail span {
+            display: inline-block;
+            margin-right: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<div th:fragment="content">
+    <h2>Subscription Topics</h2>
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#topicsTable" aria-expanded="false" aria-controls="topicsTable">
+        Ocultar/Mostrar Topicos
+    </button>
+    <div id="topicsTable" class="collapse show mt-3">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Filters</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="topic : ${subscriptionTopics}">
+                    <td th:text="${topic.name}">Name</td>
+                    <td th:text="${topic.id}">ID</td>
+                    <td>
+                        <ul style="text-align: left; padding-left: 0;">
+                            <li th:each="filter : ${topic.filters}" style="margin-bottom: 10px;">
+                                <span th:text="'Description: ' + ${filter.description}"></span>
+                                <span th:text="'Parameter: ' + ${filter.filterParameter}"></span>
+                                <span th:text="'Comparators: ' + ${filter.comparators}"></span>
+                                <span th:text="'Modifiers: ' + ${filter.modifiers}"></span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#topicsTable').collapse({
+            toggle: false
+        });
+    });
+</script>
+</body>
+</html>
