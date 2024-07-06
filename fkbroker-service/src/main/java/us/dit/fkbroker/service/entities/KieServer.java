@@ -17,8 +17,8 @@
 **/
 package us.dit.fkbroker.service.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 /**
  * Entidad que representa los datos de un servidor kie
