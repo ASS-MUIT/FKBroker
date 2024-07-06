@@ -34,7 +34,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"resourceType\" : \"SubscriptionTopic\",\r\n  \"id\" : \"1\",\r\n  \"url\" : \"http://localhost:8080/fhir/SubscriptionTopic/1\",\r\n  \"title\" : \"Creación de ServiceRequest\",\r\n  \"status\" : \"active\",\r\n  \"description\" : \"Creación de ServiceRequest\",\r\n  \"resourceTrigger\" : [{\r\n    \"description\" : \"Creación de ServiceRequest\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"supportedInteraction\" : [\"create\"]}],\r\n  \"canFilterBy\" : [{\r\n    \"description\" : \"filtrado por status.\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"filterParameter\" : \"status\",\r\n    \"comparator\" : [\"eq\"]\r\n  }]\r\n}",
+					"raw": "{\r\n  \"resourceType\" : \"SubscriptionTopic\",\r\n  \"id\" : \"1\",\r\n  \"url\" : \"http://localhost:8888/fhir/SubscriptionTopic/1\",\r\n  \"title\" : \"Creación de ServiceRequest\",\r\n  \"status\" : \"active\",\r\n  \"description\" : \"Creación de ServiceRequest\",\r\n  \"resourceTrigger\" : [{\r\n    \"description\" : \"Creación de ServiceRequest\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"supportedInteraction\" : [\"create\"]}],\r\n  \"canFilterBy\" : [{\r\n    \"description\" : \"filtrado por status.\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"filterParameter\" : \"status\",\r\n    \"comparator\" : [\"eq\"]\r\n  }]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -42,12 +42,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/fhir/SubscriptionTopic",
+					"raw": "http://localhost:8888/fhir/SubscriptionTopic",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8888",
 					"path": [
 						"fhir",
 						"SubscriptionTopic"
@@ -84,7 +84,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"resourceType\" : \"SubscriptionTopic\",\r\n  \"id\" : \"2\",\r\n  \"url\" : \"http://localhost:8080/fhir/SubscriptionTopic/2\",\r\n  \"title\" : \"Modificación de ServiceRequest\",\r\n  \"status\" : \"active\",\r\n  \"description\" : \"Modificación de ServiceRequest\",\r\n  \"resourceTrigger\" : [{\r\n    \"description\" : \"Update de ServiceRequest\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"supportedInteraction\" : [\"update\"]}],\r\n  \"canFilterBy\" : [{\r\n    \"description\" : \"filtrado por status.\",\r\n    \"resource\" : \"Encounter\",\r\n    \"filterParameter\" : \"status\",\r\n    \"comparator\" : [\"eq\"]\r\n  }]\r\n}",
+					"raw": "{\r\n  \"resourceType\" : \"SubscriptionTopic\",\r\n  \"id\" : \"2\",\r\n  \"url\" : \"http://localhost:8888/fhir/SubscriptionTopic/2\",\r\n  \"title\" : \"Modificación de ServiceRequest\",\r\n  \"status\" : \"active\",\r\n  \"description\" : \"Modificación de ServiceRequest\",\r\n  \"resourceTrigger\" : [{\r\n    \"description\" : \"Update de ServiceRequest\",\r\n    \"resource\" : \"ServiceRequest\",\r\n    \"supportedInteraction\" : [\"update\"]}],\r\n  \"canFilterBy\" : [{\r\n    \"description\" : \"filtrado por status.\",\r\n    \"resource\" : \"Encounter\",\r\n    \"filterParameter\" : \"status\",\r\n    \"comparator\" : [\"eq\"]\r\n  }]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -92,12 +92,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/fhir/SubscriptionTopic",
+					"raw": "http://localhost:8888/fhir/SubscriptionTopic",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8888",
 					"path": [
 						"fhir",
 						"SubscriptionTopic"
@@ -142,12 +142,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/fhir/ServiceRequest",
+					"raw": "http://localhost:8888/fhir/ServiceRequest",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8888",
 					"path": [
 						"fhir",
 						"ServiceRequest"
@@ -192,12 +192,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/fhir/ServiceRequest/5",
+					"raw": "http://localhost:8888/fhir/ServiceRequest/5",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8888",
 					"path": [
 						"fhir",
 						"ServiceRequest",
