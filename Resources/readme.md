@@ -40,12 +40,14 @@ A partir de ahora tendrá disponible
    - Crea un nuevo proyecto.
    - En la ventana de activos aparece la opción de importar activos, se deben seleccionar los archivos .bpmn que se proporcionan
    - Como alternativa se proporcional el kjar
+![Proyecto en BC](https://github.com/tfg-projects-dit-us/FKBroker/blob/master/Resources/img/proyectoEnBC.jpg)
 4. **Desplegar el Proyecto**:
    - Una vez importado, selecciona el proyecto y haz clic en "Build & Deploy".
    - Eso levantará un servidor kie con los procesos desplegados
+![Servidor KIE desplegado](https://github.com/tfg-projects-dit-us/FKBroker/blob/master/Resources/img/servidorKIEEnEjecucion.jpg)
 5. **Consultar las instancias de procesos**:
    - Desde el menú de inicio, vamos al menú "instancias de proceso". Desde aquí se pueden visualizar las instancias creadas al recibir señales.
-
+     
 ### Servidor FHIR local (Alternativa)
 
 Si prefiere levantar el servidor FHIR local sin usar docker puede seguir estas instrucciones:
