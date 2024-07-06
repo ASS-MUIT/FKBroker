@@ -32,6 +32,10 @@ import javax.persistence.Id;
 @Entity
 public class KieServer {
 	
+	public KieServer(){
+		super();
+	}
+	
 	public KieServer(String url, String usu, String pwd) {
 		super();
 		this.url = url;
