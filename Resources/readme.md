@@ -45,7 +45,9 @@ A partir de ahora tendrá disponible
    - Eso levantará un servidor kie con los procesos desplegados
 5. **Consultar las instancias de procesos**:
    - Desde el menú de inicio, vamos al menú "instancias de proceso". Desde aquí se pueden visualizar las instancias creadas al recibir señales.
-[!Proyecto en BC](https://github.com/tfg-projects-dit-us/FKBroker/blob/master/Resources/img/proyectoEnBC.jpg)
+     
+![Proyecto en BC](https://github.com/tfg-projects-dit-us/FKBroker/blob/master/Resources/img/proyectoEnBC.jpg)
+
 ### Servidor FHIR local (Alternativa)
 
 Si prefiere levantar el servidor FHIR local sin usar docker puede seguir estas instrucciones:
