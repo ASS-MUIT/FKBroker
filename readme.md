@@ -5,9 +5,13 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/tfg-projects-dit-us/FKBroker)
 ![GitHub watchers](https://img.shields.io/github/watchers/tfg-projects-dit-us/FKBroker)
 ![GitHub](https://img.shields.io/github/license/tfg-projects-dit-us/FKBroker)
-# Proyecto FKBroker
 
-En este proyecto se desarrolla un bróker FHIR-KIE, que permite gestionar suscripciones a servidores FHIR y envíos de señales a servidores KIE derivados de la recepción de notificaciones de los primeros.
+
+<img src="https://github.com/tfg-projects-dit-us/FKBroker/blob/master/Resources/img/steampunk.png" width="200" />
+
+# FKBroker
+
+En este proyecto se desarrolla un bróker FHIR-KIE, que permite gestionar suscripciones a servidores FHIR y envíos de señales a servidores KIE, derivadas de la recepción de notificaciones de los primeros.
 
 Actualmente es una versión beta en la que se han incluido sólo las capacidades más elementales
 
@@ -34,6 +38,9 @@ Este proyecto es el resultado del trabajo desarrollado por los alumnos que a con
 
 La supervisión incluye la generación de ideas, la corrección, el desarrollo de algunos componentes y la orientación técnica durante todo el proceso de desarrollo.
 
+**Graphical design**
+- Icon created by Paul J. -Flaticon https://www.flaticon.com/free-icons/steampunk
+<a href="https://www.flaticon.com/free-icons/steampunk" title="steampunk icons">Steampunk icons created by Paul J. - Flaticon</a>
 
 ## Contenido
 1. fkbroker-service: código del bróker
