@@ -26,9 +26,11 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.json.JSONArray;
-import org.json.JSONObject;
+///import org.json.JSONArray;
+//import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.configurationprocessor.json.JSONArray;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -457,7 +459,7 @@ public class FhirClient {
                 }
             }
 
-            if (!filterByArray.isEmpty()) {
+            if (filterByArray.length()!=0) {
                 subscriptionJson.put("filterBy", filterByArray);
             }
 
@@ -474,6 +476,8 @@ public class FhirClient {
         } catch (HttpClientErrorException e) {
             System.err.println("Client error: " + e.getMessage());
             System.err.println("Response body: " + e.getResponseBodyAsString());
+        } catch(Exception e) {
+        	 System.err.println("capturada excepcion: " + e.getMessage());
         }
     }
 

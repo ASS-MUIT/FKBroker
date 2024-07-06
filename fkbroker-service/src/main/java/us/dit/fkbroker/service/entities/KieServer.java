@@ -17,8 +17,8 @@
 **/
 package us.dit.fkbroker.service.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 /**
  * Entidad que representa los datos de un servidor kie
@@ -31,9 +31,7 @@ import jakarta.persistence.Id;
 
 @Entity
 public class KieServer {
-	public KieServer() {
-		super();
-	}	
+	
 	public KieServer(String url, String usu, String pwd) {
 		super();
 		this.url = url;
