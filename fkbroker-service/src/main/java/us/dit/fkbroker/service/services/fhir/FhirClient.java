@@ -23,14 +23,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.json.JSONArray;
+import org.json.JSONObject;
 ///import org.json.JSONArray;
 //import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.configurationprocessor.json.JSONArray;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -54,6 +57,7 @@ import ca.uhn.fhir.parser.IParser;
  */
 @Service
 public class FhirClient {
+	 private static final Logger logger = LogManager.getLogger();
 
     @Value("${fhir.server.username}")
     private String username;
@@ -423,6 +427,7 @@ public class FhirClient {
      * @param endpoint el endpoint de la suscripción.
      */
     public void createSubscription(String topicUrl, String payload, List<Filter> filters, String fhirUrl, String endpoint) {
+    	logger.debug("Entro en createSubscription del fhirClient");
         try {
             String url = fhirUrl + "/Subscription";
             HttpHeaders headers = createHeaders();

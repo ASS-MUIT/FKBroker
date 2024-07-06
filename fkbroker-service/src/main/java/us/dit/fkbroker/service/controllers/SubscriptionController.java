@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -46,6 +48,7 @@ import us.dit.fkbroker.service.services.kie.NotificationEPService;
  */
 @Controller
 public class SubscriptionController {
+    private static final Logger logger = LogManager.getLogger();
 
     @Autowired
     private SubscriptionService subscriptionService;
@@ -78,7 +81,7 @@ public class SubscriptionController {
     public String getSubscriptionPage(Model model, @RequestParam String fhirUrl) {
 
         String fhirUrlFull = "http://" + fhirUrl + "/fhir";
-        System.out.println(fhirUrlFull);
+        logger.info("URL del servidor fhir "+fhirUrlFull);
 
         List<SubscriptionTopicDetails> topics = subscriptionService.getSubscriptionTopics(fhirUrlFull);
         List<SubscriptionDetails> subscriptions = subscriptionService.getSubscriptions(fhirUrlFull);
@@ -103,16 +106,19 @@ public class SubscriptionController {
     @PostMapping("/create-subscription")
     public String createSubscription(@RequestParam String topicUrl, @RequestParam String payload, @RequestParam String fhirUrl, Model model) {
         List<SubscriptionTopicDetails.FilterDetail> filters = subscriptionService.getFilters(topicUrl, fhirUrl);
+      
         model.addAttribute("topicUrl", topicUrl);
         model.addAttribute("payload", payload);
         model.addAttribute("filters", filters);
         model.addAttribute("fhirUrl", fhirUrl);
+        logger.debug("Entrando en create-suscription con los datos "+model.toString());
 
         // Obtener recurso e interacción del topic
         String resource = subscriptionService.getTopicResource(topicUrl);
         String interaction = subscriptionService.getTopicInteraction(topicUrl);
         String endpoint;
-        System.out.println("recurso: " + resource + " interaction: " + interaction);
+        logger.info("recurso: " + resource + " interaction: " + interaction);
+        
 
         // Comparar si existe ya
         Optional<NotificationEP> optionalNotificationEP = notificationEPService.findNotificationEPByResourceAndInteraction(resource, interaction);
@@ -120,6 +126,7 @@ public class SubscriptionController {
             // Si existe, obtener el id y este será nuestro endpoint
             NotificationEP existingNotificationEP = optionalNotificationEP.get();
             endpoint = applicationAddress + "notification/" + existingNotificationEP.getId();
+            logger.debug("Usando endpoint ya existente "+endpoint);
         } else {
             // Si no existe, se crea un endpoint nuevo
             String signalName = interaction + "-" + resource;
@@ -129,8 +136,9 @@ public class SubscriptionController {
             newNotificationEP.setSignalName(signalName);
             NotificationEP savedNotificationEP = notificationEPService.saveNotificationEP(newNotificationEP);
             endpoint = applicationAddress + "notification/" + savedNotificationEP.getId();
+            logger.debug("Creado nuevo endpoint "+endpoint);
         }
-
+        
         model.addAttribute("endpoint", endpoint);
 
         return "subscription-form";
@@ -165,12 +173,14 @@ public class SubscriptionController {
         List<Filter> filters = new ArrayList<>();
         String topicUrl = requestParams.get("topicUrl");
         String payload = requestParams.get("payload");
+        logger.debug("Entando en submit-filters con topicURL "+topicUrl+" y payload "+payload);
 
         for (Map.Entry<String, String> entry : requestParams.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
             if (key.startsWith("filters[") && value != null && !value.isEmpty()) {
+            	logger.debug("Se han encontrado filtros");
                 String parameter = key.substring(8, key.length() - 1);
                 String comparatorKey = "comparators[" + parameter + "]";
                 String modifierKey = "modifiers[" + parameter + "]";
@@ -182,7 +192,7 @@ public class SubscriptionController {
                 filters.add(filter);
             }
         }
-
+        logger.debug("Invoco el método createSubscription de suscriptionService con ", payload, fhirUrl, endpoint, filters, topicUrl);
         subscriptionService.createSubscription(topicUrl, payload, filters, fhirUrl, endpoint);
 
         String url = fhirUrl.replace("http://", "").replace("/fhir", "");
