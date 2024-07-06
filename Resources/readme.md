@@ -47,7 +47,7 @@ A partir de ahora tendrá disponible
 ![Servidor KIE desplegado](https://github.com/tfg-projects-dit-us/FKBroker/blob/master/Resources/img/servidorKIEEnEjecucion.jpg)
 5. **Consultar las instancias de procesos**:
    - Desde el menú de inicio, vamos al menú "instancias de proceso". Desde aquí se pueden visualizar las instancias creadas al recibir señales.
-   - 
+     
 ### Servidor FHIR local (Alternativa)
 
 Si prefiere levantar el servidor FHIR local sin usar docker puede seguir estas instrucciones:
