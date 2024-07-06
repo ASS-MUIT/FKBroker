@@ -53,6 +53,7 @@ Este proyecto es una aplicación para la gestión de suscripciones utilizando FH
    Desde el directorio raiz de la aplicación ejecutar el siguiente comando:
 
    ```bash
-   sudo ./launch.sh clean install -Ppostgres 
+  mvn clean install
+  mvn sprint-boot:run -Ppostgres 
    ```
  
