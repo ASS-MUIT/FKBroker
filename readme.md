@@ -20,11 +20,18 @@ Está desarrollado en el Departamento de Ingeniería Telemática de la Universid
 ## Licencia
 
 Este proyecto está licenciado bajo los términos de la [Licencia Pública General de GNU (GPL) versión 3](https://www.gnu.org/licenses/gpl-3.0.html).
+Este proyecto utiliza las siguientes bibliotecas de terceros:
 
+- jBPM (Apache 2.0) - https://www.jbpm.org/
+Cada una de estas librerías mantiene su propia licencia y términos de uso.
 
 ## License
 
 This project is licensed under the terms of the [GNU General Public License (GPL) version 3](https://www.gnu.org/licenses/gpl-3.0.html).
+This project uses the following third-party libraries:
+
+    jBPM (Apache 2.0) - https://www.jbpm.org/
+Each of these libraries maintains its own license and terms of use.
 
 ## Reconocimientos
 
