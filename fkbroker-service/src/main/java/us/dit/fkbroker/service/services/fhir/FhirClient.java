@@ -47,8 +47,14 @@ import org.springframework.web.client.RestTemplate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import us.dit.fkbroker.service.entities.domain.Filter;
+import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
+import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 
 /**
+ * @deprecated Esta clase ya no se usa y será eliminada en futuras versiones. 
+ * Se recomienda usar {@link FhirService} en su lugar.
+ * 
  * Esta clase desarrolla las distintas operaciones que se realizan sobre elementos FHIR.
  * @author juanmabrazo98
  * @version 1.0
@@ -144,7 +150,7 @@ public class FhirClient {
                     filters.add(new SubscriptionTopicDetails.FilterDetail(description, filterParameter, comparators, modifiers));
                 }
 
-                topicDetails.add(new SubscriptionTopicDetails(name, id, topicUrl, filters));
+                topicDetails.add(new SubscriptionTopicDetails(name, id, topicUrl, null, null, filters));
             }
 
             return topicDetails;

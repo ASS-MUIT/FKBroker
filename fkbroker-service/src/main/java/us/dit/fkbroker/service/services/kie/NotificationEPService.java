@@ -23,16 +23,16 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import us.dit.fkbroker.service.entities.NotificationEP;
+import us.dit.fkbroker.service.entities.db.NotificationEP;
 import us.dit.fkbroker.service.repositories.NotificationEPRepository;
 
 /**
  * Servicio para gestionar las operaciones sobre las entidades NotificationEP.
  * 
  * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
- * 
+ * @author josperbel - Nueva ubicación de entidades
+ * @version 1.1
+ * @date Mar 2025
  */
 @Service
 public class NotificationEPService {
@@ -43,7 +43,8 @@ public class NotificationEPService {
     /**
      * Obtiene todas las entidades NotificationEP.
      * 
-     * @return una lista de objetos NotificationEP que representan todas las entidades NotificationEP.
+     * @return una lista de objetos NotificationEP que representan todas las
+     *         entidades NotificationEP.
      */
     public List<NotificationEP> getAllNotificationEPs() {
         return notificationEPRepository.findAll();
@@ -71,9 +72,10 @@ public class NotificationEPService {
     /**
      * Busca una entidad NotificationEP por su recurso e interacción.
      * 
-     * @param resource el recurso de la entidad NotificationEP.
+     * @param resource    el recurso de la entidad NotificationEP.
      * @param interaction la interacción de la entidad NotificationEP.
-     * @return un Optional que contiene la entidad NotificationEP si se encuentra, o un Optional vacío si no.
+     * @return un Optional que contiene la entidad NotificationEP si se encuentra, o
+     *         un Optional vacío si no.
      */
     public Optional<NotificationEP> findNotificationEPByResourceAndInteraction(String resource, String interaction) {
         return notificationEPRepository.findByResourceAndInteraction(resource, interaction);
@@ -83,7 +85,8 @@ public class NotificationEPService {
      * Busca una entidad NotificationEP por su ID.
      * 
      * @param id el ID de la entidad NotificationEP.
-     * @return un Optional que contiene la entidad NotificationEP si se encuentra, o un Optional vacío si no.
+     * @return un Optional que contiene la entidad NotificationEP si se encuentra, o
+     *         un Optional vacío si no.
      */
     public Optional<NotificationEP> findById(Long id) {
         return notificationEPRepository.findById(id);

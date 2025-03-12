@@ -15,7 +15,7 @@
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
 **/
-package us.dit.fkbroker.service.entities;
+package us.dit.fkbroker.service.entities.db;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -24,48 +24,52 @@ import javax.persistence.Id;
  * Entidad que representa los datos de un servidor kie
  * 
  * @author Isabel Roman
- * @version 1.0
- * @date jul 2024
- * 
+ * @author josperbel - Clase movida de `us.dit.fkbroker.service.entities` a
+ *         `us.dit.fkbroker.service.entities.db`
+ * @version 1.1
+ * @date Mar 2025
  */
-
 @Entity
 public class KieServer {
-	
-	public KieServer(){
-		super();
-	}
-	
-	public KieServer(String url, String usu, String pwd) {
-		super();
-		this.url = url;
-		this.usu = usu;
-		this.pwd = pwd;
-	}
-	
-	@Id
-	private String url;
-	private String usu;
-	private String pwd;
 
-	
-	public String getUrl() {
-		return url;
-	}
-	public void setUrl(String url) {
-		this.url = url;
-	}
-	public String getUsu() {
-		return usu;
-	}
-	public void setUsu(String usu) {
-		this.usu = usu;
-	}
-	public String getPwd() {
-		return pwd;
-	}
-	public void setPwd(String pwd) {
-		this.pwd = pwd;
-	}
-	
+    public KieServer() {
+        super();
+    }
+
+    public KieServer(String url, String usu, String pwd) {
+        super();
+        this.url = url;
+        this.usu = usu;
+        this.pwd = pwd;
+    }
+
+    @Id
+    private String url;
+    private String usu;
+    private String pwd;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUsu() {
+        return usu;
+    }
+
+    public void setUsu(String usu) {
+        this.usu = usu;
+    }
+
+    public String getPwd() {
+        return pwd;
+    }
+
+    public void setPwd(String pwd) {
+        this.pwd = pwd;
+    }
+
 }

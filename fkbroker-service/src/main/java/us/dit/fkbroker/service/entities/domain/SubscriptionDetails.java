@@ -37,39 +37,65 @@ public class SubscriptionDetails {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 }*/
-package us.dit.fkbroker.service.services.fhir;
+package us.dit.fkbroker.service.entities.domain;
 
 import java.util.List;
+
 /**
- * Entidad con detalle de suscripciones, debería moverse al paquete entites y usar convenciones de código mejores (no usar la misma línea para un método...)
- * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
+ * Entidad con detalle de suscripciones
  * 
+ * @author juanmabrazo98
+ * @author josperbel - Clase movida de `us.dit.fkbroker.service.services.fhir` a
+ *         `us.dit.fkbroker.service.entities.domain`
+ * @version 1.1
+ * @date Mar 2025
  */
 public class SubscriptionDetails {
     private String endpoint;
     private String topic;
     private String id;
-    private List<FilterDetail> filters; // Añadido
+    private List<FilterDetail> filters;
 
     // Constructor, getters y setters
     public SubscriptionDetails(String endpoint, String topic, String id, List<FilterDetail> filters) {
         this.endpoint = endpoint;
         this.topic = topic;
         this.id = id;
-        this.filters = filters; // Añadido
+        this.filters = filters;
     }
 
     // Getters y Setters
-    public String getEndpoint() { return endpoint; }
-    public void setEndpoint(String endpoint) { this.endpoint = endpoint; }
-    public String getTopic() { return topic; }
-    public void setTopic(String topic) { this.topic = topic; }
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public List<FilterDetail> getFilters() { return filters; } // Añadido
-    public void setFilters(List<FilterDetail> filters) { this.filters = filters; } // Añadido
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public List<FilterDetail> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<FilterDetail> filters) {
+        this.filters = filters;
+    }
 
     // Clase interna FilterDetail
     public static class FilterDetail {
@@ -85,14 +111,36 @@ public class SubscriptionDetails {
             this.value = value;
         }
 
-        public String getFilterParameter() { return filterParameter; }
-        public void setFilterParameter(String filterParameter) { this.filterParameter = filterParameter; }
-        public String getComparator() { return comparator; }
-        public void setComparator(String comparator) { this.comparator = comparator; }
-        public String getModifier() { return modifier; }
-        public void setModifier(String modifier) { this.modifier = modifier; }
-        public String getValue() { return value; }
-        public void setValue(String value) { this.value = value; }
+        public String getFilterParameter() {
+            return filterParameter;
+        }
+
+        public void setFilterParameter(String filterParameter) {
+            this.filterParameter = filterParameter;
+        }
+
+        public String getComparator() {
+            return comparator;
+        }
+
+        public void setComparator(String comparator) {
+            this.comparator = comparator;
+        }
+
+        public String getModifier() {
+            return modifier;
+        }
+
+        public void setModifier(String modifier) {
+            this.modifier = modifier;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
     }
 }
-

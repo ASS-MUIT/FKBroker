@@ -15,15 +15,18 @@
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
 **/
-package us.dit.fkbroker.service.services.fhir;
+package us.dit.fkbroker.service.entities.domain;
 
 import java.util.Map;
+
 /**
- * Entidad con detalles del formulario de suscripción, debería moverse a la carpeta entities
- * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
+ * Entidad con detalles del formulario de suscripción
  * 
+ * @author juanmabrazo98
+ * @author josperbel - Clase movida de `us.dit.fkbroker.service.services.fhir` a
+ *         `us.dit.fkbroker.service.entities.domain`
+ * @version 1.1
+ * @date Mar 2025
  */
 public class SubscriptionForm {
     private String topicUrl;

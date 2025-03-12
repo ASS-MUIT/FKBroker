@@ -28,8 +28,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import us.dit.fkbroker.service.entities.NotificationEP;
-import us.dit.fkbroker.service.services.fhir.FhirClient;
+import us.dit.fkbroker.service.entities.db.NotificationEP;
+import us.dit.fkbroker.service.services.fhir.FhirService;
 import us.dit.fkbroker.service.services.kie.KieServerService;
 import us.dit.fkbroker.service.services.kie.NotificationEPService;
 
@@ -37,11 +37,11 @@ import us.dit.fkbroker.service.services.kie.NotificationEPService;
  * Controlador para manejar las notificaciones.
  * 
  * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
- * 
+ * @author josperbel - Nueva ubicación de entidades y utilización de nuevo
+ *         servicio {@link FhirService}
+ * @version 1.1
+ * @date Mar 2025
  */
-
 @RestController
 @RequestMapping("/notification")
 public class NotificationController {
@@ -53,13 +53,14 @@ public class NotificationController {
     private KieServerService kieServerService;
 
     @Autowired
-    private FhirClient fhirClient;
+    private FhirService fhirService;
 
     /**
-     * Método que maneja las notificaciones. Llama al método para enviar las señales a los servidores kie
-     * y responde al servidor FHIR indicando que se ha recibido la notificación
+     * Método que maneja las notificaciones. Llama al método para enviar las señales
+     * a los servidores kie y responde al servidor FHIR indicando que se ha recibido
+     * la notificación
      * 
-     * @param id el ID de la notificación.
+     * @param id   el ID de la notificación.
      * @param json el JSON que contiene los detalles de la notificación.
      * @return una respuesta HTTP con el cuerpo del JSON proporcionado.
      */
@@ -70,7 +71,7 @@ public class NotificationController {
             // Responder inmediatamente con 200 OK
             CompletableFuture.runAsync(() -> {
                 NotificationEP notificationEP = optionalNotificationEP.get();
-                String idRecurso = fhirClient.getNotificationResourceId(json);
+                String idRecurso = fhirService.getNotificationResourceId(json);
                 System.out.println("Llamamos a sendsignal. Id del recurso: " + idRecurso);
                 kieServerService.sendSignalToAllKieServers(notificationEP, idRecurso);
             });

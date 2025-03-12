@@ -24,10 +24,20 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import us.dit.fkbroker.service.entities.domain.Filter;
+import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
+import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
+
 /**
- * Servicio para manejar las operaciones relacionadas con SubscriptionTopics y Subscriptions.
-/**
- * Esta clase desarrolla las distintas operaciones que se realizan sobre elementos FHIR.
+ * @deprecated Esta clase ya no se usa y será eliminada en futuras versiones. 
+ * Se recomienda usar {@link FhirService} en su lugar.
+ * 
+ * Servicio para manejar las operaciones relacionadas con SubscriptionTopics y
+ * Subscriptions.
+ *
+ * Esta clase desarrolla las distintas operaciones que se realizan sobre
+ * elementos FHIR.
+ * 
  * @author juanmabrazo98
  * @version 1.0
  * @date jul 2024
@@ -83,7 +93,7 @@ public class SubscriptionService {
      * Obtiene los filtros para un SubscriptionTopic dado desde un servidor FHIR.
      * 
      * @param topicUrl la URL del SubscriptionTopic.
-     * @param fhirUrl la URL del servidor FHIR.
+     * @param fhirUrl  la URL del servidor FHIR.
      * @return una lista de detalles de los filtros del SubscriptionTopic.
      */
     public List<SubscriptionTopicDetails.FilterDetail> getFilters(String topicUrl, String fhirUrl) {
@@ -123,13 +133,14 @@ public class SubscriptionService {
      * Crea una nueva Subscription en el servidor FHIR.
      * 
      * @param topicUrl la URL del SubscriptionTopic.
-     * @param payload el payload de la Subscription.
-     * @param filters la lista de filtros de la Subscription.
-     * @param fhirUrl la URL del servidor FHIR.
+     * @param payload  el payload de la Subscription.
+     * @param filters  la lista de filtros de la Subscription.
+     * @param fhirUrl  la URL del servidor FHIR.
      * @param endpoint el endpoint de la Subscription.
      */
-    public void createSubscription(String topicUrl, String payload, List<Filter> filters, String fhirUrl, String endpoint) {
-    	logger.debug("Entro en createSubscription");
+    public void createSubscription(String topicUrl, String payload, List<Filter> filters, String fhirUrl,
+            String endpoint) {
+        logger.debug("Entro en createSubscription");
         fhirClient.createSubscription(topicUrl, payload, filters, fhirUrl, endpoint);
     }
 }

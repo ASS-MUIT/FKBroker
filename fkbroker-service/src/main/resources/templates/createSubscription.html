@@ -9,10 +9,10 @@
     <form th:action="@{/create-subscription}" method="post">
         <input type="hidden" id="fhirUrl" name="fhirUrl" th:value="${fhirUrl}" />
         <div class="form-group">
-            <label for="topicUrl">Topic:</label>
-            <select id="topicUrl" name="topicUrl" class="form-control" required>
+            <label for="idTopic">Topic:</label>
+            <select id="idTopic" name="idTopic" class="form-control" required>
                 <option th:each="topic : ${subscriptionTopics}" 
-                        th:value="${topic.url}" 
+                        th:value="${topic.id}" 
                         th:text="${topic.id}"></option>
             </select>
         </div>

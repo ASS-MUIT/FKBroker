@@ -15,13 +15,16 @@
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
 **/
-package us.dit.fkbroker.service.services.fhir;
+package us.dit.fkbroker.service.entities.domain;
+
 /**
- * Entidad con los datos de un filtro, debería moverse al paquete entities
- * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
+ * Entidad con los datos de un filtro
  * 
+ * @author juanmabrazo98
+ * @author josperbel - Clase movida de `us.dit.fkbroker.service.services.fhir` a
+ *         `us.dit.fkbroker.service.entities.domain`
+ * @version 1.1
+ * @date Mar 2025
  */
 public class Filter {
     private String parameter;
@@ -68,4 +71,3 @@ public class Filter {
         this.modifier = modifier;
     }
 }
-

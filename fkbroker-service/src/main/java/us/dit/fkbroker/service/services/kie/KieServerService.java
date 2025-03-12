@@ -31,16 +31,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import us.dit.fkbroker.service.entities.KieServer;
-import us.dit.fkbroker.service.entities.NotificationEP;
+import us.dit.fkbroker.service.entities.db.KieServer;
+import us.dit.fkbroker.service.entities.db.NotificationEP;
 import us.dit.fkbroker.service.repositories.KieServerRepository;
 
 /**
  * Servicio para gestionar las operaciones sobre los servidores KIE.
- * @author Isabel Román, juanmabrazo98
- * @version 1.0
- * @date jul 2024
  * 
+ * @author Isabel Román, juanmabrazo98
+ * @author josperbel - Nueva ubicación de entidades
+ * @version 1.1
+ * @date Mar 2025
  */
 @Service
 public class KieServerService {
@@ -53,7 +54,8 @@ public class KieServerService {
     /**
      * Obtiene todos los servidores KIE.
      * 
-     * @return una lista de objetos KieServer que representan todos los servidores KIE.
+     * @return una lista de objetos KieServer que representan todos los servidores
+     *         KIE.
      */
     public List<KieServer> getAllKieServers() {
         return kieServerRepository.findAll();
@@ -79,10 +81,13 @@ public class KieServerService {
     }
 
     /**
-     * Envía una señal a todos los servidores KIE configurados.
-     * Convendría hacer un método específico para enviar a UN servidor KIE e invocar a este desde sendSignalToAllKieServers
-     * @param notificationEP el objeto NotificationEP que contiene los detalles de la señal.
-     * @param mensaje el mensaje a enviar como señal.
+     * Envía una señal a todos los servidores KIE configurados. Convendría hacer un
+     * método específico para enviar a UN servidor KIE e invocar a este desde
+     * sendSignalToAllKieServers
+     * 
+     * @param notificationEP el objeto NotificationEP que contiene los detalles de
+     *                       la señal.
+     * @param mensaje        el mensaje a enviar como señal.
      */
     public void sendSignalToAllKieServers(NotificationEP notificationEP, String mensaje) {
         List<KieServer> kieServers = getAllKieServers();

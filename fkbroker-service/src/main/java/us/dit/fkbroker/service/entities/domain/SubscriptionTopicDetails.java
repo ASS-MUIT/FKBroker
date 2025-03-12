@@ -15,26 +15,34 @@
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
 **/
-package us.dit.fkbroker.service.services.fhir;
+package us.dit.fkbroker.service.entities.domain;
 
 import java.util.List;
+
 /**
- * Entidad con detalles de los suscriptionTopics, debería moverse al paquete entities
- * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
+ * Entidad con detalles de los SubscriptionTopic
  * 
+ * @author juanmabrazo98
+ * @author josperbel - Clase movida de `us.dit.fkbroker.service.services.fhir` a
+ *         `us.dit.fkbroker.service.entities.domain`
+ * @version 1.1
+ * @date Mar 2025
  */
 public class SubscriptionTopicDetails {
     private String name;
     private String url;
     private String id;
+    private String resource;
+    private String interaction;
     private List<FilterDetail> filters;
 
-    public SubscriptionTopicDetails(String name, String id, String url, List<FilterDetail> filters) {
+    public SubscriptionTopicDetails(String name, String id, String url, String resource, String interaction,
+            List<FilterDetail> filters) {
         this.name = name;
         this.id = id;
         this.url = url;
+        this.resource = resource;
+        this.interaction = interaction;
         this.filters = filters;
     }
 
@@ -62,6 +70,22 @@ public class SubscriptionTopicDetails {
         this.url = url;
     }
 
+    public String getResource() {
+        return resource;
+    }
+
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
+
+    public String getInteraction() {
+        return interaction;
+    }
+
+    public void setInteraction(String interaction) {
+        this.interaction = interaction;
+    }
+
     public List<FilterDetail> getFilters() {
         return filters;
     }
@@ -76,7 +100,8 @@ public class SubscriptionTopicDetails {
         private List<String> comparators;
         private List<String> modifiers;
 
-        public FilterDetail(String description, String filterParameter, List<String> comparators, List<String> modifiers) {
+        public FilterDetail(String description, String filterParameter, List<String> comparators,
+                List<String> modifiers) {
             this.description = description;
             this.filterParameter = filterParameter;
             this.comparators = comparators;

@@ -15,21 +15,22 @@
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
 **/
-package us.dit.fkbroker.service.entities;
+package us.dit.fkbroker.service.entities.db;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-
-
 /**
- * Entidad que repreesenta los datos d eun endpoint que atiende notificaciones desde servidores FHIR
- * @author Isabel Román
- * @version 1.0
- * @date jul 2024
+ * Entidad que representa los datos de un endpoint que atiende notificaciones
+ * desde servidores FHIR
  * 
+ * @author Isabel Román
+ * @author josperbel - Clase movida de `us.dit.fkbroker.service.entities` a
+ *         `us.dit.fkbroker.service.entities.db`
+ * @version 1.1
+ * @date Mar 2025
  */
 @Entity
 public class NotificationEP {

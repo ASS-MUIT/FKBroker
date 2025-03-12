@@ -28,17 +28,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import us.dit.fkbroker.service.entities.NotificationEP;
+import us.dit.fkbroker.service.entities.db.NotificationEP;
 import us.dit.fkbroker.service.services.kie.NotificationEPService;
 
 /**
- * Controlador para gestionar las operaciones sobre las entidades NotificationEP.
- * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
+ * Controlador para gestionar las operaciones sobre las entidades
+ * NotificationEP.
  * 
+ * @author juanmabrazo98
+ * @author josperbel - Nueva ubicación de entidades
+ * @version 1.1
+ * @date Mar 2025
  */
-
 @Controller
 @RequestMapping("/notificationEPs")
 public class NotificationEPController {

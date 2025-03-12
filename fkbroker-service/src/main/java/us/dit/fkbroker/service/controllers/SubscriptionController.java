@@ -32,26 +32,31 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import us.dit.fkbroker.service.entities.NotificationEP;
-import us.dit.fkbroker.service.services.fhir.Filter;
-import us.dit.fkbroker.service.services.fhir.SubscriptionDetails;
-import us.dit.fkbroker.service.services.fhir.SubscriptionService;
-import us.dit.fkbroker.service.services.fhir.SubscriptionTopicDetails;
+import us.dit.fkbroker.service.entities.db.NotificationEP;
+import us.dit.fkbroker.service.entities.domain.Filter;
+import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
+import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
+import us.dit.fkbroker.service.services.fhir.FhirService;
 import us.dit.fkbroker.service.services.kie.NotificationEPService;
 
 /**
- * Controlador que gestiona las llamadas a los métodos necesarios al navegar por la interfaz web.
- * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
+ * Controlador que gestiona las llamadas a los métodos necesarios al navegar por
+ * la interfaz web.
  * 
+ * @author juanmabrazo98
+ * @author josperbel - Nueva ubicación de entidades, utilización de nuevo
+ *         servicio {@link FhirService} y optimización del método
+ *         createSubscription evitando varias llamadas para obtener un
+ *         SubscriptionTopic
+ * @version 1.1
+ * @date Mar 2025
  */
 @Controller
 public class SubscriptionController {
     private static final Logger logger = LogManager.getLogger();
 
     @Autowired
-    private SubscriptionService subscriptionService;
+    private FhirService fhirService;
 
     @Autowired
     private NotificationEPService notificationEPService;
@@ -73,7 +78,7 @@ public class SubscriptionController {
     /**
      * Maneja las solicitudes GET para obtener la página de suscripciones.
      * 
-     * @param model el modelo de Spring para añadir atributos.
+     * @param model   el modelo de Spring para añadir atributos.
      * @param fhirUrl la URL del servidor FHIR.
      * @return el nombre de la vista "subscriptions-manager".
      */
@@ -81,14 +86,12 @@ public class SubscriptionController {
     public String getSubscriptionPage(Model model, @RequestParam String fhirUrl) {
 
         String fhirUrlFull = "http://" + fhirUrl + "/fhir";
-        logger.info("URL del servidor fhir "+fhirUrlFull);
+        logger.info("URL del servidor fhir " + fhirUrlFull);
 
-        List<SubscriptionTopicDetails> topics = subscriptionService.getSubscriptionTopics(fhirUrlFull);
-        List<SubscriptionDetails> subscriptions = subscriptionService.getSubscriptions(fhirUrlFull);
-        List<String> topicIds = subscriptionService.getSubscriptionTopicIds(fhirUrlFull);
+        List<SubscriptionTopicDetails> topics = fhirService.getSubscriptionTopics(fhirUrlFull);
+        List<SubscriptionDetails> subscriptions = fhirService.getSubscriptions(fhirUrlFull);
         model.addAttribute("subscriptionTopics", topics);
         model.addAttribute("subscriptions", subscriptions);
-        model.addAttribute("topicIds", topicIds);
         model.addAttribute("fhirUrl", fhirUrlFull);
 
         return "subscriptions-manager";
@@ -98,35 +101,34 @@ public class SubscriptionController {
      * Maneja las solicitudes POST para crear una nueva suscripción.
      * 
      * @param topicUrl la URL del tema de la suscripción.
-     * @param payload el payload de la suscripción.
-     * @param fhirUrl la URL del servidor FHIR.
-     * @param model el modelo de Spring para añadir atributos.
+     * @param payload  el payload de la suscripción.
+     * @param fhirUrl  la URL del servidor FHIR.
+     * @param model    el modelo de Spring para añadir atributos.
      * @return el nombre de la vista "subscription-form".
      */
     @PostMapping("/create-subscription")
-    public String createSubscription(@RequestParam String topicUrl, @RequestParam String payload, @RequestParam String fhirUrl, Model model) {
-        List<SubscriptionTopicDetails.FilterDetail> filters = subscriptionService.getFilters(topicUrl, fhirUrl);
-      
-        model.addAttribute("topicUrl", topicUrl);
-        model.addAttribute("payload", payload);
-        model.addAttribute("filters", filters);
-        model.addAttribute("fhirUrl", fhirUrl);
-        logger.debug("Entrando en create-suscription con los datos "+model.toString());
+    public String createSubscription(@RequestParam String idTopic, @RequestParam String payload,
+            @RequestParam String fhirUrl, Model model) {
+        // Obtiene el SubscriptionTopic
+        SubscriptionTopicDetails topicDetails = fhirService.getSubscriptionTopic(idTopic, fhirUrl);
+
+        List<SubscriptionTopicDetails.FilterDetail> filters = topicDetails.getFilters();
+        String topicUrl = topicDetails.getUrl();
 
         // Obtener recurso e interacción del topic
-        String resource = subscriptionService.getTopicResource(topicUrl);
-        String interaction = subscriptionService.getTopicInteraction(topicUrl);
+        String resource = topicDetails.getResource();
+        String interaction = topicDetails.getInteraction();
         String endpoint;
         logger.info("recurso: " + resource + " interaction: " + interaction);
-        
 
         // Comparar si existe ya
-        Optional<NotificationEP> optionalNotificationEP = notificationEPService.findNotificationEPByResourceAndInteraction(resource, interaction);
+        Optional<NotificationEP> optionalNotificationEP = notificationEPService
+                .findNotificationEPByResourceAndInteraction(resource, interaction);
         if (optionalNotificationEP.isPresent()) {
             // Si existe, obtener el id y este será nuestro endpoint
             NotificationEP existingNotificationEP = optionalNotificationEP.get();
             endpoint = applicationAddress + "notification/" + existingNotificationEP.getId();
-            logger.debug("Usando endpoint ya existente "+endpoint);
+            logger.debug("Usando endpoint ya existente " + endpoint);
         } else {
             // Si no existe, se crea un endpoint nuevo
             String signalName = interaction + "-" + resource;
@@ -136,10 +138,15 @@ public class SubscriptionController {
             newNotificationEP.setSignalName(signalName);
             NotificationEP savedNotificationEP = notificationEPService.saveNotificationEP(newNotificationEP);
             endpoint = applicationAddress + "notification/" + savedNotificationEP.getId();
-            logger.debug("Creado nuevo endpoint "+endpoint);
+            logger.debug("Creado nuevo endpoint " + endpoint);
         }
-        
+
         model.addAttribute("endpoint", endpoint);
+        model.addAttribute("topicUrl", topicUrl);
+        model.addAttribute("payload", payload);
+        model.addAttribute("filters", filters);
+        model.addAttribute("fhirUrl", fhirUrl);
+        logger.debug("Saliendo de create-suscription con los datos " + model.toString());
 
         return "subscription-form";
     }
@@ -148,13 +155,13 @@ public class SubscriptionController {
      * Maneja las solicitudes POST para eliminar una suscripción.
      * 
      * @param subscriptionId el ID de la suscripción a eliminar.
-     * @param fhirUrl la URL del servidor FHIR.
+     * @param fhirUrl        la URL del servidor FHIR.
      * @return una redirección a la página principal.
      */
     @PostMapping("/delete-subscription")
     public String deleteSubscription(@RequestParam String subscriptionId, @RequestParam String fhirUrl) {
-        subscriptionService.deleteSubscription(subscriptionId, fhirUrl);
-    
+        fhirService.deleteSubscription(subscriptionId, fhirUrl);
+
         String url = fhirUrl.replace("http://", "").replace("/fhir", "");
         return "redirect:/subscriptions?fhirUrl=" + url;
     }
@@ -162,25 +169,27 @@ public class SubscriptionController {
     /**
      * Maneja las solicitudes POST para enviar los filtros de una suscripción.
      * 
-     * @param requestParams los parámetros de la solicitud que contienen los filtros.
-     * @param fhirUrl la URL del servidor FHIR.
-     * @param endpoint el endpoint de la suscripción.
-     * @param model el modelo de Spring para añadir atributos.
+     * @param requestParams los parámetros de la solicitud que contienen los
+     *                      filtros.
+     * @param fhirUrl       la URL del servidor FHIR.
+     * @param endpoint      el endpoint de la suscripción.
+     * @param model         el modelo de Spring para añadir atributos.
      * @return una redirección a la página de suscripciones.
      */
     @PostMapping("/submit-filters")
-    public String submitFilters(@RequestParam Map<String, String> requestParams, @RequestParam String fhirUrl, @RequestParam String endpoint, Model model) {
+    public String submitFilters(@RequestParam Map<String, String> requestParams, @RequestParam String fhirUrl,
+            @RequestParam String endpoint, Model model) {
         List<Filter> filters = new ArrayList<>();
         String topicUrl = requestParams.get("topicUrl");
         String payload = requestParams.get("payload");
-        logger.debug("Entando en submit-filters con topicURL "+topicUrl+" y payload "+payload);
+        logger.debug("Entando en submit-filters con topicURL " + topicUrl + " y payload " + payload);
 
         for (Map.Entry<String, String> entry : requestParams.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
             if (key.startsWith("filters[") && value != null && !value.isEmpty()) {
-            	logger.debug("Se han encontrado filtros");
+                logger.debug("Se han encontrado filtros");
                 String parameter = key.substring(8, key.length() - 1);
                 String comparatorKey = "comparators[" + parameter + "]";
                 String modifierKey = "modifiers[" + parameter + "]";
@@ -192,8 +201,9 @@ public class SubscriptionController {
                 filters.add(filter);
             }
         }
-        logger.debug("Invoco el método createSubscription de suscriptionService con ", payload, fhirUrl, endpoint, filters, topicUrl);
-        subscriptionService.createSubscription(topicUrl, payload, filters, fhirUrl, endpoint);
+        logger.debug("Invoco el método createSubscription de suscriptionService con ", payload, fhirUrl, endpoint,
+                filters, topicUrl);
+        fhirService.createSubscription(topicUrl, payload, filters, fhirUrl, endpoint);
 
         String url = fhirUrl.replace("http://", "").replace("/fhir", "");
         return "redirect:/subscriptions?fhirUrl=" + url;

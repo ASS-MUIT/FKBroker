@@ -29,16 +29,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import us.dit.fkbroker.service.entities.KieServer;
+import us.dit.fkbroker.service.entities.db.KieServer;
 import us.dit.fkbroker.service.services.kie.KieServerService;
+
+
 /**
  * Controlador para gestionar las operaciones sobre los servidores KIE.
- * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
  * 
+ * @author juanmabrazo98
+ * @author josperbel - Nueva ubicación de entidades
+ * @version 1.1
+ * @date Mar 2025
  */
-
 @Controller
 @RequestMapping("/kieServers")
 public class KieController {
@@ -64,7 +66,7 @@ public class KieController {
     @GetMapping
     public String getKieServers(Model model) {
         model.addAttribute("kieServers", kieServerService.getAllKieServers());
-      //  model.addAttribute("newKieServer", new KieServer());
+        // model.addAttribute("newKieServer", new KieServer());
         return "kieServers";
     }
 
