@@ -7,7 +7,7 @@
 <div th:fragment="content">
     <h2>Crear Subcripción</h2>
     <form th:action="@{/create-subscription}" method="post">
-        <input type="hidden" id="fhirUrl" name="fhirUrl" th:value="${fhirUrl}" />
+        <input type="hidden" id="idFhirServer" name="idFhirServer" th:value="${idFhirServer}" />
         <div class="form-group">
             <label for="idTopic">Topic:</label>
             <select id="idTopic" name="idTopic" class="form-control" required>

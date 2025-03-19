@@ -35,7 +35,7 @@
     <p>Si no se quiere un filtro poner como valor "NULL", de esta forma se ignorará</p>
 
     <form th:action="@{/submit-filters}" method="post">
-        <input type="hidden" id="fhirUrl" name="fhirUrl" th:value="${fhirUrl}" />
+        <input type="hidden" id="idFhirServer" name="idFhirServer" th:value="${idFhirServer}" />
         <input type="hidden" name="topicUrl" th:value="${topicUrl}">
         <input type="hidden" id="endpoint" name="endpoint" th:value="${endpoint}">
         <input type="hidden" name="payload" th:value="${payload}">

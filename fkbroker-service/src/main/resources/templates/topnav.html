@@ -3,17 +3,20 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/form-styles.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 <div class="topnav">
     <div class="d-flex justify-content-between">
         <div>
-            <a href="/" th:text="#{navbar.home}">Gestión de suscripciones</a>
-            <a href="/kieServers">Gestión de Servidores Kie</a>
-            <a href="/notificationEPs">Gestión de Endpoints</a>
+			<a href="/"><i class="fa-solid fa-house"></i></a>
+			<a href="/fhir/servers" th:text="#{navbar.fhirServers}"></a>
+            <a href="/subscriptions" th:text="#{navbar.subscriptions}"></a>
+            <a href="/kieServers" th:text="#{navbar.kieServers}"></a>
+            <a href="/notificationEPs" th:text="#{navbar.notificationEPs}"></a>
         </div>
         <div>
-            <a href="/logout" class="float-right" th:text="#{navbar.logout}">Cerrar sesión</a>
+            <a href="/logout" class="float-right" th:text="#{navbar.logout}"></a>
         </div>
     </div>
 </div>

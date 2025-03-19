@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lista de FHIR Servers</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/form-styles.css}">
+</head>
+<body>
+<div th:include="topnav.html"></div>
+<div class="container">
+    <div class="jumbotron">
+        <div class="card topbackground">
+            <h1 class="text-center"><strong>Gestión de Servidores FHIR</strong></h1>
+            <h5 class="text-center"><strong>Administración de Servidores FHIR</strong></h5>
+        </div>
+    </div>
+	<div class="d-flex justify-content-between align-items-center">
+		<h2>Servidores FHIR</h2>
+		<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addFhirServer">Agregar servidor</button>
+	</div>
+    <table class="table">
+        <thead>
+            <tr>
+				<th>ID</th>
+                <th>URL</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="fhirServer : ${fhirServers}">
+				<td th:text="${fhirServer.id}"></td>
+                <td th:text="${fhirServer.url}"></td>
+                <td>
+                    <button type="submit" class="btn btn-danger"  th:attr="onclick='eliminarServidor(' + ${fhirServer.id} + ')'">Eliminar</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal para crear un servidor FHIR  -->
+<div class="modal fade" id="addFhirServer" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form th:action="@{/fhir/servers}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Agregar servidor FHIR</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="url">URL:</label>
+                        <input type="text" class="form-control" id="url" name="url" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+
+<script>
+	function eliminarServidor(id) {
+		if (!confirm("¿Estás seguro de que quieres eliminar este servidor?")) {
+		    return;
+		}
+	
+		fetch(`/fhir/servers/${id}`, {
+		    method: "DELETE"
+		}).then(response => {
+		    if (response.ok) {
+		        window.location.reload();
+		    } else {
+		        alert("Error al eliminar el servidor.");
+		    }
+		});
+	}
+</script>
+
+</body>
+</html>

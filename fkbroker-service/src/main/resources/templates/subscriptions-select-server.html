@@ -19,16 +19,20 @@
 			<h5 class="text-center"><strong>Administración de Subscripciones</strong></h5>
         </div>
     </div>
-
     <div class="row">
-        <!-- Listado de Subscription Topics -->
-        <div class="col-12 mb-3" th:include="subscriptiontopics :: content"></div>
-
-        <!-- Listado de Suscripciones -->
-        <div class="col-12 mb-3" th:include="subscriptions :: content"></div>
-
-        <!-- Formulario para crear suscripción -->
-        <div class="col-12 mb-3" th:include="createSubscription :: content"></div>
+        <div class="col-12">
+            <form th:action="@{/subscriptions}" method="get">
+				<div class="form-group">
+				    <label for="server">Servidor:</label>
+				    <select id="server" name="idFhirServer" class="form-control" required>
+						<option th:each="server : ${fhirServers}" 
+						                        th:value="${server.id}" 
+						                        th:text="${server.url}"></option>
+				    </select>
+				</div>
+                <button type="submit" class="btn btn-primary">Conectar</button>
+            </form>
+        </div>
     </div>
 </div>
 </body>

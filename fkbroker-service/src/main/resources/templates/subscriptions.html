@@ -41,7 +41,7 @@
                         <td>
                             <form th:action="@{/delete-subscription}" method="post">
                                 <input type="hidden" name="subscriptionId" th:value="${subscription.id}">
-                                <input type="hidden" name="fhirUrl" th:value="${fhirUrl}">
+                                <input type="hidden" name="idFhirServer" th:value="${idFhirServer}">
                                 <button type="submit" class="btn btn-danger">Eliminar</button>
                             </form>
                         </td>
