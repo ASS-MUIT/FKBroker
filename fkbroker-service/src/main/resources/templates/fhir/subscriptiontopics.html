@@ -1,0 +1,48 @@
+<div th:fragment="content">
+	<div class="d-flex align-items-center">
+		<h2>SubscriptionTopic</h2>
+	    <button class="btn btn-primary ml-3" type="button" data-toggle="collapse" data-target="#topicsTable" aria-expanded="false" aria-controls="topicsTable">
+	        <i id="topicIcon" class="fas fa-eye-slash"></i>
+	    </button>
+	</div>
+    <div id="topicsTable" class="collapse show mt-3">
+        <table class="table">
+            <thead>
+                <tr>
+					<th>ID</th>
+                    <th>Nombre</th>
+					<th>Recurso</th>
+					<th>Interacción</th>
+					<th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="topic : ${subscriptionTopics}">
+					<td th:text="${topic.id}"></td>
+                    <td th:text="${topic.name}"></td>
+					<td th:text="${topic.resource}"></td>
+					<td th:text="${topic.interaction}"></td>
+                    <td>
+						<form th:action="@{/create-subscription}" method="post">
+							<input type="hidden" id="urlServer" name="urlServer" th:value="${urlServer}" />
+							<input type="hidden" id="idTopic" name="idTopic" th:value="${topic.id}" />
+							<button type="submit" class="btn btn-primary">Subscribirse</button>
+						</form>
+					</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+	
+	<!-- Cambio de icono -->
+    <script>
+        $('#topicsTable').on('show.bs.collapse', function () {
+            $('#topicIcon').removeClass('fa-eye').addClass('fa-eye-slash');
+        });
+
+        $('#topicsTable').on('hide.bs.collapse', function () {
+            $('#topicIcon').removeClass('fa-eye-slash').addClass('fa-eye');
+        });
+    </script>
+	
+</div>

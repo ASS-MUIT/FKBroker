@@ -70,15 +70,34 @@ public class NotificationEPService {
     }
 
     /**
-     * Busca una entidad NotificationEP por su recurso e interacción.
+     * Obtiene una entidad NotificationEP por su recurso e interacción. Si no
+     * existe, guarda una entidad nueva.
      * 
      * @param resource    el recurso de la entidad NotificationEP.
      * @param interaction la interacción de la entidad NotificationEP.
-     * @return un Optional que contiene la entidad NotificationEP si se encuentra, o
-     *         un Optional vacío si no.
+     * @return la entidad NotificationEP obtenida o creada
      */
-    public Optional<NotificationEP> findNotificationEPByResourceAndInteraction(String resource, String interaction) {
-        return notificationEPRepository.findByResourceAndInteraction(resource, interaction);
+    public NotificationEP getNotificationEPByResourceAndInteraction(String resource, String interaction) {
+        NotificationEP notificationEP;
+
+        // Comprueba si existe ya
+        Optional<NotificationEP> optionalNotificationEP = notificationEPRepository
+                .findByResourceAndInteraction(resource, interaction);
+
+        if (optionalNotificationEP.isPresent()) {
+            // Si existe, lo obtiene
+            notificationEP = optionalNotificationEP.get();
+        } else {
+            // Si no existe, crea un endpoint nuevo
+            String signalName = interaction + "-" + resource;
+            NotificationEP newNotificationEP = new NotificationEP();
+            newNotificationEP.setResource(resource);
+            newNotificationEP.setInteraction(interaction);
+            newNotificationEP.setSignalName(signalName);
+            notificationEP = notificationEPRepository.save(newNotificationEP);
+        }
+
+        return notificationEP;
     }
 
     /**

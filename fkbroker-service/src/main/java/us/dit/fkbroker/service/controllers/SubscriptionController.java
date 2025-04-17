@@ -20,7 +20,6 @@ package us.dit.fkbroker.service.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +30,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import us.dit.fkbroker.service.entities.db.NotificationEP;
 import us.dit.fkbroker.service.entities.domain.FhirServerDTO;
@@ -102,30 +102,33 @@ public class SubscriptionController {
      * @return el nombre de la vista "subscriptions-manager".
      */
     @GetMapping("/subscriptions")
-    public String getSubscriptionPage(Model model, @RequestParam(required = false) Long idFhirServer) {
+    public String getSubscriptionPage(Model model) {
 
-        if (idFhirServer == null) {
-            List<FhirServerDTO> fhirServers = fhirServerService.getAllFhirServers();
+        List<FhirServerDTO> fhirServers = fhirServerService.getAllFhirServers();
 
-            model.addAttribute("fhirServers", fhirServers);
+        model.addAttribute("fhirServers", fhirServers);
 
-            return "subscriptions-select-server";
-        } else {
-            Optional<FhirServerDTO> optionalFhirServer = fhirServerService.getFhirServer(idFhirServer);
+        return "fhir/subscriptions-manager";
+    }
 
-            if (optionalFhirServer.isPresent()) {
-                FhirServerDTO fhirServer = optionalFhirServer.get();
+    /**
+     * Maneja las solicitudes GET para obtener la página de suscripciones.
+     * 
+     * @param model        el modelo de Spring para añadir atributos.
+     * @param idFhirServer el id del servidor FHIR.
+     * @return el nombre de la vista "subscriptions-manager".
+     */
+    @PostMapping("/server")
+    public String getSubscriptionsAndTopics(@RequestParam String server, RedirectAttributes redirectAttributes) {
 
-                List<SubscriptionTopicDetails> topics = fhirService.getSubscriptionTopics(fhirServer.getUrl());
-                List<SubscriptionDetails> subscriptions = fhirService.getSubscriptions(fhirServer.getUrl());
+        List<SubscriptionTopicDetails> topics = fhirService.getSubscriptionTopics(server);
+        List<SubscriptionDetails> subscriptions = fhirService.getSubscriptions(server);
 
-                model.addAttribute("subscriptionTopics", topics);
-                model.addAttribute("subscriptions", subscriptions);
-                model.addAttribute("idFhirServer", idFhirServer);
-            }
+        redirectAttributes.addFlashAttribute("subscriptionTopics", topics);
+        redirectAttributes.addFlashAttribute("subscriptions", subscriptions);
+        redirectAttributes.addFlashAttribute("urlServer", server);
 
-            return "subscriptions-manager";
-        }
+        return "redirect:/subscriptions";
     }
 
     /**
@@ -138,55 +141,33 @@ public class SubscriptionController {
      * @return el nombre de la vista "subscription-form".
      */
     @PostMapping("/create-subscription")
-    public String createSubscription(@RequestParam String idTopic, @RequestParam String payload,
-            @RequestParam Long idFhirServer, Model model) {
+    public String createSubscription(@RequestParam String idTopic,
+            @RequestParam String urlServer, Model model) {
 
-        Optional<FhirServerDTO> optionalFhirServer = fhirServerService.getFhirServer(idFhirServer);
+        // Obtiene el SubscriptionTopic
+        SubscriptionTopicDetails topicDetails = fhirService.getSubscriptionTopic(idTopic, urlServer);
 
-        if (optionalFhirServer.isPresent()) {
-            FhirServerDTO fhirServer = optionalFhirServer.get();
+        List<SubscriptionTopicDetails.FilterDetail> filters = topicDetails.getFilters();
+        String topicUrl = topicDetails.getUrl();
 
-            // Obtiene el SubscriptionTopic
-            SubscriptionTopicDetails topicDetails = fhirService.getSubscriptionTopic(idTopic, fhirServer.getUrl());
+        // Obtener recurso e interacción del topic
+        String resource = topicDetails.getResource();
+        String interaction = topicDetails.getInteraction();
+        String endpoint;
+        logger.info("recurso: " + resource + " interaction: " + interaction);
 
-            List<SubscriptionTopicDetails.FilterDetail> filters = topicDetails.getFilters();
-            String topicUrl = topicDetails.getUrl();
+        // Obtiene el endpoint
+        NotificationEP notificationEP = notificationEPService
+                .getNotificationEPByResourceAndInteraction(resource, interaction);
+        endpoint = applicationAddress + "notification/" + notificationEP.getId();
 
-            // Obtener recurso e interacción del topic
-            String resource = topicDetails.getResource();
-            String interaction = topicDetails.getInteraction();
-            String endpoint;
-            logger.info("recurso: " + resource + " interaction: " + interaction);
+        model.addAttribute("endpoint", endpoint);
+        model.addAttribute("topicUrl", topicUrl);
+        model.addAttribute("filters", filters);
+        model.addAttribute("urlServer", urlServer);
+        logger.debug("Saliendo de create-suscription con los datos " + model.toString());
 
-            // Comparar si existe ya
-            Optional<NotificationEP> optionalNotificationEP = notificationEPService
-                    .findNotificationEPByResourceAndInteraction(resource, interaction);
-            if (optionalNotificationEP.isPresent()) {
-                // Si existe, obtener el id y este será nuestro endpoint
-                NotificationEP existingNotificationEP = optionalNotificationEP.get();
-                endpoint = applicationAddress + "notification/" + existingNotificationEP.getId();
-                logger.debug("Usando endpoint ya existente " + endpoint);
-            } else {
-                // Si no existe, se crea un endpoint nuevo
-                String signalName = interaction + "-" + resource;
-                NotificationEP newNotificationEP = new NotificationEP();
-                newNotificationEP.setResource(resource);
-                newNotificationEP.setInteraction(interaction);
-                newNotificationEP.setSignalName(signalName);
-                NotificationEP savedNotificationEP = notificationEPService.saveNotificationEP(newNotificationEP);
-                endpoint = applicationAddress + "notification/" + savedNotificationEP.getId();
-                logger.debug("Creado nuevo endpoint " + endpoint);
-            }
-
-            model.addAttribute("endpoint", endpoint);
-            model.addAttribute("topicUrl", topicUrl);
-            model.addAttribute("payload", payload);
-            model.addAttribute("filters", filters);
-            model.addAttribute("idFhirServer", idFhirServer);
-            logger.debug("Saliendo de create-suscription con los datos " + model.toString());
-        }
-
-        return "subscription-form";
+        return "fhir/subscription-form";
     }
 
     /**
@@ -197,16 +178,11 @@ public class SubscriptionController {
      * @return una redirección a la página principal.
      */
     @PostMapping("/delete-subscription")
-    public String deleteSubscription(@RequestParam String subscriptionId, @RequestParam Long idFhirServer) {
-        Optional<FhirServerDTO> optionalFhirServer = fhirServerService.getFhirServer(idFhirServer);
+    public String deleteSubscription(@RequestParam String subscriptionId, @RequestParam String urlServer) {
 
-        if (optionalFhirServer.isPresent()) {
-            FhirServerDTO fhirServer = optionalFhirServer.get();
+        fhirService.deleteSubscription(subscriptionId, urlServer);
 
-            fhirService.deleteSubscription(subscriptionId, fhirServer.getUrl());
-        }
-
-        return "redirect:/subscriptions?idFhirServer=" + idFhirServer;
+        return "redirect:/subscriptions";
     }
 
     /**
@@ -220,40 +196,35 @@ public class SubscriptionController {
      * @return una redirección a la página de suscripciones.
      */
     @PostMapping("/submit-filters")
-    public String submitFilters(@RequestParam Map<String, String> requestParams, @RequestParam Long idFhirServer,
+    public String submitFilters(@RequestParam Map<String, String> requestParams, @RequestParam String urlServer,
             @RequestParam String endpoint, Model model) {
-        Optional<FhirServerDTO> optionalFhirServer = fhirServerService.getFhirServer(idFhirServer);
 
-        if (optionalFhirServer.isPresent()) {
-            FhirServerDTO fhirServer = optionalFhirServer.get();
+        List<Filter> filters = new ArrayList<>();
+        String topicUrl = requestParams.get("topicUrl");
+        String payload = requestParams.get("payload");
+        logger.debug("Entando en submit-filters con topicURL " + topicUrl + " y payload " + payload);
 
-            List<Filter> filters = new ArrayList<>();
-            String topicUrl = requestParams.get("topicUrl");
-            String payload = requestParams.get("payload");
-            logger.debug("Entando en submit-filters con topicURL " + topicUrl + " y payload " + payload);
+        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
 
-            for (Map.Entry<String, String> entry : requestParams.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
+            if (key.startsWith("filters[") && value != null && !value.isEmpty()) {
+                logger.debug("Se han encontrado filtros");
+                String parameter = key.substring(8, key.length() - 1);
+                String comparatorKey = "comparators[" + parameter + "]";
+                String modifierKey = "modifiers[" + parameter + "]";
 
-                if (key.startsWith("filters[") && value != null && !value.isEmpty()) {
-                    logger.debug("Se han encontrado filtros");
-                    String parameter = key.substring(8, key.length() - 1);
-                    String comparatorKey = "comparators[" + parameter + "]";
-                    String modifierKey = "modifiers[" + parameter + "]";
+                String comparator = requestParams.get(comparatorKey);
+                String modifier = requestParams.get(modifierKey);
 
-                    String comparator = requestParams.get(comparatorKey);
-                    String modifier = requestParams.get(modifierKey);
-
-                    Filter filter = new Filter(parameter, value, comparator, modifier);
-                    filters.add(filter);
-                }
+                Filter filter = new Filter(parameter, value, comparator, modifier);
+                filters.add(filter);
             }
-            logger.debug("Invoco el método createSubscription de suscriptionService con ", payload, idFhirServer,
-                    endpoint, filters, topicUrl);
-            fhirService.createSubscription(topicUrl, payload, filters, fhirServer.getUrl(), endpoint);
         }
+        logger.debug("Invoco el método createSubscription de suscriptionService con ", payload, urlServer, endpoint,
+                filters, topicUrl);
+        fhirService.createSubscription(topicUrl, payload, filters, urlServer, endpoint);
 
-        return "redirect:/subscriptions?idFhirServer=" + idFhirServer;
+        return "redirect:/subscriptions";
     }
 }

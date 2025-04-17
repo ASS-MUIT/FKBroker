@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Gestión de subscripciones</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/form-styles.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<div th:replace="layout/topnav :: topnav"></div>
+<div class="container">
+	<div th:replace="layout/header :: header('Gestión de Servidores FHIR','Administración de Subscripciones')"></div>
+
+    <div class="row">
+		<!-- Búsqueda -->
+		<div class="col-12">
+			<h2>Servidor FHIR</h2>
+		    <form th:action="@{/server}" method="post" id="serverForm">
+				<div class="form-group">
+				    <select id="server" name="server" class="form-control" required>
+						<option value="">-- Seleccione un servidor --</option>
+						<option th:each="server : ${fhirServers}" 
+		                        th:value="${server.url}" 
+		                        th:text="${server.url}"
+								th:selected="${server.url == urlServer}">
+						</option>
+				    </select>
+				</div>
+		    </form>
+			
+			<script>
+			    document.getElementById("server").addEventListener("change", function() {
+			        if (this.value) {
+			            document.getElementById("serverForm").submit();
+			        }
+			    });
+			</script>
+		</div>
+		
+		<div class="col-12 mb-3" th:if="${urlServer}">
+	        <!-- Listado de Subscription Topics -->
+	        <div th:replace="fhir/subscriptiontopics :: content"></div>
+	
+	        <!-- Listado de Suscripciones -->
+	        <div th:replace="fhir/subscriptions :: content"></div>
+		</div>
+    </div>
+	
+</div>
+</body>
+</html>

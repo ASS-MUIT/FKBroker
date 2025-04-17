@@ -169,7 +169,6 @@ public class FhirService {
     public SubscriptionTopicDetails getSubscriptionTopic(String id, String fhirUrl) {
         IGenericClient client = getClient(fhirUrl);
         SubscriptionTopic topic = client.read().resource(SubscriptionTopic.class).withId(id).execute();
-        logger.info("Se encuentra topic: {}", topic.getResourceTriggerFirstRep().getResource());
 
         String name = topic.getTitle();
         String url = topic.getUrl();

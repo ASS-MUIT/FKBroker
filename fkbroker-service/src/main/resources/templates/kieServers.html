@@ -4,16 +4,12 @@
     <title>Lista de Kie Servers</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="/form-styles.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-<div th:include="topnav.html"></div>
+<div th:replace="layout/topnav :: topnav"></div>
 <div class="container">
-    <div class="jumbotron">
-        <div class="card topbackground">
-            <h1 class="text-center"><strong>Gestión de Kie Servers</strong></h1>
-            <h5 class="text-center"><strong>Administración de Servidores Kie</strong></h5>
-        </div>
-    </div>
+	<div th:replace="layout/header :: header('Gestión de Kie Servers','Administración de Servidores Kie')"></div>
     <h2>Kie Servers</h2>
     <table class="table">
         <thead>

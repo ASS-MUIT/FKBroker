@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/form-styles.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body>
-<div class="topnav">
+<div th:fragment="topnav" class="topnav">
     <div class="d-flex justify-content-between">
         <div>
 			<a href="/"><i class="fa-solid fa-house"></i></a>
@@ -20,5 +12,3 @@
         </div>
     </div>
 </div>
-</body>
-</html>

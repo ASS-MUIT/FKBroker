@@ -4,16 +4,12 @@
     <title>Notification EPs</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="/form-styles.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-<div th:include="topnav.html"></div>
+<div th:replace="layout/topnav :: topnav"></div>
 <div class="container">
-    <div class="jumbotron">
-        <div class="card topbackground">
-            <h1 class="text-center"><strong>Notification EPs</strong></h1>
-            <h5 class="text-center"><strong>Gestión de Notification EPs</strong></h5>
-        </div>
-    </div>
+	<div th:replace="layout/header :: header('Notification EPs','Gestión de Notification EPs')"></div>
     <h2>Notification EPs</h2>
     <table class="table">
         <thead>

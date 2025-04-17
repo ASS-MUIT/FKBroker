@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Formulario de Filtros</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<link rel="stylesheet" th:href="@{/form-styles.css}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<div th:replace="layout/topnav :: topnav"></div>
+<div class="container">
+	<div th:replace="layout/header :: header('Gestión de Servidores FHIR','Administración de Subscripciones')"></div>
+    <h2>Crear nueva Subscripción</h2>
+    <p>Topic URL: <span th:text="${topicUrl}"></span></p>
+
+    <form th:action="@{/submit-filters}" method="post">
+        <input type="hidden" id="urlServer" name="urlServer" th:value="${urlServer}" />
+        <input type="hidden" name="topicUrl" th:value="${topicUrl}">
+        <input type="hidden" id="endpoint" name="endpoint" th:value="${endpoint}">
+
+		<!-- Campos genérigos de la subscripción -->
+		<div class="form-group">
+		    <label for="payload">Payload:</label>
+		    <select id="payload" name="payload" class="form-control" required>
+		        <option value="id-only">ID Only</option>
+		    </select>
+		</div>
+		
+		<!-- Configuración de Filtros -->
+		<h4>Configuración de Filtros</h4>
+		<p>Si no se quiere un filtro poner como valor "NULL", de esta forma se ignorará</p>
+		
+		<table class="table mb-3">
+            <thead>
+                <tr>
+					<th>Parámetros</th>
+                    <th>Valores</th>
+					<th>Comparadores</th>
+					<th>Modificadores</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="filter : ${filters}">
+					<td th:text="${filter.filterParameter}"></td>
+                    <td>
+						<input type="text" class="form-control" th:name="'filters[' + ${filter.filterParameter} + ']'" required>
+					</td>
+					<td>
+						<select class="form-control" th:if="${not #lists.isEmpty(filter.comparators)}" th:name="'comparators[' + ${filter.filterParameter} + ']'">
+		                    <option value="">null</option> <!-- Opción null -->
+		                    <option th:each="comparator : ${filter.comparators}" th:value="${comparator}" th:text="${comparator}"></option>
+		                </select>
+					</td>
+					<td>
+						<select class="form-control" th:if="${not #lists.isEmpty(filter.modifiers)}" th:name="'modifiers[' + ${filter.filterParameter} + ']'">
+		                    <option value="">null</option> <!-- Opción null -->
+		                    <option th:each="modifier : ${filter.modifiers}" th:value="${modifier}" th:text="${modifier}"></option>
+		                </select>
+					</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-primary">Crear</button>
+		<a href="/subscriptions" class="btn btn-danger">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>
