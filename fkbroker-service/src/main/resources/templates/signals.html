@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Notification EPs</title>
+    <title>Señales</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="/form-styles.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -9,8 +9,8 @@
 <body>
 <div th:replace="layout/topnav :: topnav"></div>
 <div class="container">
-	<div th:replace="layout/header :: header('Notification EPs','Gestión de Notification EPs')"></div>
-    <h2>Notification EPs</h2>
+	<div th:replace="layout/header :: header('Señales','Gestión de Señales')"></div>
+    <h2>Señales</h2>
     <table class="table">
         <thead>
             <tr>
@@ -22,16 +22,16 @@
             </tr>
         </thead>
         <tbody>
-            <tr th:each="notificationEP : ${notificationEPs}">
-                <td th:text="${notificationEP.id}">ID</td>
-                <td th:text="${notificationEP.resource}">Resource</td>
-                <td th:text="${notificationEP.interaction}">Interaction</td>
-                <td th:text="${notificationEP.signalName}">Signal Name</td>
+            <tr th:each="signal : ${signals}">
+                <td th:text="${signal.id}">ID</td>
+                <td th:text="${signal.resource}">Resource</td>
+                <td th:text="${signal.interaction}">Interaction</td>
+                <td th:text="${signal.signalName}">Signal Name</td>
                 <td>
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#editModal" 
-                            th:attr="data-id=${notificationEP.id},data-signalname=${notificationEP.signalName}">Editar</button>
-                    <form th:action="@{/notificationEPs/delete}" method="post" style="display:inline;">
-                        <input type="hidden" name="id" th:value="${notificationEP.id}" />
+                            th:attr="data-id=${signal.id},data-signalname=${signal.signalName}">Editar</button>
+                    <form th:action="@{/signals/delete}" method="post" style="display:inline;">
+                        <input type="hidden" name="id" th:value="${signal.id}" />
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </form>
                 </td>
@@ -39,8 +39,8 @@
         </tbody>
     </table>
 
-    <h2>Agregar Notification EP</h2>
-    <form th:action="@{/notificationEPs/add}" method="post">
+    <h2>Agregar Señal</h2>
+    <form th:action="@{/signals/add}" method="post">
         <div class="form-group">
             <label for="resource">Resource:</label>
             <input type="text" class="form-control" id="resource" name="resource" required>
@@ -61,7 +61,7 @@
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form th:action="@{/notificationEPs/edit}" method="post">
+            <form th:action="@{/signals/edit}" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Editar Signal Name</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">

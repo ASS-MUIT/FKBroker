@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import us.dit.fkbroker.service.entities.db.NotificationEP;
+import us.dit.fkbroker.service.entities.db.Signal;
 import us.dit.fkbroker.service.services.fhir.FhirService;
 import us.dit.fkbroker.service.services.kie.KieServerService;
-import us.dit.fkbroker.service.services.kie.NotificationEPService;
+import us.dit.fkbroker.service.services.kie.SignalService;
 
 /**
  * Controlador para manejar las notificaciones.
@@ -47,7 +47,7 @@ import us.dit.fkbroker.service.services.kie.NotificationEPService;
 public class NotificationController {
 
     @Autowired
-    private NotificationEPService notificationEPService;
+    private SignalService signalService;
 
     @Autowired
     private KieServerService kieServerService;
@@ -66,14 +66,14 @@ public class NotificationController {
      */
     @PostMapping("/{id}")
     public ResponseEntity<String> sendNotification(@PathVariable Long id, @RequestBody String json) {
-        Optional<NotificationEP> optionalNotificationEP = notificationEPService.findById(id);
-        if (optionalNotificationEP.isPresent()) {
+        Optional<Signal> optionalSignal = signalService.findById(id);
+        if (optionalSignal.isPresent()) {
             // Responder inmediatamente con 200 OK
             CompletableFuture.runAsync(() -> {
-                NotificationEP notificationEP = optionalNotificationEP.get();
+                Signal signal = optionalSignal.get();
                 String idRecurso = fhirService.getNotificationResourceId(json);
                 System.out.println("Llamamos a sendsignal. Id del recurso: " + idRecurso);
-                kieServerService.sendSignalToAllKieServers(notificationEP, idRecurso);
+                kieServerService.sendSignalToAllKieServers(signal, idRecurso);
             });
         } else {
             // Manejar el caso cuando no se encuentra la entidad

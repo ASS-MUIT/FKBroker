@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import us.dit.fkbroker.service.entities.db.NotificationEP;
+import us.dit.fkbroker.service.entities.db.Signal;
 
 /**
  * https://spring.io/guides/gs/accessing-data-rest
@@ -31,6 +31,6 @@ import us.dit.fkbroker.service.entities.db.NotificationEP;
  * @version 1.1
  * @date Mar 2025
  */
-public interface NotificationEPRepository extends JpaRepository<NotificationEP, Long> {
-    Optional<NotificationEP> findByResourceAndInteraction(String resource, String interaction);
+public interface SignalRepository extends JpaRepository<Signal, Long> {
+    Optional<Signal> findByResourceAndInteraction(String resource, String interaction);
 }

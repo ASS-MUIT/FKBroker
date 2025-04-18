@@ -33,7 +33,7 @@ import javax.persistence.Id;
  * @date Mar 2025
  */
 @Entity
-public class NotificationEP {
+public class Signal {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;

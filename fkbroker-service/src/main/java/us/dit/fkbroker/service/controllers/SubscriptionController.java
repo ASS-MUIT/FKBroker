@@ -32,14 +32,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import us.dit.fkbroker.service.entities.db.NotificationEP;
+import us.dit.fkbroker.service.entities.db.Signal;
 import us.dit.fkbroker.service.entities.domain.FhirServerDTO;
 import us.dit.fkbroker.service.entities.domain.Filter;
 import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
 import us.dit.fkbroker.service.services.fhir.FhirService;
-import us.dit.fkbroker.service.services.kie.NotificationEPService;
+import us.dit.fkbroker.service.services.kie.SignalService;
 
 /**
  * Controlador que gestiona las llamadas a los métodos necesarios al navegar por
@@ -62,12 +62,12 @@ public class SubscriptionController {
     private String applicationAddress;
 
     private final FhirService fhirService;
-    private final NotificationEPService notificationEPService;
+    private final SignalService signalService;
     private final FhirServerService fhirServerService;
 
     /**
      * Constructor que inyecta los servicios {@link FhirService},
-     * {@link NotificationEPService} y {@link FhirServerService}.
+     * {@link SignalService} y {@link FhirServerService}.
      * 
      * @param fhirService           servicio para gestionar operaciones que se
      *                              realizan sobre elementos FHIR.
@@ -76,10 +76,10 @@ public class SubscriptionController {
      * @param fhirServerService     servicio para gestionar los servidores FHIR.
      */
     @Autowired
-    public SubscriptionController(FhirService fhirService, NotificationEPService notificationEPService,
+    public SubscriptionController(FhirService fhirService, SignalService signalService,
             FhirServerService fhirServerService) {
         this.fhirService = fhirService;
-        this.notificationEPService = notificationEPService;
+        this.signalService = signalService;
         this.fhirServerService = fhirServerService;
     }
 
@@ -141,8 +141,7 @@ public class SubscriptionController {
      * @return el nombre de la vista "subscription-form".
      */
     @PostMapping("/create-subscription")
-    public String createSubscription(@RequestParam String idTopic,
-            @RequestParam String urlServer, Model model) {
+    public String createSubscription(@RequestParam String idTopic, @RequestParam String urlServer, Model model) {
 
         // Obtiene el SubscriptionTopic
         SubscriptionTopicDetails topicDetails = fhirService.getSubscriptionTopic(idTopic, urlServer);
@@ -157,9 +156,8 @@ public class SubscriptionController {
         logger.info("recurso: " + resource + " interaction: " + interaction);
 
         // Obtiene el endpoint
-        NotificationEP notificationEP = notificationEPService
-                .getNotificationEPByResourceAndInteraction(resource, interaction);
-        endpoint = applicationAddress + "notification/" + notificationEP.getId();
+        Signal signal = signalService.getSignalByResourceAndInteraction(resource, interaction);
+        endpoint = applicationAddress + "notification/" + signal.getId();
 
         model.addAttribute("endpoint", endpoint);
         model.addAttribute("topicUrl", topicUrl);
