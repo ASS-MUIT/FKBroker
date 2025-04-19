@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hl7.fhir.r5.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -32,14 +33,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import us.dit.fkbroker.service.entities.db.Signal;
+import us.dit.fkbroker.service.entities.db.SubscriptionData;
 import us.dit.fkbroker.service.entities.domain.FhirServerDTO;
 import us.dit.fkbroker.service.entities.domain.Filter;
 import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
 import us.dit.fkbroker.service.services.fhir.FhirService;
-import us.dit.fkbroker.service.services.kie.SignalService;
+import us.dit.fkbroker.service.services.fhir.SubscriptionService;
 
 /**
  * Controlador que gestiona las llamadas a los métodos necesarios al navegar por
@@ -62,24 +63,24 @@ public class SubscriptionController {
     private String applicationAddress;
 
     private final FhirService fhirService;
-    private final SignalService signalService;
+    private final SubscriptionService subscriptionService;
     private final FhirServerService fhirServerService;
 
     /**
      * Constructor que inyecta los servicios {@link FhirService},
-     * {@link SignalService} y {@link FhirServerService}.
+     * {@link SubscriptionService} y {@link FhirServerService}.
      * 
-     * @param fhirService           servicio para gestionar operaciones que se
-     *                              realizan sobre elementos FHIR.
-     * @param notificationEPService servicio para gestionar las operaciones sobre
-     *                              las entidades NotificationEP.
-     * @param fhirServerService     servicio para gestionar los servidores FHIR.
+     * @param fhirService         servicio para gestionar operaciones que se
+     *                            realizan sobre elementos FHIR.
+     * @param subscriptionService servicio para gestionar las operaciones sobre las
+     *                            entidades {@link Subscription}.
+     * @param fhirServerService   servicio para gestionar los servidores FHIR.
      */
     @Autowired
-    public SubscriptionController(FhirService fhirService, SignalService signalService,
+    public SubscriptionController(FhirService fhirService, SubscriptionService subscriptionService,
             FhirServerService fhirServerService) {
         this.fhirService = fhirService;
-        this.signalService = signalService;
+        this.subscriptionService = subscriptionService;
         this.fhirServerService = fhirServerService;
     }
 
@@ -152,16 +153,11 @@ public class SubscriptionController {
         // Obtener recurso e interacción del topic
         String resource = topicDetails.getResource();
         String interaction = topicDetails.getInteraction();
-        String endpoint;
-        logger.info("recurso: " + resource + " interaction: " + interaction);
 
-        // Obtiene el endpoint
-        Signal signal = signalService.getSignalByResourceAndInteraction(resource, interaction);
-        endpoint = applicationAddress + "notification/" + signal.getId();
-
-        model.addAttribute("endpoint", endpoint);
         model.addAttribute("topicUrl", topicUrl);
         model.addAttribute("filters", filters);
+        model.addAttribute("resource", resource);
+        model.addAttribute("interaction", interaction);
         model.addAttribute("urlServer", urlServer);
         logger.debug("Saliendo de create-suscription con los datos " + model.toString());
 
@@ -179,6 +175,7 @@ public class SubscriptionController {
     public String deleteSubscription(@RequestParam String subscriptionId, @RequestParam String urlServer) {
 
         fhirService.deleteSubscription(subscriptionId, urlServer);
+        subscriptionService.deleteSubscription(urlServer, subscriptionId);
 
         return "redirect:/subscriptions";
     }
@@ -186,22 +183,24 @@ public class SubscriptionController {
     /**
      * Maneja las solicitudes POST para enviar los filtros de una suscripción.
      * 
-     * @param requestParams los parámetros de la solicitud que contienen los
-     *                      filtros.
-     * @param idFhirServer  el id del servidor FHIR.
-     * @param endpoint      el endpoint de la suscripción.
-     * @param model         el modelo de Spring para añadir atributos.
+     * @param requestParams los parámetros de la solicitud.
+     * @param urlServer     la URL del servidor FHIR.
      * @return una redirección a la página de suscripciones.
      */
     @PostMapping("/submit-filters")
-    public String submitFilters(@RequestParam Map<String, String> requestParams, @RequestParam String urlServer,
-            @RequestParam String endpoint, Model model) {
+    public String submitFilters(@RequestParam Map<String, String> requestParams, @RequestParam String urlServer) {
 
         List<Filter> filters = new ArrayList<>();
         String topicUrl = requestParams.get("topicUrl");
         String payload = requestParams.get("payload");
-        logger.debug("Entando en submit-filters con topicURL " + topicUrl + " y payload " + payload);
+        String resource = requestParams.get("resource");
+        String interaction = requestParams.get("interaction");
 
+        // Obtiene el endpoint
+        Long idSubs = subscriptionService.getId();
+        String endpoint = applicationAddress + "notification/" + idSubs;
+
+        // Mapea los filtros
         for (Map.Entry<String, String> entry : requestParams.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -219,9 +218,20 @@ public class SubscriptionController {
                 filters.add(filter);
             }
         }
-        logger.debug("Invoco el método createSubscription de suscriptionService con ", payload, urlServer, endpoint,
-                filters, topicUrl);
-        fhirService.createSubscription(topicUrl, payload, filters, urlServer, endpoint);
+
+        // Crea la subscripción en el servidor FHIR
+        Subscription createdSubscription = fhirService.createSubscription(topicUrl, payload, filters, urlServer,
+                endpoint);
+
+        // Guarda los datos de la subscripción en BBDD
+        SubscriptionData subscription = new SubscriptionData();
+        subscription.setId(idSubs);
+        subscription.setServer(urlServer);
+        subscription.setSubscription(createdSubscription.getIdElement().getIdPart());
+        subscription.setResource(resource);
+        subscription.setInteraction(interaction);
+        subscription.setEvents((long) 0);
+        subscriptionService.saveSubscription(subscription);
 
         return "redirect:/subscriptions";
     }

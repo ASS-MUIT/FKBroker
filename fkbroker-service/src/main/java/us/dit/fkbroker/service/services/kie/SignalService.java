@@ -70,34 +70,15 @@ public class SignalService {
     }
 
     /**
-     * Obtiene una entidad {@link Signal} por su recurso e interacción. Si no
-     * existe, guarda una entidad nueva.
+     * Obtiene una entidad {@link Signal} por su recurso e interacción.
      * 
      * @param resource    el recurso de la entidad {@link Signal}.
      * @param interaction la interacción de la entidad {@link Signal}.
-     * @return la entidad {@link Signal} obtenida o creada
+     * @return un Optional que contiene la entidad {@link Signal} si se encuentra, o
+     *         un Optional vacío si no.
      */
-    public Signal getSignalByResourceAndInteraction(String resource, String interaction) {
-        Signal signal;
-
-        // Comprueba si existe ya
-        Optional<Signal> optionalNotificationEP = signalRepository
-                .findByResourceAndInteraction(resource, interaction);
-
-        if (optionalNotificationEP.isPresent()) {
-            // Si existe, lo obtiene
-            signal = optionalNotificationEP.get();
-        } else {
-            // Si no existe, crea un endpoint nuevo
-            String signalName = interaction + "-" + resource;
-            Signal newsignal = new Signal();
-            newsignal.setResource(resource);
-            newsignal.setInteraction(interaction);
-            newsignal.setSignalName(signalName);
-            signal = signalRepository.save(newsignal);
-        }
-
-        return signal;
+    public Optional<Signal> getSignalByResourceAndInteraction(String resource, String interaction) {
+        return signalRepository.findByResourceAndInteraction(resource, interaction);
     }
 
     /**

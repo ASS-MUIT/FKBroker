@@ -202,7 +202,7 @@ public class FhirService {
      * @param fhirUrl  la URL del servidor FHIR.
      * @param endpoint el endpoint de la suscripción.
      */
-    public void createSubscription(String topicUrl, String payload, List<Filter> filters, String fhirUrl,
+    public Subscription createSubscription(String topicUrl, String payload, List<Filter> filters, String fhirUrl,
             String endpoint) {
         logger.debug("Entro en createSubscription del fhirClient");
 
@@ -246,6 +246,8 @@ public class FhirService {
 
         logger.info("Suscripción creada: {}",
                 fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdSubscription));
+        
+        return createdSubscription;
     }
 
     /**

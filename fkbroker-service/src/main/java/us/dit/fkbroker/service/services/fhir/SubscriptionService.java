@@ -1,146 +1,85 @@
-/**
-*  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
-*
-*  FKBroker is free software: you can redistribute it and/or
-*  modify it under the terms of the GNU General Public License as published
-*  by the Free Software Foundation, either version 3 of the License, or (at
-*  your option) any later version.
-*
-*  FKBroker is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-*  Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License along
-*  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
-**/
 package us.dit.fkbroker.service.services.fhir;
 
-import java.util.List;
+import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import us.dit.fkbroker.service.entities.domain.Filter;
-import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
-import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
+import us.dit.fkbroker.service.entities.db.SubscriptionData;
+import us.dit.fkbroker.service.repositories.SubscriptionRepository;
 
 /**
- * @deprecated Esta clase ya no se usa y será eliminada en futuras versiones. 
- * Se recomienda usar {@link FhirService} en su lugar.
+ * Servicio para manejar las operaciones de la entidad
+ * {@link SubscriptionData}.
  * 
- * Servicio para manejar las operaciones relacionadas con SubscriptionTopics y
- * Subscriptions.
- *
- * Esta clase desarrolla las distintas operaciones que se realizan sobre
- * elementos FHIR.
- * 
- * @author juanmabrazo98
+ * @author josperbel
  * @version 1.0
- * @date jul 2024
- * 
+ * @date Abr 2025
  */
 @Service
 public class SubscriptionService {
 
-    private final FhirClient fhirClient;
-    private static final Logger logger = LogManager.getLogger();
+    private final SubscriptionRepository subscriptionRepository;
+
+    private final EntityManager entityManager;
 
     /**
-     * Constructor que inyecta el FhirClient.
+     * Constructor que inyecta el {@link SubscriptionRepository}.
      * 
-     * @param fhirClient el cliente FHIR para realizar operaciones FHIR.
+     * @param subscriptionRepository repositorio JPA de la entidad
+     *                               {@link SubscriptionData}.
+     * @param entityManager          interfaz usada para interaccionar con el
+     *                               contexto de persistencia.
      */
     @Autowired
-    public SubscriptionService(FhirClient fhirClient) {
-        this.fhirClient = fhirClient;
+    public SubscriptionService(SubscriptionRepository subscriptionRepository, EntityManager entityManager) {
+        this.subscriptionRepository = subscriptionRepository;
+        this.entityManager = entityManager;
     }
 
     /**
-     * Obtiene una lista de SubscriptionTopics desde un servidor FHIR.
+     * Obtiene un nuevo identificador de una secuencia.
      * 
-     * @param url la URL del servidor FHIR.
-     * @return una lista de SubscriptionTopics.
+     * @return el identificador obtenido de la secuencia para una nueva entidad
+     *         {@link SubscriptionData}.
      */
-    public List<SubscriptionTopicDetails> getSubscriptionTopics(String url) {
-        return fhirClient.getSubscriptionTopics(url);
+    public Long getId() {
+        return ((Number) entityManager.createNativeQuery("SELECT nextval('sub_seq')").getSingleResult()).longValue();
     }
 
     /**
-     * Obtiene una lista de Subscriptions desde un servidor FHIR.
+     * Busca una entidad {@link SubscriptionData} por su ID.
      * 
-     * @param url la URL del servidor FHIR.
-     * @return una lista de Subscriptions.
+     * @param id el ID de la entidad {@link SubscriptionData}.
+     * @return un Optional que contiene la entidad {@link SubscriptionData} si se
+     *         encuentra, o un Optional vacío si no.
      */
-    public List<SubscriptionDetails> getSubscriptions(String url) {
-        return fhirClient.getSubscriptions(url);
+    public Optional<SubscriptionData> findById(Long id) {
+        return subscriptionRepository.findById(id);
     }
 
     /**
-     * Obtiene una lista de IDs de SubscriptionTopics desde un servidor FHIR.
+     * Guarda una entidad {@link SubscriptionData} en la base de datos.
      * 
-     * @param url la URL del servidor FHIR.
-     * @return una lista de SubscriptionTopics.
+     * @param subscription el objeto {@link SubscriptionData} a guardar.
+     * @return el objeto {@link SubscriptionData} guardado.
      */
-    public List<String> getSubscriptionTopicIds(String url) {
-        return fhirClient.getSubscriptionTopicIds(url);
+    public SubscriptionData saveSubscription(SubscriptionData subscription) {
+        return subscriptionRepository.save(subscription);
     }
 
     /**
-     * Obtiene los filtros para un SubscriptionTopic dado desde un servidor FHIR.
+     * Elimina una entidad {@link SubscriptionData} de la base de datos por su ID.
      * 
-     * @param topicUrl la URL del SubscriptionTopic.
-     * @param fhirUrl  la URL del servidor FHIR.
-     * @return una lista de detalles de los filtros del SubscriptionTopic.
+     * @param server       la url del servidor de la subscripción a eliminar.
+     * @param subscription el identificador de la subscripción a eliminar.
      */
-    public List<SubscriptionTopicDetails.FilterDetail> getFilters(String topicUrl, String fhirUrl) {
-        return fhirClient.getFilters(topicUrl, fhirUrl);
+    @Transactional
+    public void deleteSubscription(String server, String subscription) {
+        subscriptionRepository.deleteByServerAndSubscription(server, subscription);
     }
 
-    /**
-     * Elimina una Subscription en el servidor FHIR.
-     * 
-     * @param subscriptionId el ID de la Subscription a eliminar.
-     */
-    public void deleteSubscription(String subscriptionId, String url) {
-        fhirClient.deleteSubscription(subscriptionId, url);
-    }
-
-    /**
-     * Obtiene el recurso asociado a un SubscriptionTopic a partir de su URL.
-     * 
-     * @param topicUrl la URL del SubscriptionTopic.
-     * @return el recurso asociado al SubscriptionTopic.
-     */
-    public String getTopicResource(String topicUrl) {
-        return fhirClient.getTopicResource(topicUrl);
-    }
-
-    /**
-     * Obtiene la interacción asociada a un SubscriptionTopic a partir de su URL.
-     * 
-     * @param topicUrl la URL del SubscriptionTopic.
-     * @return la interacción asociada al SubscriptionTopic.
-     */
-    public String getTopicInteraction(String topicUrl) {
-        return fhirClient.getTopicInteraction(topicUrl);
-    }
-
-    /**
-     * Crea una nueva Subscription en el servidor FHIR.
-     * 
-     * @param topicUrl la URL del SubscriptionTopic.
-     * @param payload  el payload de la Subscription.
-     * @param filters  la lista de filtros de la Subscription.
-     * @param fhirUrl  la URL del servidor FHIR.
-     * @param endpoint el endpoint de la Subscription.
-     */
-    public void createSubscription(String topicUrl, String payload, List<Filter> filters, String fhirUrl,
-            String endpoint) {
-        logger.debug("Entro en createSubscription");
-        fhirClient.createSubscription(topicUrl, payload, filters, fhirUrl, endpoint);
-    }
 }

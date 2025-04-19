@@ -20,6 +20,8 @@ package us.dit.fkbroker.service.controllers;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,8 +30,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import us.dit.fkbroker.service.entities.db.KieServer;
 import us.dit.fkbroker.service.entities.db.Signal;
+import us.dit.fkbroker.service.entities.db.SubscriptionData;
 import us.dit.fkbroker.service.services.fhir.FhirService;
+import us.dit.fkbroker.service.services.fhir.SubscriptionService;
 import us.dit.fkbroker.service.services.kie.KieServerService;
 import us.dit.fkbroker.service.services.kie.SignalService;
 
@@ -46,14 +51,34 @@ import us.dit.fkbroker.service.services.kie.SignalService;
 @RequestMapping("/notification")
 public class NotificationController {
 
-    @Autowired
-    private SignalService signalService;
+    private static final Logger logger = LogManager.getLogger();
 
-    @Autowired
-    private KieServerService kieServerService;
+    private final FhirService fhirService;
+    private final KieServerService kieServerService;
+    private final SignalService signalService;
+    private final SubscriptionService subscriptionService;
 
+    /**
+     * Constructor que inyecta los servicios {@link FhirService},
+     * {@link KieServerService} y {@link SignalService}.
+     * 
+     * @param fhirService         servicio para gestionar operaciones que se
+     *                            realizan sobre elementos FHIR.
+     * @param kieServerService    servicio para gestionar las operaciones sobre las
+     *                            entidades {@link KieServer}.
+     * @param signalService       servicio para gestionar las operaciones sobre las
+     *                            entidades {@link Signal}.
+     * @param subscriptionService servicio para gestionar las operaciones sobre las
+     *                            entidades {@link SubscriptionData}.
+     */
     @Autowired
-    private FhirService fhirService;
+    public NotificationController(FhirService fhirService, KieServerService kieServerService,
+            SignalService signalService, SubscriptionService subscriptionService) {
+        this.fhirService = fhirService;
+        this.kieServerService = kieServerService;
+        this.signalService = signalService;
+        this.subscriptionService = subscriptionService;
+    }
 
     /**
      * Método que maneja las notificaciones. Llama al método para enviar las señales
@@ -66,14 +91,18 @@ public class NotificationController {
      */
     @PostMapping("/{id}")
     public ResponseEntity<String> sendNotification(@PathVariable Long id, @RequestBody String json) {
-        Optional<Signal> optionalSignal = signalService.findById(id);
-        if (optionalSignal.isPresent()) {
+        Optional<SubscriptionData> optionalSubscription = subscriptionService.findById(id);
+        if (optionalSubscription.isPresent()) {
             // Responder inmediatamente con 200 OK
             CompletableFuture.runAsync(() -> {
-                Signal signal = optionalSignal.get();
-                String idRecurso = fhirService.getNotificationResourceId(json);
-                System.out.println("Llamamos a sendsignal. Id del recurso: " + idRecurso);
-                kieServerService.sendSignalToAllKieServers(signal, idRecurso);
+                SubscriptionData subscription = optionalSubscription.get();
+                String resource = fhirService.getNotificationResourceId(json);
+                Optional<Signal> optionalSignal = signalService
+                        .getSignalByResourceAndInteraction(subscription.getResource(), subscription.getInteraction());
+                if (optionalSignal.isPresent()) {
+                    logger.info("Llamamos a sendsignal. Id del recurso: {}", resource);
+                    kieServerService.sendSignalToAllKieServers(optionalSignal.get(), resource);
+                }
             });
         } else {
             // Manejar el caso cuando no se encuentra la entidad

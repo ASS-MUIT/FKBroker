@@ -16,7 +16,8 @@
     <form th:action="@{/submit-filters}" method="post">
         <input type="hidden" id="urlServer" name="urlServer" th:value="${urlServer}" />
         <input type="hidden" name="topicUrl" th:value="${topicUrl}">
-        <input type="hidden" id="endpoint" name="endpoint" th:value="${endpoint}">
+        <input type="hidden" id="resource" name="resource" th:value="${resource}">
+		<input type="hidden" id="interaction" name="interaction" th:value="${interaction}">
 
 		<!-- Campos genérigos de la subscripción -->
 		<div class="form-group">
