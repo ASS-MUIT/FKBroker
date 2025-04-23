@@ -14,11 +14,12 @@ import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.Enumerations.SearchComparator;
 import org.hl7.fhir.r5.model.Enumerations.SearchModifierCode;
 import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Integer64Type;
+import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent;
 import org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent;
-import org.hl7.fhir.r5.model.SubscriptionStatus;
-import org.hl7.fhir.r5.model.SubscriptionStatus.SubscriptionNotificationType;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,12 @@ public class FhirService {
 
     @Value("${application.address}")
     private String applicationAddress;
+    
+    @Value("${fhir.server.mock.enable}")
+    private Boolean fhirMockEnable;
+    
+    @Value("${fhir.server.mock.url}")
+    private String fhirMockUrl;
 
     private static final Logger logger = LogManager.getLogger(FhirService.class);
 
@@ -246,7 +253,7 @@ public class FhirService {
 
         logger.info("Suscripción creada: {}",
                 fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdSubscription));
-        
+
         return createdSubscription;
     }
 
@@ -262,35 +269,34 @@ public class FhirService {
     }
 
     /**
-     * Obtiene la URL completa del recurso asociado a una notificación a partir de
-     * su JSON.
+     * Obtiene las referencia de las notificaciones que se han perdido.
      * 
-     * @param notification el JSON que contiene la notificación.
+     * @param fhirUrl           la URL del servidor FHIR.
+     * @param subscriptionId    el identificador de la subscripción.
+     * @param eventsSinceNumber el número del primer evento perdido.
+     * @param eventsUntilNumber el número del último evento perdido.
      * @return la URL completa del recurso de notificación.
      */
-    public String getNotificationResourceId(String notification) {
-        logger.info("Se recibe una notificación: {}", notification);
-        String id = null;
-
-        Bundle bundle = fhirContext.newJsonParser().parseResource(Bundle.class, notification);
-
-        if (!bundle.getEntry().isEmpty() && bundle.getEntryFirstRep().hasResource()) {
-            SubscriptionStatus subscriptionStatus = (SubscriptionStatus) bundle.getEntryFirstRep().getResource();
-
-            // Comprueba si el estado es activo y se trata de una notificación
-            if (subscriptionStatus.getStatus().equals(SubscriptionStatusCodes.ACTIVE)
-                    && subscriptionStatus.getType().equals(SubscriptionNotificationType.EVENTNOTIFICATION)) {
-                id = subscriptionStatus.getNotificationEventFirstRep().getFocus().getReference();
-                // TODO en estos casos se debe guardar el número del evento, comprobando que el
-                // anterior ha llegado, en caso contrario, se debe consultar al servidor FHIR.
-            } else {
-                logger.info("No se trata de una notificación");
-                // TODO se debe implementar la lógica cuando la suscripción no esté activa o no
-                // se reciba notificación
-            }
+    public Bundle getLostEvents(String fhirUrl, String subscriptionId, Long eventsSinceNumber,
+            Long eventsUntilNumber) {
+        // Si está activada la configuración, utiliza el mock
+        if (fhirMockEnable) {
+            fhirUrl = fhirMockUrl;
         }
 
-        return id;
+        // Prepara los parámetros de entrada para realizar la consulta
+        Parameters inputParams = new Parameters();
+        inputParams.addParameter().setName("eventsSinceNumber").setValue(new Integer64Type(eventsSinceNumber));
+        inputParams.addParameter().setName("eventsUntilNumber").setValue(new Integer64Type(eventsUntilNumber));
+
+        // Realiza la consulta
+        IGenericClient client = getClient(fhirUrl);
+        Bundle response = (Bundle) client.operation().onInstance(new IdType("Subscription", subscriptionId))
+                .named("$events").withParameters(inputParams).useHttpGet().returnResourceType(Bundle.class).execute();
+        logger.info("Respuesta del servidor: {}",
+                fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+        return response;
     }
 
 }

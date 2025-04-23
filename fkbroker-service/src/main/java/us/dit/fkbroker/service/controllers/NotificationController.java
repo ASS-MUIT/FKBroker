@@ -33,7 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 import us.dit.fkbroker.service.entities.db.KieServer;
 import us.dit.fkbroker.service.entities.db.Signal;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
+import us.dit.fkbroker.service.entities.domain.NotificationDetails;
 import us.dit.fkbroker.service.services.fhir.FhirService;
+import us.dit.fkbroker.service.services.fhir.NotificationService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionService;
 import us.dit.fkbroker.service.services.kie.KieServerService;
 import us.dit.fkbroker.service.services.kie.SignalService;
@@ -53,31 +55,31 @@ public class NotificationController {
 
     private static final Logger logger = LogManager.getLogger();
 
-    private final FhirService fhirService;
     private final KieServerService kieServerService;
     private final SignalService signalService;
     private final SubscriptionService subscriptionService;
+    private final NotificationService notificationService;
 
     /**
      * Constructor que inyecta los servicios {@link FhirService},
      * {@link KieServerService} y {@link SignalService}.
      * 
-     * @param fhirService         servicio para gestionar operaciones que se
-     *                            realizan sobre elementos FHIR.
      * @param kieServerService    servicio para gestionar las operaciones sobre las
      *                            entidades {@link KieServer}.
      * @param signalService       servicio para gestionar las operaciones sobre las
      *                            entidades {@link Signal}.
      * @param subscriptionService servicio para gestionar las operaciones sobre las
      *                            entidades {@link SubscriptionData}.
+     * @param notificationService servicio para gestionar las notificaciones de
+     *                            subscripciones.
      */
     @Autowired
-    public NotificationController(FhirService fhirService, KieServerService kieServerService,
-            SignalService signalService, SubscriptionService subscriptionService) {
-        this.fhirService = fhirService;
+    public NotificationController(KieServerService kieServerService, SignalService signalService,
+            SubscriptionService subscriptionService, NotificationService notificationService) {
         this.kieServerService = kieServerService;
         this.signalService = signalService;
         this.subscriptionService = subscriptionService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -90,18 +92,32 @@ public class NotificationController {
      * @return una respuesta HTTP con el cuerpo del JSON proporcionado.
      */
     @PostMapping("/{id}")
-    public ResponseEntity<String> sendNotification(@PathVariable Long id, @RequestBody String json) {
+    public ResponseEntity<String> sendNotification(@PathVariable Long id, @RequestBody String message) {
         Optional<SubscriptionData> optionalSubscription = subscriptionService.findById(id);
         if (optionalSubscription.isPresent()) {
             // Responder inmediatamente con 200 OK
             CompletableFuture.runAsync(() -> {
+                logger.info("Se recibe un mensaje de notificación: {}", message);
                 SubscriptionData subscription = optionalSubscription.get();
-                String resource = fhirService.getNotificationResourceId(json);
-                Optional<Signal> optionalSignal = signalService
-                        .getSignalByResourceAndInteraction(subscription.getResource(), subscription.getInteraction());
-                if (optionalSignal.isPresent()) {
-                    logger.info("Llamamos a sendsignal. Id del recurso: {}", resource);
-                    kieServerService.sendSignalToAllKieServers(optionalSignal.get(), resource);
+
+                // Se obtienen los recursos de las notificaciones
+                NotificationDetails notification = notificationService.processNotification(message, subscription);
+
+                if (notification.getHasNewEvents()) {
+                    // Actualiza el número de eventos recibidos
+                    subscription.setEvents(notification.getLastEvent());
+                    subscriptionService.saveSubscription(subscription);
+
+                    // Se obtiene la señal que se debe enviar
+                    Optional<Signal> optionalSignal = signalService.getSignalByResourceAndInteraction(
+                            subscription.getResource(), subscription.getInteraction());
+                    if (optionalSignal.isPresent()) {
+                        // Se envía una señal a todos los servidores KIE por cada recurso notificado
+                        for (String resource : notification.getReferenceEvents()) {
+                            logger.info("Llamamos a sendsignal. Id del recurso: {}", resource);
+                            kieServerService.sendSignalToAllKieServers(optionalSignal.get(), resource);
+                        }
+                    }
                 }
             });
         } else {
@@ -109,6 +125,6 @@ public class NotificationController {
             throw new RuntimeException("NotificationEP not found with id: " + id);
         }
 
-        return ResponseEntity.ok(json);
+        return ResponseEntity.ok(message);
     }
 }
