@@ -20,6 +20,7 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent;
 import org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent;
+import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,10 +48,10 @@ public class FhirService {
 
     @Value("${application.address}")
     private String applicationAddress;
-    
+
     @Value("${fhir.server.mock.enable}")
     private Boolean fhirMockEnable;
-    
+
     @Value("${fhir.server.mock.url}")
     private String fhirMockUrl;
 
@@ -275,9 +276,9 @@ public class FhirService {
      * @param subscriptionId    el identificador de la subscripción.
      * @param eventsSinceNumber el número del primer evento perdido.
      * @param eventsUntilNumber el número del último evento perdido.
-     * @return la URL completa del recurso de notificación.
+     * @return la respuesta del servidor.
      */
-    public Bundle getLostEvents(String fhirUrl, String subscriptionId, Long eventsSinceNumber,
+    public SubscriptionStatus getLostEvents(String fhirUrl, String subscriptionId, Long eventsSinceNumber,
             Long eventsUntilNumber) {
         // Si está activada la configuración, utiliza el mock
         if (fhirMockEnable) {
@@ -291,12 +292,66 @@ public class FhirService {
 
         // Realiza la consulta
         IGenericClient client = getClient(fhirUrl);
-        Bundle response = (Bundle) client.operation().onInstance(new IdType("Subscription", subscriptionId))
+        Bundle bundle = (Bundle) client.operation().onInstance(new IdType("Subscription", subscriptionId))
                 .named("$events").withParameters(inputParams).useHttpGet().returnResourceType(Bundle.class).execute();
-        logger.info("Respuesta del servidor: {}",
-                fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
-        return response;
+        logger.info("Respuesta del servidor: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
+
+        // Comprueba que tenga SubscriptionStatus y lo extrae
+        if (bundle.getEntry().isEmpty() || !bundle.getEntryFirstRep().hasResource()
+                || bundle.getEntryFirstRep().getResource().getClass() != SubscriptionStatus.class) {
+            throw new RuntimeException("Mensaje incorrecto. Bundle sin SubscriptionStatus.");
+        } else {
+            return (SubscriptionStatus) bundle.getEntryFirstRep().getResource();
+        }
+    }
+
+    /**
+     * Obtiene el estado de la subscripción.
+     * 
+     * @param fhirUrl        la URL del servidor FHIR.
+     * @param subscriptionId el identificador de la subscripción.
+     * @return la respuesta del servidor.
+     */
+    public SubscriptionStatus getStatus(String fhirUrl, String subscriptionId) {
+        // Si está activada la configuración, utiliza el mock
+        if (fhirMockEnable) {
+            fhirUrl = fhirMockUrl;
+        }
+
+        // Realiza la consulta
+        IGenericClient client = getClient(fhirUrl);
+        Bundle bundle = (Bundle) client.operation().onInstance(new IdType("Subscription", subscriptionId))
+                .named("$status").withNoParameters(Parameters.class).useHttpGet().returnResourceType(Bundle.class)
+                .execute();
+
+        logger.info("Respuesta del servidor: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
+
+        // Comprueba que tenga SubscriptionStatus y lo extrae
+        if (bundle.getEntry().isEmpty() || !bundle.getEntryFirstRep().hasResource()
+                || bundle.getEntryFirstRep().getResource().getClass() != SubscriptionStatus.class) {
+            throw new RuntimeException("Mensaje incorrecto. Bundle sin SubscriptionStatus.");
+        } else {
+            return (SubscriptionStatus) bundle.getEntryFirstRep().getResource();
+        }
+    }
+
+    /**
+     * Obtiene el SubscriptionStatus que contiene el mensaje.
+     * 
+     * @param mesagge el JSON que contiene el SubscriptionStatus.
+     * @return el recurso el SubscriptionStatus.
+     */
+    public SubscriptionStatus getSubscriptionStatus(String mesagge) {
+        Bundle bundle = fhirContext.newJsonParser().parseResource(Bundle.class, mesagge);
+
+        // Comprueba que tenga SubscriptionStatus y lo extrae
+        if (bundle.getEntry().isEmpty() || !bundle.getEntryFirstRep().hasResource()
+                || bundle.getEntryFirstRep().getResource().getClass() != SubscriptionStatus.class) {
+            throw new RuntimeException("Mensaje incorrecto. Bundle sin SubscriptionStatus.");
+        } else {
+            return (SubscriptionStatus) bundle.getEntryFirstRep().getResource();
+        }
     }
 
 }

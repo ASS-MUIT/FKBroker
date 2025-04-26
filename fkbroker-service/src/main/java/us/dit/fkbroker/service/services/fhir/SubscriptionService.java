@@ -1,5 +1,6 @@
 package us.dit.fkbroker.service.services.fhir;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
@@ -12,8 +13,7 @@ import us.dit.fkbroker.service.entities.db.SubscriptionData;
 import us.dit.fkbroker.service.repositories.SubscriptionRepository;
 
 /**
- * Servicio para manejar las operaciones de la entidad
- * {@link SubscriptionData}.
+ * Servicio para manejar las operaciones de la entidad {@link SubscriptionData}.
  * 
  * @author josperbel
  * @version 1.0
@@ -59,6 +59,15 @@ public class SubscriptionService {
      */
     public Optional<SubscriptionData> findById(Long id) {
         return subscriptionRepository.findById(id);
+    }
+
+    /**
+     * Obtiene todas las entidades {@link SubscriptionData}.
+     * 
+     * @return un listado de {@link SubscriptionData}.
+     */
+    public List<SubscriptionData> findAll() {
+        return subscriptionRepository.findAll();
     }
 
     /**
