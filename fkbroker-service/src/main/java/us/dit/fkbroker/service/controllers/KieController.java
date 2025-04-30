@@ -67,7 +67,7 @@ public class KieController {
     public String getKieServers(Model model) {
         model.addAttribute("kieServers", kieServerService.getAllKieServers());
         // model.addAttribute("newKieServer", new KieServer());
-        return "kieServers";
+        return "kie/kieServers";
     }
 
     /**

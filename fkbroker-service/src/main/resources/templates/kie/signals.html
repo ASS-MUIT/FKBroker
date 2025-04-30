@@ -5,12 +5,17 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="/form-styles.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
 </head>
 <body>
 <div th:replace="layout/topnav :: topnav"></div>
 <div class="container">
 	<div th:replace="layout/header :: header('Señales','Gestión de Señales')"></div>
-    <h2>Señales</h2>
+	<div class="d-flex justify-content-between align-items-center">
+		<h2>Señales</h2>
+		<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addSignal">Agregar señal</button>
+	</div>
     <table class="table">
         <thead>
             <tr>
@@ -28,7 +33,7 @@
                 <td th:text="${signal.interaction}">Interaction</td>
                 <td th:text="${signal.signalName}">Signal Name</td>
                 <td>
-                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#editModal" 
+                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#editSignal" 
                             th:attr="data-id=${signal.id},data-signalname=${signal.signalName}">Editar</button>
                     <form th:action="@{/signals/delete}" method="post" style="display:inline;">
                         <input type="hidden" name="id" th:value="${signal.id}" />
@@ -38,27 +43,10 @@
             </tr>
         </tbody>
     </table>
-
-    <h2>Agregar Señal</h2>
-    <form th:action="@{/signals/add}" method="post">
-        <div class="form-group">
-            <label for="resource">Resource:</label>
-            <input type="text" class="form-control" id="resource" name="resource" required>
-        </div>
-        <div class="form-group">
-            <label for="interaction">Interaction:</label>
-            <input type="text" class="form-control" id="interaction" name="interaction" required>
-        </div>
-        <div class="form-group">
-            <label for="signalName">Signal Name:</label>
-            <input type="text" class="form-control" id="signalName" name="signalName" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Agregar</button>
-    </form>
 </div>
 
 <!-- Modal para editar Signal Name -->
-<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+<div class="modal fade" id="editSignal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form th:action="@{/signals/edit}" method="post">
@@ -84,10 +72,42 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+	<!-- Modal para crear una señal  -->
+	<div class="modal fade" id="addSignal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+	    <div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	            <form th:action="@{/signals/add}" method="post">
+	                <div class="modal-header">
+	                    <h5 class="modal-title" id="editModalLabel">Agregar señal</h5>
+	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                        <span aria-hidden="true">&times;</span>
+	                    </button>
+	                </div>
+					<div class="modal-body">
+						<div class="form-group">
+				            <label for="resource">Resource:</label>
+				            <input type="text" class="form-control" id="resource" name="resource" required>
+				        </div>
+				        <div class="form-group">
+				            <label for="interaction">Interaction:</label>
+				            <input type="text" class="form-control" id="interaction" name="interaction" required>
+				        </div>
+				        <div class="form-group">
+				            <label for="signalName">Signal Name:</label>
+				            <input type="text" class="form-control" id="signalName" name="signalName" required>
+				        </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+		                    <button type="submit" class="btn btn-primary">Guardar</button>
+		                </div>
+					</div>
+	            </form>
+	        </div>
+	    </div>
+	</div>
+
 <script>
-    $('#editModal').on('show.bs.modal', function (event) {
+    $('#editSignal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var id = button.data('id');
         var signalName = button.data('signalname');

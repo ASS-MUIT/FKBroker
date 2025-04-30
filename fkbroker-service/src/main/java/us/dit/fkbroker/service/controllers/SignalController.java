@@ -56,7 +56,7 @@ public class SignalController {
     @GetMapping
     public String getSignals(Model model) {
         model.addAttribute("signals", signalService.getAllSignals());
-        return "signals";
+        return "kie/signals";
     }
 
     /**

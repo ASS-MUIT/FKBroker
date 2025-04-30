@@ -19,7 +19,10 @@
     <div class="row">
 		<!-- Búsqueda -->
 		<div class="col-12">
-			<h2>Servidor FHIR</h2>
+			<div class="d-flex justify-content-between align-items-center">
+				<h2>Servidor FHIR</h2>
+				<a class="btn btn-info" href="/fhir/servers">Administración de servidores</a>
+			</div>
 		    <form th:action="@{/server}" method="post" id="serverForm">
 				<div class="form-group">
 				    <select id="server" name="server" class="form-control" required>

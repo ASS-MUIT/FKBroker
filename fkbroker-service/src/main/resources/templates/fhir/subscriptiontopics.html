@@ -1,7 +1,7 @@
 <div th:fragment="content">
 	<div class="d-flex align-items-center">
 		<h2>SubscriptionTopic</h2>
-	    <button class="btn btn-primary ml-3" type="button" data-toggle="collapse" data-target="#topicsTable" aria-expanded="false" aria-controls="topicsTable">
+	    <button class="btn btn-info ml-3" type="button" data-toggle="collapse" data-target="#topicsTable" aria-expanded="false" aria-controls="topicsTable">
 	        <i id="topicIcon" class="fas fa-eye-slash"></i>
 	    </button>
 	</div>
@@ -26,7 +26,7 @@
 						<form th:action="@{/create-subscription}" method="post">
 							<input type="hidden" id="urlServer" name="urlServer" th:value="${urlServer}" />
 							<input type="hidden" id="idTopic" name="idTopic" th:value="${topic.id}" />
-							<button type="submit" class="btn btn-primary">Subscribirse</button>
+							<button type="submit" class="btn btn-info">Subscribirse</button>
 						</form>
 					</td>
                 </tr>

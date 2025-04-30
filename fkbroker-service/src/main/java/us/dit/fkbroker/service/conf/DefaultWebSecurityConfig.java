@@ -58,7 +58,8 @@ SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
             .antMatchers(HttpMethod.POST, "/endpoint").permitAll() 
             .antMatchers(HttpMethod.POST, "/notification/**").permitAll()  
-            .antMatchers("/*").authenticated()
+            .antMatchers("/*").authenticated() 
+            .antMatchers("/fhir/servers").authenticated()
             .antMatchers("/img/*").permitAll()
             .antMatchers("/topics").authenticated())
             .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/access-denied.html"))
