@@ -142,8 +142,7 @@ public class FhirService {
         // Mapea las suscripciones
         List<SubscriptionDetails> subscriptionDetails = bundle.getEntry().stream()
                 .map(entry -> (Subscription) entry.getResource())
-                .filter(subscription -> subscription.getEndpoint().startsWith(applicationAddress))
-                .map(subscription -> {
+                .filter(subscription -> subscription.getEndpoint().startsWith(applicationAddress)).map(subscription -> {
                     String endpoint = subscription.getEndpoint();
                     String topicTitle = subscription.getTopic();
                     String id = subscription.getIdElement().getIdPart();
@@ -224,21 +223,23 @@ public class FhirService {
         subscription.setContentType("application/fhir+json");
 
         // Mapea los filtros
-        SubscriptionFilterByComponent filterBy = new SubscriptionFilterByComponent();
-        subscriptionForm.getFilters().stream().filter(filter -> filter.getActive()).forEach(filter -> {
-            filterBy.setFilterParameter(filter.getParameter());
+        if (subscriptionForm.getFilters() != null) {
+            SubscriptionFilterByComponent filterBy = new SubscriptionFilterByComponent();
+            subscriptionForm.getFilters().stream().filter(filter -> filter.getActive()).forEach(filter -> {
+                filterBy.setFilterParameter(filter.getParameter());
 
-            if (filter.getComparator() != null && !filter.getComparator().isEmpty()) {
-                filterBy.setComparator(SearchComparator.fromCode(filter.getComparator()));
-            }
+                if (filter.getComparator() != null && !filter.getComparator().isEmpty()) {
+                    filterBy.setComparator(SearchComparator.fromCode(filter.getComparator()));
+                }
 
-            if (filter.getModifier() != null && !filter.getModifier().isEmpty()) {
-                filterBy.setModifier(SearchModifierCode.fromCode(filter.getModifier()));
-            }
+                if (filter.getModifier() != null && !filter.getModifier().isEmpty()) {
+                    filterBy.setModifier(SearchModifierCode.fromCode(filter.getModifier()));
+                }
 
-            filterBy.setValue(filter.getValue());
-        });
-        subscription.setFilterBy(Collections.singletonList(filterBy));
+                filterBy.setValue(filter.getValue());
+            });
+            subscription.setFilterBy(Collections.singletonList(filterBy));
+        }
 
         // Envía el recurso Subscription al servidor FHIR
         IGenericClient client = getClient(fhirUrl);

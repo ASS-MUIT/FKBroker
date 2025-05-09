@@ -36,14 +36,16 @@
                     <!-- Botón para eliminar el servidor KIE -->
                     <form th:action="@{/kie/servers/delete}" method="post">
                         <input type="hidden" name="url" th:value="${kieServer.url}">
-                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                        <button type="submit" class="btn btn-danger" title="Eliminar Servidor">
+							<i class="fas fa-trash-alt"></i>
+						</button>
                     </form>
                 </td>
             </tr>
         </tbody>
     </table>
 	
-	<div class="d-flex justify-content-between align-items-center">
+	<div class="d-flex justify-content-between align-items-center mt-3">
 		<h2>Señales</h2>
 		<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addSignal">Agregar señal</button>
 	</div>
@@ -65,10 +67,14 @@
                 <td th:text="${signal.signalName}">Signal Name</td>
                 <td>
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#editSignal" 
-                            th:attr="data-id=${signal.id},data-signalname=${signal.signalName}">Editar</button>
+						th:attr="data-id=${signal.id},data-signalname=${signal.signalName}" title="Editar Señal">
+							<i class="fas fa-edit"></i>
+					</button>
                     <form th:action="@{/kie/signals/delete}" method="post" style="display:inline;">
                         <input type="hidden" name="id" th:value="${signal.id}" />
-                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                        <button type="submit" class="btn btn-danger" title="Eliminar Señal">
+							<i class="fas fa-trash-alt"></i>
+						</button>
                     </form>
                 </td>
             </tr>
