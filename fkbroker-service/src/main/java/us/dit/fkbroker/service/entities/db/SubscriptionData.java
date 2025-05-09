@@ -19,6 +19,8 @@ package us.dit.fkbroker.service.entities.db;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 /**
  * Entidad que representa los datos de las subscripciones
@@ -32,11 +34,14 @@ public class SubscriptionData {
 
     @Id
     private Long id;
-    private String server;
     private String subscription;
     private String resource;
     private String interaction;
     private Long events;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_SERVER")
+    private FhirServer server;
 
     public Long getId() {
         return id;
@@ -44,14 +49,6 @@ public class SubscriptionData {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public void setServer(String server) {
-        this.server = server;
     }
 
     public String getSubscription() {
@@ -84,5 +81,13 @@ public class SubscriptionData {
 
     public void setEvents(Long events) {
         this.events = events;
+    }
+
+    public FhirServer getServer() {
+        return server;
+    }
+
+    public void setServer(FhirServer server) {
+        this.server = server;
     }
 }

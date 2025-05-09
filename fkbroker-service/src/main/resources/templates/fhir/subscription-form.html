@@ -9,11 +9,11 @@
 <body>
 <div th:replace="layout/topnav :: topnav"></div>
 <div class="container">
-	<div th:replace="layout/header :: header('Gestión de Servidores FHIR','Administración de Subscripciones')"></div>
+	<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Subscripciones')"></div>
     <h2>Crear nueva Subscripción</h2>
     <p>Topic URL: <span th:text="${topicUrl}"></span></p>
 
-    <form th:action="@{/submit-filters}" method="post">
+    <form th:action="@{/fhir/servers/{id}/subscriptions/create(id=${idServer})}" method="post">
         <input type="hidden" id="urlServer" name="urlServer" th:value="${urlServer}" />
         <input type="hidden" name="topicUrl" th:value="${topicUrl}">
         <input type="hidden" id="resource" name="resource" th:value="${resource}">
@@ -62,8 +62,8 @@
             </tbody>
         </table>
 
-        <button type="submit" class="btn btn-primary">Crear</button>
-		<a href="/subscriptions" class="btn btn-danger">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Crear</button>
+		<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${idServer})}">Cancelar</a>
     </form>
 </div>
 </body>

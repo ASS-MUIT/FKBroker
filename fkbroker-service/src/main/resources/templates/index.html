@@ -15,12 +15,6 @@
 	<div th:replace="layout/topnav :: topnav"></div>
 	<div class="container">
 		<div th:replace="layout/header :: header('Bienvenido al Broker','Aplicación iniciada correctamente')"></div>
-		<ul>
-	        <li><a href="/fhir/servers" th:text="#{navbar.fhirServers}"></a></li>
-	        <li><a href="/subscriptions" th:text="#{navbar.subscriptions}"></a></li>
-	        <li><a href="/kieServers" th:text="#{navbar.kieServers}"></a></li>
-			<li><a href="/signals" th:text="#{navbar.signals}"></a></li>
-	    </ul>
 	</div>
 </body>
 </html>

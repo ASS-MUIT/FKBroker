@@ -5,15 +5,18 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.KieServer;
 import us.dit.fkbroker.service.entities.db.Signal;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
+import us.dit.fkbroker.service.services.fhir.FhirServerService;
 import us.dit.fkbroker.service.services.fhir.FhirService;
 import us.dit.fkbroker.service.services.fhir.NotificationService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionService;
@@ -38,6 +41,7 @@ public class BrokerRunner implements ApplicationRunner {
     private final KieServerService kieServerService;
     private final SignalService signalService;
     private final NotificationService notificationService;
+    private final FhirServerService fhirServerService;
 
     /**
      * Constructor que inyecta los servicios {@link FhirService},
@@ -56,50 +60,64 @@ public class BrokerRunner implements ApplicationRunner {
      */
     @Autowired
     public BrokerRunner(FhirService fhirService, SubscriptionService subscriptionService,
-            KieServerService kieServerService, SignalService signalService, NotificationService notificationService) {
+            KieServerService kieServerService, SignalService signalService, NotificationService notificationService,
+            FhirServerService fhirServerService) {
         this.fhirService = fhirService;
         this.subscriptionService = subscriptionService;
         this.kieServerService = kieServerService;
         this.signalService = signalService;
         this.notificationService = notificationService;
+        this.fhirServerService = fhirServerService;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        // Obtiene de base de datos todas las subscripciones que deben estar activas
-        List<SubscriptionData> subscriptions = subscriptionService.findAll();
 
-        for (SubscriptionData subscription : subscriptions) {
-            // Ontiene el estado de las subscripciones de cada servidor
-            SubscriptionStatus status = fhirService.getStatus(subscription.getServer(), subscription.getSubscription());
+        List<FhirServer> servers = fhirServerService.getAllFhirServers();
 
-            // TODO debe comprobar que estén activas, sino debe volver a activarlas
+        for (FhirServer server : servers) {
+            if (server.getQueryOperations()) {
+                // Obtiene de base de datos todas las subscripciones que deben estar activas
+                List<SubscriptionData> subscriptions = subscriptionService.findByServerId(server.getId());
 
-            // Comprueba que no se haya perdido ninguna subscripción
-            Long lastEventSent = status.getEventsSinceSubscriptionStart();
-            Long lastEventReceived = subscription.getEvents();
-            if (lastEventSent > lastEventReceived) {
-                // En caso de detectar perdida, recupera estos eventos
-                logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
+                for (SubscriptionData subscription : subscriptions) {
+                    // Ontiene el estado de las subscripciones de cada servidor
+                    SubscriptionStatus status = fhirService.getStatus(subscription.getServer().getUrl(),
+                            subscription.getSubscription());
 
-                SubscriptionStatus LostEvents = fhirService.getLostEvents(subscription.getServer(),
-                        subscription.getSubscription(), lastEventReceived + 1, lastEventSent);
+                    // TODO comprobar si se debe añadir otros estados
+                    // Compruebar que estén activas, sino vuelve a activarlas
+                    if (status.getStatus() == SubscriptionStatusCodes.ERROR) {
+                        fhirService.updateSubscriptionStatus(server.getUrl(), subscription.getId().toString());
+                    }
 
-                List<String> resources = notificationService.getNotifications(LostEvents);
+                    // Comprueba que no se haya perdido ninguna subscripción
+                    Long lastEventSent = status.getEventsSinceSubscriptionStart();
+                    Long lastEventReceived = subscription.getEvents();
+                    if (lastEventSent > lastEventReceived) {
+                        // En caso de detectar perdida, recupera estos eventos
+                        logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
 
-                if (resources.size() > 0) {
-                    // Actualiza el número de eventos recibidos
-                    subscription.setEvents(lastEventSent);
-                    subscriptionService.saveSubscription(subscription);
+                        SubscriptionStatus LostEvents = fhirService.getLostEvents(subscription.getServer().getUrl(),
+                                subscription.getSubscription(), lastEventReceived + 1, lastEventSent);
 
-                    // Se obtiene la señal que se debe enviar
-                    Optional<Signal> optionalSignal = signalService.getSignalByResourceAndInteraction(
-                            subscription.getResource(), subscription.getInteraction());
-                    if (optionalSignal.isPresent()) {
-                        // Se envía una señal a todos los servidores KIE por cada recurso notificado
-                        for (String resource : resources) {
-                            logger.info("Llamamos a sendsignal. Id del recurso: {}", resource);
-                            kieServerService.sendSignalToAllKieServers(optionalSignal.get(), resource);
+                        List<String> resources = notificationService.getNotifications(LostEvents);
+
+                        if (resources.size() > 0) {
+                            // Actualiza el número de eventos recibidos
+                            subscription.setEvents(lastEventSent);
+                            subscriptionService.saveSubscription(subscription);
+
+                            // Se obtiene la señal que se debe enviar
+                            Optional<Signal> optionalSignal = signalService.getSignalByResourceAndInteraction(
+                                    subscription.getResource(), subscription.getInteraction());
+                            if (optionalSignal.isPresent()) {
+                                // Se envía una señal a todos los servidores KIE por cada recurso notificado
+                                for (String resource : resources) {
+                                    logger.info("Llamamos a sendsignal. Id del recurso: {}", resource);
+                                    kieServerService.sendSignalToAllKieServers(optionalSignal.get(), resource);
+                                }
+                            }
                         }
                     }
                 }

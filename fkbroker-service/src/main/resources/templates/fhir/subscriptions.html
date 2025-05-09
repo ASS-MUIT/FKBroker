@@ -32,9 +32,7 @@
                             </ul>
                         </td>
                         <td>
-                            <form th:action="@{/delete-subscription}" method="post">
-                                <input type="hidden" name="subscriptionId" th:value="${subscription.id}">
-                                <input type="hidden" name="urlServer" th:value="${urlServer}">
+                            <form th:action="@{/fhir/servers/{idServer}/subscriptions/{idSubs}/delete(idServer=${fhirServer.id},idSubs=${subscription.id})}" method="post">
                                 <button type="submit" class="btn btn-danger">Eliminar</button>
                             </form>
                         </td>

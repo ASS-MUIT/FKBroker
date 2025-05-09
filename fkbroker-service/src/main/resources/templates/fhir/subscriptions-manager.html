@@ -14,38 +14,16 @@
 <body>
 <div th:replace="layout/topnav :: topnav"></div>
 <div class="container">
-	<div th:replace="layout/header :: header('Gestión de Servidores FHIR','Administración de Subscripciones')"></div>
+	<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Subscripciones')"></div>
 
     <div class="row">
-		<!-- Búsqueda -->
-		<div class="col-12">
-			<div class="d-flex justify-content-between align-items-center">
-				<h2>Servidor FHIR</h2>
-				<a class="btn btn-info" href="/fhir/servers">Administración de servidores</a>
-			</div>
-		    <form th:action="@{/server}" method="post" id="serverForm">
-				<div class="form-group">
-				    <select id="server" name="server" class="form-control" required>
-						<option value="">-- Seleccione un servidor --</option>
-						<option th:each="server : ${fhirServers}" 
-		                        th:value="${server.url}" 
-		                        th:text="${server.url}"
-								th:selected="${server.url == urlServer}">
-						</option>
-				    </select>
-				</div>
-		    </form>
+		<div class="col-12 mb-3">
+			<!-- Datos del servidor FHIR -->
+			<h2>
+				<a class="btn btn-danger" href="/fhir/servers" title="Volver"><i class="fas fa-arrow-left"></i></a>
+				<strong th:text="${fhirServer.name}"></strong> (<span th:text="${fhirServer.url}"></span>)
+			</h2>
 			
-			<script>
-			    document.getElementById("server").addEventListener("change", function() {
-			        if (this.value) {
-			            document.getElementById("serverForm").submit();
-			        }
-			    });
-			</script>
-		</div>
-		
-		<div class="col-12 mb-3" th:if="${urlServer}">
 	        <!-- Listado de Subscription Topics -->
 	        <div th:replace="fhir/subscriptiontopics :: content"></div>
 	

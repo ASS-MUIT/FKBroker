@@ -11,25 +11,41 @@
 <body>
 	<div th:replace="layout/topnav :: topnav"></div>
 	<div class="container">
-		<div th:replace="layout/header :: header('Gestión de Servidores FHIR','Administración de Servidores FHIR')"></div>
+		<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Servidores FHIR')"></div>
 		<div class="d-flex justify-content-between align-items-center">
 			<h2>Servidores FHIR</h2>
-			<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addFhirServer">Agregar servidor</button>
+			<button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalFhirServer">Agregar servidor</button>
 		</div>
 	    <table class="table">
 	        <thead>
 	            <tr>
-					<th>ID</th>
+					<th>Nombre</th>
 	                <th>URL</th>
+					<th>Heartbeat</th>
+					<th>Operaciones Especiales ($status y $events)</th>
 	                <th>Acciones</th>
 	            </tr>
 	        </thead>
 	        <tbody>
 	            <tr th:each="fhirServer : ${fhirServers}">
-					<td th:text="${fhirServer.id}"></td>
+					<td th:text="${fhirServer.name}"></td>
 	                <td th:text="${fhirServer.url}"></td>
+					<td th:text="${fhirServer.heartbeat ? 'Sí' : 'No'}"></td>
+		            <td th:text="${fhirServer.queryOperations ? 'Sí' : 'No'}"></td>
 	                <td>
-	                    <button type="submit" class="btn btn-danger"  th:attr="onclick='eliminarServidor(' + ${fhirServer.id} + ')'">Eliminar</button>
+						<a class="btn btn-info" th:href="@{/fhir/servers/{id}/subscriptions(id=${fhirServer.id})}"
+							 title="Configuración de Subscripciones">
+								<i class="fas fa-cog"></i>
+						</a>
+						<button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalFhirServer" 
+							th:attr="data-id=${fhirServer.id},data-name=${fhirServer.name},data-url=${fhirServer.url},
+							data-heartbeat=${fhirServer.heartbeat},data-query=${fhirServer.queryOperations}" title="Editar Servidor">
+								<i class="fas fa-edit"></i>
+						</button>
+	                    <button type="submit" class="btn btn-danger"  th:attr="onclick='eliminarServidor(' + ${fhirServer.id} + ')'"
+						 	title="Eliminar Servidor">
+								<i class="fas fa-trash-alt"></i>
+						</button>
 	                </td>
 	            </tr>
 	        </tbody>
@@ -37,20 +53,33 @@
 	</div>
 	
 	<!-- Modal para crear un servidor FHIR  -->
-	<div class="modal fade" id="addFhirServer" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+	<div class="modal fade" id="modalFhirServer" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
 	    <div class="modal-dialog" role="document">
 	        <div class="modal-content">
 	            <form th:action="@{/fhir/servers}" method="post">
 	                <div class="modal-header">
-	                    <h5 class="modal-title" id="editModalLabel">Agregar servidor FHIR</h5>
+	                    <h5 class="modal-title" id="modalLabel">Agregar servidor FHIR</h5>
 	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 	                        <span aria-hidden="true">&times;</span>
 	                    </button>
 	                </div>
 	                <div class="modal-body">
+						<input type="hidden" id="id" name="id">
 	                    <div class="form-group">
-	                        <label for="url">URL:</label>
-	                        <input type="text" class="form-control" id="url" name="url" required>
+	                        <label for="name">Nombre:</label>
+	                        <input type="text" class="form-control" id="name" name="name" required>
+	                    </div>
+						<div class="form-group">
+						    <label for="url">URL:</label>
+						    <input type="text" class="form-control" id="url" name="url" required>
+						</div>
+						<div class="form-group form-check">
+	                        <input type="checkbox" class="form-check-input" id="heartbeat" name="heartbeat" value="true">
+	                        <label class="form-check-label" for="heartbeat">Heartbeat</label>
+	                    </div>
+	                    <div class="form-group form-check">
+							<input type="checkbox" class="form-check-input" id="queryOperations" name="queryOperations" value="true">
+	                        <label class="form-check-label" for="queryOperations">Operaciones Especiales ($status y $events)</label>
 	                    </div>
 	                </div>
 	                <div class="modal-footer">
@@ -63,6 +92,22 @@
 	</div>
 	
 	<script>
+		$('#modalFhirServer').on('show.bs.modal', function (event) {
+	        var button = $(event.relatedTarget);
+	        var id = button.data('id');
+			var name = button.data('name');
+			var url = button.data('url');
+			var heartbeat = button.data('heartbeat');
+			var query = button.data('query');
+
+	        var modal = $(this);
+	        modal.find('#id').val(id);
+			modal.find('#name').val(name);
+			modal.find('#url').val(url);
+			modal.find('#heartbeat').prop('checked', heartbeat === true || heartbeat === 'true');
+			modal.find('#queryOperations').prop('checked', query === true || query === 'true');
+	    });
+		
 		function eliminarServidor(id) {
 			if (!confirm("¿Estás seguro de que quieres eliminar este servidor?")) {
 			    return;

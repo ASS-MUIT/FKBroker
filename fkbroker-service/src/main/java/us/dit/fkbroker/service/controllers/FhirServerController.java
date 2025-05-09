@@ -1,5 +1,8 @@
 package us.dit.fkbroker.service.controllers;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,8 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import us.dit.fkbroker.service.entities.domain.FhirServerDTO;
+import us.dit.fkbroker.service.entities.db.FhirServer;
+import us.dit.fkbroker.service.entities.domain.FhirServerDetails;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
+import us.dit.fkbroker.service.services.mapper.FhirServerMapper;
 
 /**
  * Controlador para gestionar las operaciones sobre los servidores FHIR.
@@ -26,6 +31,7 @@ import us.dit.fkbroker.service.services.fhir.FhirServerService;
 public class FhirServerController {
 
     private final FhirServerService fhirServerService;
+    private final FhirServerMapper fhirServerMapper;
 
     /**
      * Constructor que inyecta el servicio {@link FhirServerService}.
@@ -33,8 +39,9 @@ public class FhirServerController {
      * @param fhirServerService servicio para gestionar los servidores FHIR.
      */
     @Autowired
-    public FhirServerController(FhirServerService fhirServerService) {
+    public FhirServerController(FhirServerService fhirServerService, FhirServerMapper fhirServerMapper) {
         this.fhirServerService = fhirServerService;
+        this.fhirServerMapper = fhirServerMapper;
     }
 
     /**
@@ -45,18 +52,22 @@ public class FhirServerController {
      */
     @GetMapping
     public String getKieServers(Model model) {
-        model.addAttribute("fhirServers", fhirServerService.getAllFhirServers());
+        List<FhirServer> servers = fhirServerService.getAllFhirServers();
+        List<FhirServerDetails> serversDetails = servers.stream().map(fhirServerMapper::toDTO)
+                .collect(Collectors.toList());
+
+        model.addAttribute("fhirServers", serversDetails);
         return "fhir/servers";
     }
 
     /**
-     * Maneja las solicitudes POST para añadir un nuevo servidor FHIR.
+     * Maneja las solicitudes POST para añadir o editar un servidor FHIR.
      * 
-     * @param kieServer el objeto KieServer a añadir.
+     * @param fhirServer el servidor que se desea añadir o editar.
      * @return una redirección a la página de servidores FHIR.
      */
     @PostMapping
-    public String addKieServer(@ModelAttribute FhirServerDTO fhirServer) {
+    public String addKieServer(@ModelAttribute FhirServerDetails fhirServer) {
         fhirServerService.saveFhirServer(fhirServer);
         return "redirect:/fhir/servers";
     }

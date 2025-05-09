@@ -1,42 +1,31 @@
-package us.dit.fkbroker.service.entities.db;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+package us.dit.fkbroker.service.entities.domain;
 
 /**
- * Entidad que representa los datos de configuración de un servidor fhir
+ * Entidad con el detalle de servidores FHIR
  * 
  * @author josperbel
  * @version 1.0
  * @date Mar 2025
  */
-@Entity
-public class FhirServer {
+public class FhirServerDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
     private String url;
     private Boolean heartbeat;
-    @Column(name = "QUERY_OPERATIONS")
     private Boolean queryOperations;
 
-    public FhirServer() {
+    public FhirServerDetails() {
         super();
     }
-
-    public FhirServer(Long id, String name, String url, Boolean heartbeat, Boolean queryOperations) {
+    
+    public FhirServerDetails(Long id, String name, String url, Boolean heartbeat, Boolean queryOperations) {
         super();
         this.id = id;
         this.name = name;
         this.url = url;
-        // Comprueba si es null, en ese caso guarda false
-        this.heartbeat = (heartbeat != null) ? heartbeat : false;
-        this.queryOperations = (queryOperations != null) ? queryOperations : false;
+        this.heartbeat = heartbeat;
+        this.queryOperations = queryOperations;
     }
 
     public Long getId() {
@@ -68,8 +57,7 @@ public class FhirServer {
     }
 
     public void setHeartbeat(Boolean heartbeat) {
-        // Comprueba si es null, en ese caso guarda false
-        this.heartbeat = (heartbeat != null) ? heartbeat : false;
+        this.heartbeat = heartbeat;
     }
 
     public Boolean getQueryOperations() {

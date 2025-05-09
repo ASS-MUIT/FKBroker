@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import us.dit.fkbroker.service.entities.domain.Filter;
 import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
@@ -216,7 +217,7 @@ public class FhirService {
 
         // Contruye el recurso Subscription
         Subscription subscription = new Subscription();
-        subscription.setStatus(SubscriptionStatusCodes.ACTIVE);
+        subscription.setStatus(SubscriptionStatusCodes.REQUESTED);
         subscription.setTopic(topicUrl);
 
         Coding coding = new Coding();
@@ -280,11 +281,6 @@ public class FhirService {
      */
     public SubscriptionStatus getLostEvents(String fhirUrl, String subscriptionId, Long eventsSinceNumber,
             Long eventsUntilNumber) {
-        // Si está activada la configuración, utiliza el mock
-        if (fhirMockEnable) {
-            fhirUrl = fhirMockUrl;
-        }
-
         // Prepara los parámetros de entrada para realizar la consulta
         Parameters inputParams = new Parameters();
         inputParams.addParameter().setName("eventsSinceNumber").setValue(new Integer64Type(eventsSinceNumber));
@@ -314,11 +310,6 @@ public class FhirService {
      * @return la respuesta del servidor.
      */
     public SubscriptionStatus getStatus(String fhirUrl, String subscriptionId) {
-        // Si está activada la configuración, utiliza el mock
-        if (fhirMockEnable) {
-            fhirUrl = fhirMockUrl;
-        }
-
         // Realiza la consulta
         IGenericClient client = getClient(fhirUrl);
         Bundle bundle = (Bundle) client.operation().onInstance(new IdType("Subscription", subscriptionId))
@@ -352,6 +343,20 @@ public class FhirService {
         } else {
             return (SubscriptionStatus) bundle.getEntryFirstRep().getResource();
         }
+    }
+
+    public void updateSubscriptionStatus(String fhirUrl, String subscriptionId) {
+        IGenericClient client = getClient(fhirUrl);
+
+        String patchBody = "[{ \"op\": \"replace\", \"path\": \"/status\", \"value\": \"requested\" }]";
+
+        // Realizar la operación PATCH
+        MethodOutcome methodOutcome = client.patch().withBody(patchBody)
+                .withId(new IdType("Subscription", subscriptionId)).encodedJson().preferResponseType(Subscription.class)
+                .execute();
+
+        logger.info("Respuesta del servidor: {}",
+                fhirContext.newJsonParser().encodeResourceToString(methodOutcome.getResource()));
     }
 
 }

@@ -20,6 +20,7 @@ package us.dit.fkbroker.service.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,12 +30,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
-import us.dit.fkbroker.service.entities.domain.FhirServerDTO;
 import us.dit.fkbroker.service.entities.domain.Filter;
 import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
@@ -55,6 +57,7 @@ import us.dit.fkbroker.service.services.fhir.SubscriptionService;
  * @date Mar 2025
  */
 @Controller
+@RequestMapping("/fhir/servers/{idServer}/subscriptions")
 public class SubscriptionController {
 
     private static final Logger logger = LogManager.getLogger();
@@ -85,51 +88,32 @@ public class SubscriptionController {
     }
 
     /**
-     * Maneja las solicitudes GET para obtener la página principal.
-     * 
-     * @param model el modelo de Spring para añadir atributos.
-     * @return el nombre de la vista "index".
-     */
-    @GetMapping("/")
-    public String getHomePage(Model model) {
-        return "index";
-    }
-
-    /**
      * Maneja las solicitudes GET para obtener la página de suscripciones.
      * 
      * @param model        el modelo de Spring para añadir atributos.
      * @param idFhirServer el id del servidor FHIR.
      * @return el nombre de la vista "subscriptions-manager".
      */
-    @GetMapping("/subscriptions")
-    public String getSubscriptionPage(Model model) {
+    @GetMapping
+    public String getSubscriptionsAndTopics(@PathVariable Long idServer, Model model) {
 
-        List<FhirServerDTO> fhirServers = fhirServerService.getAllFhirServers();
+        Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
 
-        model.addAttribute("fhirServers", fhirServers);
+        if (optionalServer.isPresent()) {
+            FhirServer server = optionalServer.get();
+            String urlServer = server.getUrl();
+
+            List<SubscriptionTopicDetails> topics = fhirService.getSubscriptionTopics(urlServer);
+            List<SubscriptionDetails> subscriptions = fhirService.getSubscriptions(urlServer);
+
+            model.addAttribute("fhirServer", server);
+            model.addAttribute("subscriptionTopics", topics);
+            model.addAttribute("subscriptions", subscriptions);
+        } else {
+            // TODO lanzar error
+        }
 
         return "fhir/subscriptions-manager";
-    }
-
-    /**
-     * Maneja las solicitudes GET para obtener la página de suscripciones.
-     * 
-     * @param model        el modelo de Spring para añadir atributos.
-     * @param idFhirServer el id del servidor FHIR.
-     * @return el nombre de la vista "subscriptions-manager".
-     */
-    @PostMapping("/server")
-    public String getSubscriptionsAndTopics(@RequestParam String server, RedirectAttributes redirectAttributes) {
-
-        List<SubscriptionTopicDetails> topics = fhirService.getSubscriptionTopics(server);
-        List<SubscriptionDetails> subscriptions = fhirService.getSubscriptions(server);
-
-        redirectAttributes.addFlashAttribute("subscriptionTopics", topics);
-        redirectAttributes.addFlashAttribute("subscriptions", subscriptions);
-        redirectAttributes.addFlashAttribute("urlServer", server);
-
-        return "redirect:/subscriptions";
     }
 
     /**
@@ -141,25 +125,33 @@ public class SubscriptionController {
      * @param model        el modelo de Spring para añadir atributos.
      * @return el nombre de la vista "subscription-form".
      */
-    @PostMapping("/create-subscription")
-    public String createSubscription(@RequestParam String idTopic, @RequestParam String urlServer, Model model) {
+    @PostMapping("/form")
+    public String createSubscription(@PathVariable Long idServer, @RequestParam String idTopic, Model model) {
 
-        // Obtiene el SubscriptionTopic
-        SubscriptionTopicDetails topicDetails = fhirService.getSubscriptionTopic(idTopic, urlServer);
+        Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
 
-        List<SubscriptionTopicDetails.FilterDetail> filters = topicDetails.getFilters();
-        String topicUrl = topicDetails.getUrl();
+        if (optionalServer.isPresent()) {
+            String urlServer = optionalServer.get().getUrl();
 
-        // Obtener recurso e interacción del topic
-        String resource = topicDetails.getResource();
-        String interaction = topicDetails.getInteraction();
+            // Obtiene el SubscriptionTopic
+            SubscriptionTopicDetails topicDetails = fhirService.getSubscriptionTopic(idTopic, urlServer);
 
-        model.addAttribute("topicUrl", topicUrl);
-        model.addAttribute("filters", filters);
-        model.addAttribute("resource", resource);
-        model.addAttribute("interaction", interaction);
-        model.addAttribute("urlServer", urlServer);
-        logger.debug("Saliendo de create-suscription con los datos " + model.toString());
+            List<SubscriptionTopicDetails.FilterDetail> filters = topicDetails.getFilters();
+            String topicUrl = topicDetails.getUrl();
+
+            // Obtener recurso e interacción del topic
+            String resource = topicDetails.getResource();
+            String interaction = topicDetails.getInteraction();
+
+            model.addAttribute("topicUrl", topicUrl);
+            model.addAttribute("filters", filters);
+            model.addAttribute("resource", resource);
+            model.addAttribute("interaction", interaction);
+            model.addAttribute("idServer", idServer);
+            logger.debug("Saliendo de create-suscription con los datos " + model.toString());
+        } else {
+            // TODO lanzar error
+        }
 
         return "fhir/subscription-form";
     }
@@ -171,13 +163,22 @@ public class SubscriptionController {
      * @param idFhirServer   el id del servidor FHIR.
      * @return una redirección a la página principal.
      */
-    @PostMapping("/delete-subscription")
-    public String deleteSubscription(@RequestParam String subscriptionId, @RequestParam String urlServer) {
+    @PostMapping("/{idSubs}/delete")
+    public String deleteSubscription(@PathVariable Long idServer, @PathVariable String idSubs) {
 
-        fhirService.deleteSubscription(subscriptionId, urlServer);
-        subscriptionService.deleteSubscription(urlServer, subscriptionId);
+        Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
 
-        return "redirect:/subscriptions";
+        if (optionalServer.isPresent()) {
+            FhirServer server = optionalServer.get();
+            String urlServer = server.getUrl();
+
+            fhirService.deleteSubscription(idSubs, urlServer);
+            subscriptionService.deleteSubscription(server, idSubs);
+        } else {
+            // TODO lanzar error
+        }
+
+        return "redirect:/fhir/servers/" + idServer + "/subscriptions";
     }
 
     /**
@@ -187,52 +188,61 @@ public class SubscriptionController {
      * @param urlServer     la URL del servidor FHIR.
      * @return una redirección a la página de suscripciones.
      */
-    @PostMapping("/submit-filters")
-    public String submitFilters(@RequestParam Map<String, String> requestParams, @RequestParam String urlServer) {
+    @PostMapping("/create")
+    public String submitFilters(@PathVariable Long idServer, @RequestParam Map<String, String> requestParams) {
 
-        List<Filter> filters = new ArrayList<>();
-        String topicUrl = requestParams.get("topicUrl");
-        String payload = requestParams.get("payload");
-        String resource = requestParams.get("resource");
-        String interaction = requestParams.get("interaction");
+        Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
 
-        // Obtiene el endpoint
-        Long idSubs = subscriptionService.getId();
-        String endpoint = applicationAddress + "notification/" + idSubs;
+        if (optionalServer.isPresent()) {
+            FhirServer server = optionalServer.get();
+            String urlServer = server.getUrl();
 
-        // Mapea los filtros
-        for (Map.Entry<String, String> entry : requestParams.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
+            List<Filter> filters = new ArrayList<>();
+            String topicUrl = requestParams.get("topicUrl");
+            String payload = requestParams.get("payload");
+            String resource = requestParams.get("resource");
+            String interaction = requestParams.get("interaction");
 
-            if (key.startsWith("filters[") && value != null && !value.isEmpty()) {
-                logger.debug("Se han encontrado filtros");
-                String parameter = key.substring(8, key.length() - 1);
-                String comparatorKey = "comparators[" + parameter + "]";
-                String modifierKey = "modifiers[" + parameter + "]";
+            // Obtiene el endpoint
+            Long idSubs = subscriptionService.getId();
+            String endpoint = applicationAddress + "notification/" + idSubs;
 
-                String comparator = requestParams.get(comparatorKey);
-                String modifier = requestParams.get(modifierKey);
+            // Mapea los filtros
+            for (Map.Entry<String, String> entry : requestParams.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
 
-                Filter filter = new Filter(parameter, value, comparator, modifier);
-                filters.add(filter);
+                if (key.startsWith("filters[") && value != null && !value.isEmpty()) {
+                    logger.debug("Se han encontrado filtros");
+                    String parameter = key.substring(8, key.length() - 1);
+                    String comparatorKey = "comparators[" + parameter + "]";
+                    String modifierKey = "modifiers[" + parameter + "]";
+
+                    String comparator = requestParams.get(comparatorKey);
+                    String modifier = requestParams.get(modifierKey);
+
+                    Filter filter = new Filter(parameter, value, comparator, modifier);
+                    filters.add(filter);
+                }
             }
+
+            // Crea la subscripción en el servidor FHIR
+            Subscription createdSubscription = fhirService.createSubscription(topicUrl, payload, filters, urlServer,
+                    endpoint);
+
+            // Guarda los datos de la subscripción en BBDD
+            SubscriptionData subscription = new SubscriptionData();
+            subscription.setId(idSubs);
+            subscription.setServer(server);
+            subscription.setSubscription(createdSubscription.getIdElement().getIdPart());
+            subscription.setResource(resource);
+            subscription.setInteraction(interaction);
+            subscription.setEvents((long) 0);
+            subscriptionService.saveSubscription(subscription);
+        } else {
+            // TODO lanzar error
         }
 
-        // Crea la subscripción en el servidor FHIR
-        Subscription createdSubscription = fhirService.createSubscription(topicUrl, payload, filters, urlServer,
-                endpoint);
-
-        // Guarda los datos de la subscripción en BBDD
-        SubscriptionData subscription = new SubscriptionData();
-        subscription.setId(idSubs);
-        subscription.setServer(urlServer);
-        subscription.setSubscription(createdSubscription.getIdElement().getIdPart());
-        subscription.setResource(resource);
-        subscription.setInteraction(interaction);
-        subscription.setEvents((long) 0);
-        subscriptionService.saveSubscription(subscription);
-
-        return "redirect:/subscriptions";
+        return "redirect:/fhir/servers/" + idServer + "/subscriptions";
     }
 }

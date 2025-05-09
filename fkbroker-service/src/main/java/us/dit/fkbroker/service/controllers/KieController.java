@@ -20,6 +20,8 @@
 **/
 package us.dit.fkbroker.service.controllers;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +32,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import us.dit.fkbroker.service.entities.db.KieServer;
+import us.dit.fkbroker.service.entities.db.Signal;
 import us.dit.fkbroker.service.services.kie.KieServerService;
+import us.dit.fkbroker.service.services.kie.SignalService;
 
 
 /**
@@ -42,10 +46,11 @@ import us.dit.fkbroker.service.services.kie.KieServerService;
  * @date Mar 2025
  */
 @Controller
-@RequestMapping("/kieServers")
+@RequestMapping("/kie")
 public class KieController {
 
     private final KieServerService kieServerService;
+    private final SignalService signalService;
 
     /**
      * Constructor que inyecta el servicio KieServerService.
@@ -53,8 +58,9 @@ public class KieController {
      * @param kieServerService el servicio para gestionar los servidores KIE.
      */
     @Autowired
-    public KieController(KieServerService kieServerService) {
+    public KieController(KieServerService kieServerService, SignalService signalService) {
         this.kieServerService = kieServerService;
+        this.signalService = signalService;
     }
 
     /**
@@ -66,7 +72,8 @@ public class KieController {
     @GetMapping
     public String getKieServers(Model model) {
         model.addAttribute("kieServers", kieServerService.getAllKieServers());
-        // model.addAttribute("newKieServer", new KieServer());
+        model.addAttribute("signals", signalService.getAllSignals());
+        
         return "kie/kieServers";
     }
 
@@ -76,10 +83,22 @@ public class KieController {
      * @param kieServer el objeto KieServer a añadir.
      * @return una redirección a la página de servidores KIE.
      */
-    @PostMapping("/add")
+    @PostMapping("/servers/add")
     public String addKieServer(@ModelAttribute KieServer kieServer) {
         kieServerService.saveKieServer(kieServer);
-        return "redirect:/kieServers";
+        return "redirect:/kie";
+    }
+
+    /**
+     * Maneja las solicitudes POST para añadir una nueva entidad {@link Signal}.
+     * 
+     * @param notificationEP el objeto {@link Signal} a añadir.
+     * @return una redirección a la página de entidades {@link Signal}.
+     */
+    @PostMapping("/signals/add")
+    public String addSignal(@ModelAttribute Signal signal) {
+        signalService.saveSignal(signal);
+        return "redirect:/kie";
     }
 
     /**
@@ -88,9 +107,39 @@ public class KieController {
      * @param url la URL del servidor KIE a eliminar.
      * @return una redirección a la página de servidores KIE.
      */
-    @PostMapping("/delete")
+    @PostMapping("/servers/delete")
     public String deleteKieServer(@RequestParam String url) {
         kieServerService.deleteKieServer(url);
-        return "redirect:/kieServers";
+        return "redirect:/kie";
+    }
+
+    /**
+     * Maneja las solicitudes POST para eliminar una entidad {@link Signal}.
+     * 
+     * @param id el ID de la entidad NotificationEP a eliminar.
+     * @return una redirección a la página de entidades {@link Signal}.
+     */
+    @PostMapping("/signals/delete")
+    public String deleteSignal(@RequestParam Long id) {
+        signalService.deleteSignal(id);
+        return "redirect:/kie";
+    }
+
+    /**
+     * Maneja las solicitudes POST para editar una entidad {@link Signal}.
+     * 
+     * @param id el ID de la entidad NotificationEP a editar.
+     * @param signalName el nuevo nombre de la señal.
+     * @return una redirección a la página de entidades {@link Signal}.
+     */
+    @PostMapping("/signals/edit")
+    public String editSignal(@RequestParam Long id, @RequestParam String signalName) {
+        Optional<Signal> optionalSignal = signalService.findById(id);
+        if (optionalSignal.isPresent()) {
+            Signal signal = optionalSignal.get();
+            signal.setSignalName(signalName);
+            signalService.saveSignal(signal);
+        }
+        return "redirect:/kie";
     }
 }

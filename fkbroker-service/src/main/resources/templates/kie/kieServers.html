@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Lista de Kie Servers</title>
+    <title>Servidores KIE y Señales</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="/form-styles.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -11,9 +11,11 @@
 <body>
 <div th:replace="layout/topnav :: topnav"></div>
 <div class="container">
-	<div th:replace="layout/header :: header('Gestión de Kie Servers','Administración de Servidores Kie')"></div>
+	<div th:replace="layout/header :: header('Servidores KIE y Señales','Administración de Servidores KIE y Señales')"></div>
+	
+	<!-- Listado de Servidores KIE -->
 	<div class="d-flex justify-content-between align-items-center">
-		<h2>Servidores Kie</h2>
+		<h2>Servidores KIE</h2>
 		<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addKieServer">Agregar servidor</button>
 	</div>
     <table class="table">
@@ -31,9 +33,41 @@
                 <td th:text="${kieServer.usu}"></td>
                 <td th:text="${kieServer.pwd}"></td>
                 <td>
-                    <!-- Botón para eliminar el servidor Kie -->
-                    <form th:action="@{/kieServers/delete}" method="post">
+                    <!-- Botón para eliminar el servidor KIE -->
+                    <form th:action="@{/kie/servers/delete}" method="post">
                         <input type="hidden" name="url" th:value="${kieServer.url}">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	
+	<div class="d-flex justify-content-between align-items-center">
+		<h2>Señales</h2>
+		<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addSignal">Agregar señal</button>
+	</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Resource</th>
+                <th>Interaction</th>
+                <th>Signal Name</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="signal : ${signals}">
+                <td th:text="${signal.id}">ID</td>
+                <td th:text="${signal.resource}">Resource</td>
+                <td th:text="${signal.interaction}">Interaction</td>
+                <td th:text="${signal.signalName}">Signal Name</td>
+                <td>
+                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#editSignal" 
+                            th:attr="data-id=${signal.id},data-signalname=${signal.signalName}">Editar</button>
+                    <form th:action="@{/kie/signals/delete}" method="post" style="display:inline;">
+                        <input type="hidden" name="id" th:value="${signal.id}" />
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </form>
                 </td>
@@ -42,13 +76,13 @@
     </table>
 </div>
 
-	<!-- Modal para crear un servidor Kie  -->
+	<!-- Modal para crear un servidor KIE  -->
 	<div class="modal fade" id="addKieServer" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
 	    <div class="modal-dialog" role="document">
 	        <div class="modal-content">
-	            <form th:action="@{/kieServers/add}" method="post">
+	            <form th:action="@{/kie/servers/add}" method="post">
 	                <div class="modal-header">
-	                    <h5 class="modal-title" id="editModalLabel">Agregar servidor Kie</h5>
+	                    <h5 class="modal-title" id="editModalLabel">Agregar servidor KIE</h5>
 	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 	                        <span aria-hidden="true">&times;</span>
 	                    </button>
@@ -76,5 +110,78 @@
 	    </div>
 	</div>
 
+	<!-- Modal para editar Signal Name -->
+	<div class="modal fade" id="editSignal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+	    <div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	            <form th:action="@{/kie/signals/edit}" method="post">
+	                <div class="modal-header">
+	                    <h5 class="modal-title" id="editModalLabel">Editar Signal Name</h5>
+	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                        <span aria-hidden="true">&times;</span>
+	                    </button>
+	                </div>
+	                <div class="modal-body">
+	                    <input type="hidden" id="editId" name="id">
+	                    <div class="form-group">
+	                        <label for="editSignalName">Signal Name:</label>
+	                        <input type="text" class="form-control" id="editSignalName" name="signalName" required>
+	                    </div>
+	                </div>
+	                <div class="modal-footer">
+	                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+	                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+	                </div>
+	            </form>
+	        </div>
+	    </div>
+	</div>
+
+	<!-- Modal para crear una señal  -->
+	<div class="modal fade" id="addSignal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+	    <div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	            <form th:action="@{/kie/signals/add}" method="post">
+	                <div class="modal-header">
+	                    <h5 class="modal-title" id="editModalLabel">Agregar señal</h5>
+	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                        <span aria-hidden="true">&times;</span>
+	                    </button>
+	                </div>
+					<div class="modal-body">
+						<div class="form-group">
+				            <label for="resource">Resource:</label>
+				            <input type="text" class="form-control" id="resource" name="resource" required>
+				        </div>
+				        <div class="form-group">
+				            <label for="interaction">Interaction:</label>
+				            <input type="text" class="form-control" id="interaction" name="interaction" required>
+				        </div>
+				        <div class="form-group">
+				            <label for="signalName">Signal Name:</label>
+				            <input type="text" class="form-control" id="signalName" name="signalName" required>
+				        </div>
+					</div>
+					<div class="modal-footer">
+					    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+					    <button type="submit" class="btn btn-primary">Guardar</button>
+					</div>
+	            </form>
+	        </div>
+	    </div>
+	</div>
+
+	<script>
+	    $('#editSignal').on('show.bs.modal', function (event) {
+	        var button = $(event.relatedTarget);
+	        var id = button.data('id');
+	        var signalName = button.data('signalname');
+
+	        var modal = $(this);
+	        modal.find('#editId').val(id);
+	        modal.find('#editSignalName').val(signalName);
+	    });
+	</script>
+	
 </body>
 </html>

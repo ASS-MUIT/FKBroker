@@ -103,7 +103,7 @@ public class NotificationService {
             if (receivedEvent > expectedEvent) {
                 logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
 
-                SubscriptionStatus lostEvents = fhirService.getLostEvents(subscription.getServer(),
+                SubscriptionStatus lostEvents = fhirService.getLostEvents(subscription.getServer().getUrl(),
                         subscription.getSubscription(), expectedEvent, receivedEvent - 1);
 
                 resources.addAll(getNotifications(lostEvents));

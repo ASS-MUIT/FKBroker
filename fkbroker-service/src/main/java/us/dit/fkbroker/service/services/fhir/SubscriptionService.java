@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
 import us.dit.fkbroker.service.repositories.SubscriptionRepository;
 
@@ -87,8 +88,19 @@ public class SubscriptionService {
      * @param subscription el identificador de la subscripción a eliminar.
      */
     @Transactional
-    public void deleteSubscription(String server, String subscription) {
+    public void deleteSubscription(FhirServer server, String subscription) {
         subscriptionRepository.deleteByServerAndSubscription(server, subscription);
+    }
+
+    /**
+     * Busca las entidades {@link SubscriptionData} de un servidor.
+     * 
+     * @param id el ID de la entidad {@link SubscriptionData}.
+     * @return un Optional que contiene la entidad {@link SubscriptionData} si se
+     *         encuentra, o un Optional vacío si no.
+     */
+    public List<SubscriptionData> findByServerId(Long id) {
+        return subscriptionRepository.findByServerId(id);
     }
 
 }

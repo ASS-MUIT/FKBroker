@@ -23,8 +23,7 @@
 					<td th:text="${topic.resource}"></td>
 					<td th:text="${topic.interaction}"></td>
                     <td>
-						<form th:action="@{/create-subscription}" method="post">
-							<input type="hidden" id="urlServer" name="urlServer" th:value="${urlServer}" />
+						<form th:action="@{/fhir/servers/{id}/subscriptions/form(id=${fhirServer.id})}" method="post">
 							<input type="hidden" id="idTopic" name="idTopic" th:value="${topic.id}" />
 							<button type="submit" class="btn btn-info">Subscribirse</button>
 						</form>
