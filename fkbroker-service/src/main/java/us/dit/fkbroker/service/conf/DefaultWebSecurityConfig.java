@@ -56,12 +56,19 @@ public class DefaultWebSecurityConfig {
 @Bean
 SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-            .antMatchers(HttpMethod.POST, "/endpoint").permitAll() 
-            .antMatchers(HttpMethod.POST, "/notification/**").permitAll()  
-            .antMatchers("/*").authenticated() 
+            .antMatchers("/").authenticated()
+            .antMatchers(HttpMethod.POST, "/notification/**").permitAll()
             .antMatchers("/fhir/servers").authenticated()
-            .antMatchers("/img/*").permitAll()
-            .antMatchers("/topics").authenticated())
+            .antMatchers("/fhir/servers/*").authenticated()
+            .antMatchers("/fhir/servers/*/subscriptions").authenticated()
+            .antMatchers("/fhir/servers/*/subscriptions/*").authenticated()
+            .antMatchers("/fhir/servers/*/subscriptions/*/delete").authenticated()
+            .antMatchers("/kie").authenticated()
+            .antMatchers("/kie/servers/add").authenticated()
+            .antMatchers("/kie/servers/delete").authenticated()
+            .antMatchers("/kie/signals/add").authenticated()
+            .antMatchers("/kie/signals/delete").authenticated()
+            .antMatchers("/img/*").permitAll())
             .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/access-denied.html"))
             .csrf((csrf) -> csrf.disable()).httpBasic(withDefaults()).cors(withDefaults())
             .formLogin(withDefaults());

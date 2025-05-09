@@ -11,29 +11,27 @@
 <div class="container">
 	<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Subscripciones')"></div>
     <h2>Crear nueva Subscripción</h2>
-    <p>Topic URL: <span th:text="${topicUrl}"></span></p>
+    <p>Topic URL: <span th:text="${topic.url}"></span></p>
 
-    <form th:action="@{/fhir/servers/{id}/subscriptions/create(id=${idServer})}" method="post">
-        <input type="hidden" id="urlServer" name="urlServer" th:value="${urlServer}" />
-        <input type="hidden" name="topicUrl" th:value="${topicUrl}">
-        <input type="hidden" id="resource" name="resource" th:value="${resource}">
-		<input type="hidden" id="interaction" name="interaction" th:value="${interaction}">
+    <form th:action="@{/fhir/servers/{id}/subscriptions/create(id=${idServer})}" method="post" th:object="${subscriptionForm}">
+        <input type="hidden" th:field="*{topicUrl}" th:value="${topic.url}">
+        <input type="hidden" th:field="*{resource}" th:value="${topic.resource}">
+		<input type="hidden" th:field="*{interaction}" th:value="${topic.interaction}">
 
 		<!-- Campos genérigos de la subscripción -->
 		<div class="form-group">
 		    <label for="payload">Payload:</label>
-		    <select id="payload" name="payload" class="form-control" required>
+		    <select id="payload" th:field="*{payload}" class="form-control" required>
 		        <option value="id-only">ID Only</option>
 		    </select>
 		</div>
 		
 		<!-- Configuración de Filtros -->
 		<h4>Configuración de Filtros</h4>
-		<p>Si no se quiere un filtro poner como valor "NULL", de esta forma se ignorará</p>
-		
 		<table class="table mb-3">
             <thead>
                 <tr>
+					<th>Activo</th>
 					<th>Parámetros</th>
                     <th>Valores</th>
 					<th>Comparadores</th>
@@ -41,19 +39,24 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="filter : ${filters}">
-					<td th:text="${filter.filterParameter}"></td>
-                    <td>
-						<input type="text" class="form-control" th:name="'filters[' + ${filter.filterParameter} + ']'" required>
+                <tr th:each="filter, iterStat : ${topic.filters}">
+					<td>
+						<input type="checkbox" class="form-check-input" th:field="*{filters[__${iterStat.index}__].active}">
 					</td>
 					<td>
-						<select class="form-control" th:if="${not #lists.isEmpty(filter.comparators)}" th:name="'comparators[' + ${filter.filterParameter} + ']'">
+						<input type="text" class="form-control" th:field="*{filters[__${iterStat.index}__].parameter}" readonly />
+					</td>
+                    <td>
+						<input type="text" class="form-control" th:field="*{filters[__${iterStat.index}__].value}">
+					</td>
+					<td>
+						<select class="form-control" th:if="${not #lists.isEmpty(filter.comparators)}" th:field="*{filters[__${iterStat.index}__].comparator}">
 		                    <option value="">null</option> <!-- Opción null -->
 		                    <option th:each="comparator : ${filter.comparators}" th:value="${comparator}" th:text="${comparator}"></option>
 		                </select>
 					</td>
 					<td>
-						<select class="form-control" th:if="${not #lists.isEmpty(filter.modifiers)}" th:name="'modifiers[' + ${filter.filterParameter} + ']'">
+						<select class="form-control" th:if="${not #lists.isEmpty(filter.modifiers)}" th:field="*{filters[__${iterStat.index}__].comparator}">
 		                    <option value="">null</option> <!-- Opción null -->
 		                    <option th:each="modifier : ${filter.modifiers}" th:value="${modifier}" th:text="${modifier}"></option>
 		                </select>

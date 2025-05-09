@@ -17,19 +17,15 @@
 **/
 package us.dit.fkbroker.service.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hl7.fhir.r5.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,8 +33,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
-import us.dit.fkbroker.service.entities.domain.Filter;
 import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
+import us.dit.fkbroker.service.entities.domain.SubscriptionForm;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
 import us.dit.fkbroker.service.services.fhir.FhirService;
@@ -59,11 +55,6 @@ import us.dit.fkbroker.service.services.fhir.SubscriptionService;
 @Controller
 @RequestMapping("/fhir/servers/{idServer}/subscriptions")
 public class SubscriptionController {
-
-    private static final Logger logger = LogManager.getLogger();
-
-    @Value("${application.address}")
-    private String applicationAddress;
 
     private final FhirService fhirService;
     private final SubscriptionService subscriptionService;
@@ -126,29 +117,19 @@ public class SubscriptionController {
      * @return el nombre de la vista "subscription-form".
      */
     @PostMapping("/form")
-    public String createSubscription(@PathVariable Long idServer, @RequestParam String idTopic, Model model) {
+    public String subscriptionForm(@PathVariable Long idServer, @RequestParam String idTopic, Model model) {
 
         Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
 
         if (optionalServer.isPresent()) {
             String urlServer = optionalServer.get().getUrl();
 
-            // Obtiene el SubscriptionTopic
             SubscriptionTopicDetails topicDetails = fhirService.getSubscriptionTopic(idTopic, urlServer);
+            SubscriptionForm subscriptionForm = new SubscriptionForm(topicDetails);
 
-            List<SubscriptionTopicDetails.FilterDetail> filters = topicDetails.getFilters();
-            String topicUrl = topicDetails.getUrl();
-
-            // Obtener recurso e interacción del topic
-            String resource = topicDetails.getResource();
-            String interaction = topicDetails.getInteraction();
-
-            model.addAttribute("topicUrl", topicUrl);
-            model.addAttribute("filters", filters);
-            model.addAttribute("resource", resource);
-            model.addAttribute("interaction", interaction);
+            model.addAttribute("topic", topicDetails);
+            model.addAttribute("subscriptionForm", subscriptionForm);
             model.addAttribute("idServer", idServer);
-            logger.debug("Saliendo de create-suscription con los datos " + model.toString());
         } else {
             // TODO lanzar error
         }
@@ -189,7 +170,8 @@ public class SubscriptionController {
      * @return una redirección a la página de suscripciones.
      */
     @PostMapping("/create")
-    public String submitFilters(@PathVariable Long idServer, @RequestParam Map<String, String> requestParams) {
+    public String createSubscription(@PathVariable Long idServer,
+            @ModelAttribute("subscriptionForm") SubscriptionForm subscriptionForm) {
 
         Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
 
@@ -197,46 +179,18 @@ public class SubscriptionController {
             FhirServer server = optionalServer.get();
             String urlServer = server.getUrl();
 
-            List<Filter> filters = new ArrayList<>();
-            String topicUrl = requestParams.get("topicUrl");
-            String payload = requestParams.get("payload");
-            String resource = requestParams.get("resource");
-            String interaction = requestParams.get("interaction");
-
-            // Obtiene el endpoint
             Long idSubs = subscriptionService.getId();
-            String endpoint = applicationAddress + "notification/" + idSubs;
-
-            // Mapea los filtros
-            for (Map.Entry<String, String> entry : requestParams.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-
-                if (key.startsWith("filters[") && value != null && !value.isEmpty()) {
-                    logger.debug("Se han encontrado filtros");
-                    String parameter = key.substring(8, key.length() - 1);
-                    String comparatorKey = "comparators[" + parameter + "]";
-                    String modifierKey = "modifiers[" + parameter + "]";
-
-                    String comparator = requestParams.get(comparatorKey);
-                    String modifier = requestParams.get(modifierKey);
-
-                    Filter filter = new Filter(parameter, value, comparator, modifier);
-                    filters.add(filter);
-                }
-            }
 
             // Crea la subscripción en el servidor FHIR
-            Subscription createdSubscription = fhirService.createSubscription(topicUrl, payload, filters, urlServer,
-                    endpoint);
+            Subscription createdSubscription = fhirService.createSubscription(urlServer, idSubs, subscriptionForm);
 
             // Guarda los datos de la subscripción en BBDD
             SubscriptionData subscription = new SubscriptionData();
             subscription.setId(idSubs);
             subscription.setServer(server);
             subscription.setSubscription(createdSubscription.getIdElement().getIdPart());
-            subscription.setResource(resource);
-            subscription.setInteraction(interaction);
+            subscription.setResource(subscriptionForm.getResource());
+            subscription.setInteraction(subscriptionForm.getInteraction());
             subscription.setEvents((long) 0);
             subscriptionService.saveSubscription(subscription);
         } else {

@@ -28,8 +28,8 @@ import org.springframework.stereotype.Service;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import us.dit.fkbroker.service.entities.domain.Filter;
 import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
+import us.dit.fkbroker.service.entities.domain.SubscriptionForm;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 
 /**
@@ -49,12 +49,6 @@ public class FhirService {
 
     @Value("${application.address}")
     private String applicationAddress;
-
-    @Value("${fhir.server.mock.enable}")
-    private Boolean fhirMockEnable;
-
-    @Value("${fhir.server.mock.url}")
-    private String fhirMockUrl;
 
     private static final Logger logger = LogManager.getLogger(FhirService.class);
 
@@ -148,7 +142,7 @@ public class FhirService {
         // Mapea las suscripciones
         List<SubscriptionDetails> subscriptionDetails = bundle.getEntry().stream()
                 .map(entry -> (Subscription) entry.getResource())
-                .filter(subscription -> subscription.getEndpoint().startsWith(applicationAddress)) // Filtrado
+                .filter(subscription -> subscription.getEndpoint().startsWith(applicationAddress))
                 .map(subscription -> {
                     String endpoint = subscription.getEndpoint();
                     String topicTitle = subscription.getTopic();
@@ -211,41 +205,39 @@ public class FhirService {
      * @param fhirUrl  la URL del servidor FHIR.
      * @param endpoint el endpoint de la suscripción.
      */
-    public Subscription createSubscription(String topicUrl, String payload, List<Filter> filters, String fhirUrl,
-            String endpoint) {
+    public Subscription createSubscription(String fhirUrl, Long idSubs, SubscriptionForm subscriptionForm) {
         logger.debug("Entro en createSubscription del fhirClient");
 
         // Contruye el recurso Subscription
         Subscription subscription = new Subscription();
         subscription.setStatus(SubscriptionStatusCodes.REQUESTED);
-        subscription.setTopic(topicUrl);
+        subscription.setTopic(subscriptionForm.getTopicUrl());
 
         Coding coding = new Coding();
         coding.setCode("rest-hook");
         subscription.setChannelType(coding);
 
-        subscription.setEndpoint(endpoint);
+        subscription.setEndpoint(applicationAddress + "notification/" + idSubs);
         subscription.setHeartbeatPeriod(60);
         subscription.setTimeout(300);
-        subscription.setContent(SubscriptionPayloadContent.fromCode(payload));
+        subscription.setContent(SubscriptionPayloadContent.fromCode(subscriptionForm.getPayload()));
         subscription.setContentType("application/fhir+json");
 
         // Mapea los filtros
         SubscriptionFilterByComponent filterBy = new SubscriptionFilterByComponent();
-        filters.stream().filter(filter -> !"NULL".equals(filter.getValue())) // Filtrado de valores
-                .forEach(filter -> {
-                    filterBy.setFilterParameter(filter.getParameter());
+        subscriptionForm.getFilters().stream().filter(filter -> filter.getActive()).forEach(filter -> {
+            filterBy.setFilterParameter(filter.getParameter());
 
-                    if (filter.getComparator() != null && !filter.getComparator().isEmpty()) {
-                        filterBy.setComparator(SearchComparator.fromCode(filter.getComparator()));
-                    }
+            if (filter.getComparator() != null && !filter.getComparator().isEmpty()) {
+                filterBy.setComparator(SearchComparator.fromCode(filter.getComparator()));
+            }
 
-                    if (filter.getModifier() != null && !filter.getModifier().isEmpty()) {
-                        filterBy.setModifier(SearchModifierCode.fromCode(filter.getModifier()));
-                    }
+            if (filter.getModifier() != null && !filter.getModifier().isEmpty()) {
+                filterBy.setModifier(SearchModifierCode.fromCode(filter.getModifier()));
+            }
 
-                    filterBy.setValue(filter.getValue());
-                });
+            filterBy.setValue(filter.getValue());
+        });
         subscription.setFilterBy(Collections.singletonList(filterBy));
 
         // Envía el recurso Subscription al servidor FHIR

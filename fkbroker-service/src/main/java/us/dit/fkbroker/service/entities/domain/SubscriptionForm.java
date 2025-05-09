@@ -17,7 +17,8 @@
 **/
 package us.dit.fkbroker.service.entities.domain;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entidad con detalles del formulario de suscripción
@@ -29,11 +30,32 @@ import java.util.Map;
  * @date Mar 2025
  */
 public class SubscriptionForm {
+
     private String topicUrl;
     private String payload;
-    private Map<String, String> filters;
+    private String resource;
+    private String interaction;
+    private List<FilterDetail> filters;
 
-    // Getter y setter para topicUrl
+    public SubscriptionForm() {
+
+    }
+
+    public SubscriptionForm(SubscriptionTopicDetails topic) {
+        topicUrl = topic.getUrl();
+        resource = topic.getResource();
+        interaction = topic.getInteraction();
+
+        filters = new ArrayList<SubscriptionForm.FilterDetail>();
+
+        for (SubscriptionTopicDetails.FilterDetail filterDetail : topic.getFilters()) {
+            FilterDetail filter = new FilterDetail();
+            filter.setActive(false);
+            filter.setParameter(filterDetail.getFilterParameter());
+            filters.add(filter);
+        }
+    }
+
     public String getTopicUrl() {
         return topicUrl;
     }
@@ -42,7 +64,6 @@ public class SubscriptionForm {
         this.topicUrl = topicUrl;
     }
 
-    // Getter y setter para payload
     public String getPayload() {
         return payload;
     }
@@ -51,12 +72,77 @@ public class SubscriptionForm {
         this.payload = payload;
     }
 
-    // Getter y setter para filters
-    public Map<String, String> getFilters() {
+    public String getResource() {
+        return resource;
+    }
+
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
+
+    public String getInteraction() {
+        return interaction;
+    }
+
+    public void setInteraction(String interaction) {
+        this.interaction = interaction;
+    }
+
+    public List<FilterDetail> getFilters() {
         return filters;
     }
 
-    public void setFilters(Map<String, String> filters) {
+    public void setFilters(List<FilterDetail> filters) {
         this.filters = filters;
+    }
+
+    // Clase interna FilterDetail
+    public static class FilterDetail {
+
+        private String parameter;
+        private String comparator;
+        private String modifier;
+        private String value;
+        private Boolean active;
+
+        public String getParameter() {
+            return parameter;
+        }
+
+        public void setParameter(String parameter) {
+            this.parameter = parameter;
+        }
+
+        public String getComparator() {
+            return comparator;
+        }
+
+        public void setComparator(String comparator) {
+            this.comparator = comparator;
+        }
+
+        public String getModifier() {
+            return modifier;
+        }
+
+        public void setModifier(String modifier) {
+            this.modifier = modifier;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public Boolean getActive() {
+            return active;
+        }
+
+        public void setActive(Boolean active) {
+            this.active = active;
+        }
     }
 }
