@@ -1,0 +1,121 @@
+:root {
+    --color-principal: #ffffff;  /* Amarillo rgb(241, 225, 16)*/
+    --color-secundario: rgb(140, 16, 16); /* Rojo */
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-principal);
+  color: #343a40; /* Color del texto principal */
+}
+
+.container {
+  margin-top: 20px;
+}
+
+.jumbotron {
+  background-image: url('/img/bgimage.png');
+  background-size: cover;
+  color: #000000;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.table th {
+  background-color: var(--color-secundario);
+  color: #000000;
+}
+
+.table tbody tr {
+  background-color: var(--color-secundario);
+}
+
+.nav-link {
+  color: #ffffff !important;
+}
+
+.navbar-dark .navbar-brand {
+  color: #ffffff;
+}
+
+.table {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: rgb(128, 0, 0);
+  color: white;
+  text-align: center;
+}
+
+.topnav {
+  overflow: hidden;
+  background-color: var(--color-secundario);
+}
+
+.topnav a {
+  float: left;
+  color: var(--color-principal);
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.topnav a.active {
+  background-color: var(--color-principal);
+  color: var(--color-secundario);
+}
+
+.button {
+  background-color: var(--color-secundario); 
+  border: none;
+  color: var(--color-principal);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  height: 100px;
+  width: 200px;
+}
+
+.box {
+  max-width: 500px;
+  margin: 0 auto;
+  background-color: var(--color-secundario);
+  color: var(--color-principal);
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
+  margin-bottom: 10px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.checkbox-group label input[type=checkbox] {
+  margin-right: 5px;
+}
