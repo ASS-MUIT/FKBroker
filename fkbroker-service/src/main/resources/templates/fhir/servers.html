@@ -42,10 +42,13 @@
 							data-heartbeat=${fhirServer.heartbeat},data-query=${fhirServer.queryOperations}" title="Editar Servidor">
 								<i class="fas fa-edit"></i>
 						</button>
-	                    <button type="submit" class="btn btn-danger"  th:attr="onclick='eliminarServidor(' + ${fhirServer.id} + ')'"
-						 	title="Eliminar Servidor">
-								<i class="fas fa-trash-alt"></i>
-						</button>
+						<form th:action="@{/fhir/servers/{idServer}/delete(idServer=${fhirServer.id})}" method="post" 
+							th:id="'deleteServerForm-' + ${fhirServer.id}" style="display:inline;">
+	                        	<button type="button" class="btn btn-danger" title="Eliminar Subscripción"
+									th:onclick="'messageConfirm(\'¿Estás seguro de que quieres eliminar este servidor?\', \'deleteServerForm-' + ${fhirServer.id} + '\')'">
+										<i class="fas fa-trash-alt"></i>
+								</button>
+                        </form>
 	                </td>
 	            </tr>
 	        </tbody>
@@ -107,21 +110,12 @@
 			modal.find('#heartbeat').prop('checked', heartbeat === true || heartbeat === 'true');
 			modal.find('#queryOperations').prop('checked', query === true || query === 'true');
 	    });
-		
-		function eliminarServidor(id) {
-			if (!confirm("¿Estás seguro de que quieres eliminar este servidor?")) {
-			    return;
+
+		function messageConfirm(message, formId) {
+			if (confirm(message)) {
+				const form = document.getElementById(formId);
+				form.submit();
 			}
-		
-			fetch(`/fhir/servers/${id}`, {
-			    method: "DELETE"
-			}).then(response => {
-			    if (response.ok) {
-			        window.location.reload();
-			    } else {
-			        alert("Error al eliminar el servidor.");
-			    }
-			});
 		}
 	</script>
 

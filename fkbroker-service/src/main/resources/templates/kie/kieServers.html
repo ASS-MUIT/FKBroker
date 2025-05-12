@@ -34,10 +34,11 @@
                 <td th:text="${kieServer.pwd}"></td>
                 <td>
                     <!-- Botón para eliminar el servidor KIE -->
-                    <form th:action="@{/kie/servers/delete}" method="post">
-                        <input type="hidden" name="url" th:value="${kieServer.url}">
-                        <button type="submit" class="btn btn-danger" title="Eliminar Servidor">
-							<i class="fas fa-trash-alt"></i>
+					<form th:action="@{/kie/servers/delete}" method="post" th:id="'deleteServerForm-' + ${kieServer.url}" style="display:inline;">
+						<input type="hidden" name="url" th:value="${kieServer.url}">
+                    	<button type="button" class="btn btn-danger" title="Eliminar Servidor"
+							th:attr="onclick='messageConfirm(\'¿Estás seguro de que quieres eliminar este servidor?\', \'deleteServerForm-' + ${kieServer.url} + '\')'">
+								<i class="fas fa-trash-alt"></i>
 						</button>
                     </form>
                 </td>
@@ -70,9 +71,10 @@
 						th:attr="data-id=${signal.id},data-signalname=${signal.signalName}" title="Editar Señal">
 							<i class="fas fa-edit"></i>
 					</button>
-                    <form th:action="@{/kie/signals/delete}" method="post" style="display:inline;">
+                    <form th:action="@{/kie/signals/delete}" method="post" th:id="'deleteSignalForm-' + ${signal.id}" style="display:inline;">
                         <input type="hidden" name="id" th:value="${signal.id}" />
-                        <button type="submit" class="btn btn-danger" title="Eliminar Señal">
+                        <button type="button" class="btn btn-danger" title="Eliminar Señal"
+							th:attr="onclick='messageConfirm(\'¿Estás seguro de que quieres eliminar esta señal?\', \'deleteSignalForm-' + ${signal.id} + '\')'">
 							<i class="fas fa-trash-alt"></i>
 						</button>
                     </form>
@@ -187,6 +189,13 @@
 	        modal.find('#editId').val(id);
 	        modal.find('#editSignalName').val(signalName);
 	    });
+		
+		function messageConfirm(message, formId) {
+			if (confirm(message)) {
+				const form = document.getElementById(formId);
+				form.submit();
+			}
+		}
 	</script>
 	
 </body>

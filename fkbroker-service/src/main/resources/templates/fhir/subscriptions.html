@@ -12,7 +12,6 @@
 						<th>ID</th>
                         <th>Endpoint</th>
                         <th>Topic</th>
-                        <th>Filters</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -22,18 +21,12 @@
                         <td th:text="${subscription.endpoint}"></td>
                         <td th:text="${subscription.topic}"></td>
                         <td>
-                            <ul>
-                                <li th:each="filter : ${subscription.filters}">
-                                    <span th:text="'Parameter: ' + ${filter.filterParameter}"></span>
-                                    <span th:if="${filter.comparator != null}" th:text="', Comparator: ' + ${filter.comparator}"></span>
-                                    <span th:if="${filter.modifier != null}" th:text="', Modifier: ' + ${filter.modifier}"></span>
-                                    <span th:text="', Value: ' + ${filter.value}"></span>
-                                </li>
-                            </ul>
-                        </td>
-                        <td>
-                            <form th:action="@{/fhir/servers/{idServer}/subscriptions/{idSubs}/delete(idServer=${fhirServer.id},idSubs=${subscription.id})}" method="post">
-                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            <form th:action="@{/fhir/servers/{idServer}/subscriptions/{idSubs}/delete(idServer=${fhirServer.id},idSubs=${subscription.id})}"
+								method="post" th:id="'deleteSubscriptionForm-' + ${subscription.id}" style="display:inline;">
+                                	<button type="button" class="btn btn-danger" title="Eliminar Subscripción"
+										th:attr="onclick='messageConfirm(\'¿Estás seguro de que quieres eliminar esta subscripción?\', \'deleteSubscriptionForm-' + ${subscription.id} + '\')'">
+											<i class="fas fa-trash-alt"></i>
+									</button>
                             </form>
                         </td>
                     </tr>
@@ -50,5 +43,12 @@
 	        $('#subscriptionsTable').on('hide.bs.collapse', function () {
 	            $('#subscriptionsIcon').removeClass('fa-eye-slash').addClass('fa-eye');
 	        });
+			
+			function messageConfirm(message, formId) {
+				if (confirm(message)) {
+					const form = document.getElementById(formId);
+					form.submit();
+				}
+			}
 	    </script>
     </div>
