@@ -37,7 +37,7 @@
 					<form th:action="@{/kie/servers/delete}" method="post" th:id="'deleteServerForm-' + ${kieServer.url}" style="display:inline;">
 						<input type="hidden" name="url" th:value="${kieServer.url}">
                     	<button type="button" class="btn btn-danger" title="Eliminar Servidor"
-							th:attr="onclick='messageConfirm(\'¿Estás seguro de que quieres eliminar este servidor?\', \'deleteServerForm-' + ${kieServer.url} + '\')'">
+							th:attr="onclick='messageConfirm(\'' + #{message.confirm.server} + '\', \'deleteServerForm-' + ${kieServer.url} + '\')'">
 								<i class="fas fa-trash-alt"></i>
 						</button>
                     </form>
@@ -74,7 +74,7 @@
                     <form th:action="@{/kie/signals/delete}" method="post" th:id="'deleteSignalForm-' + ${signal.id}" style="display:inline;">
                         <input type="hidden" name="id" th:value="${signal.id}" />
                         <button type="button" class="btn btn-danger" title="Eliminar Señal"
-							th:attr="onclick='messageConfirm(\'¿Estás seguro de que quieres eliminar esta señal?\', \'deleteSignalForm-' + ${signal.id} + '\')'">
+							th:attr="onclick='messageConfirm(\'' + #{message.confirm.signal} + '\', \'deleteSignalForm-' + ${signal.id} + '\')'">
 							<i class="fas fa-trash-alt"></i>
 						</button>
                     </form>

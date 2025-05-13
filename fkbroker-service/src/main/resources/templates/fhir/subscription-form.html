@@ -28,7 +28,7 @@
 		
 		<!-- Configuración de Filtros -->
 		<h4>Configuración de Filtros</h4>
-		<table class="table mb-3">
+		<table th:if="${not #lists.isEmpty(topic.filters)}" class="table mb-3">
             <thead>
                 <tr>
 					<th>Activo</th>
@@ -64,6 +64,7 @@
                 </tr>
             </tbody>
         </table>
+		<p th:if="${#lists.isEmpty(topic.filters)}">No hay filtros disponibles</p>
 
         <button class="btn btn-primary" type="submit">Crear</button>
 		<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${idServer})}">Cancelar</a>

@@ -6,7 +6,7 @@
 	    </button>
 	</div>
     <div id="topicsTable" class="collapse show">
-        <table class="table">
+        <table th:if="${not #lists.isEmpty(subscriptionTopics)}" class="table">
             <thead>
                 <tr>
 					<th>ID</th>
@@ -31,6 +31,7 @@
                 </tr>
             </tbody>
         </table>
+		<p th:if="${#lists.isEmpty(subscriptionTopics)}">No hay topics disponibles</p>
     </div>
 	
 	<!-- Cambio de icono -->

@@ -6,7 +6,7 @@
 			</button>
 		</div>
         <div id="subscriptionsTable" class="collapse show">
-            <table class="table">
+            <table th:if="${not #lists.isEmpty(subscriptions)}" class="table">
                 <thead>
                     <tr>
 						<th>ID</th>
@@ -24,7 +24,7 @@
                             <form th:action="@{/fhir/servers/{idServer}/subscriptions/{idSubs}/delete(idServer=${fhirServer.id},idSubs=${subscription.id})}"
 								method="post" th:id="'deleteSubscriptionForm-' + ${subscription.id}" style="display:inline;">
                                 	<button type="button" class="btn btn-danger" title="Eliminar Subscripción"
-										th:attr="onclick='messageConfirm(\'¿Estás seguro de que quieres eliminar esta subscripción?\', \'deleteSubscriptionForm-' + ${subscription.id} + '\')'">
+										th:attr="onclick='messageConfirm(\'' + #{message.confirm.subscription} + '\', \'deleteSubscriptionForm-' + ${subscription.id} + '\')'">
 											<i class="fas fa-trash-alt"></i>
 									</button>
                             </form>
@@ -32,6 +32,7 @@
                     </tr>
                 </tbody>
             </table>
+			<p th:if="${#lists.isEmpty(subscriptions)}">No hay subscripciones disponibles</p>
         </div>
 		
 		<!-- Cambio de icono -->

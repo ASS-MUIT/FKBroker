@@ -45,7 +45,7 @@
 						<form th:action="@{/fhir/servers/{idServer}/delete(idServer=${fhirServer.id})}" method="post" 
 							th:id="'deleteServerForm-' + ${fhirServer.id}" style="display:inline;">
 	                        	<button type="button" class="btn btn-danger" title="Eliminar Subscripción"
-									th:onclick="'messageConfirm(\'¿Estás seguro de que quieres eliminar este servidor?\', \'deleteServerForm-' + ${fhirServer.id} + '\')'">
+									th:onclick="|messageConfirm('#{message.confirm.server}', 'deleteServerForm-${fhirServer.id}')|">
 										<i class="fas fa-trash-alt"></i>
 								</button>
                         </form>
