@@ -17,9 +17,6 @@
 **/
 package us.dit.fkbroker.service.controllers;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import us.dit.fkbroker.service.entities.db.KieServer;
-import us.dit.fkbroker.service.entities.db.Signal;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
-import us.dit.fkbroker.service.entities.domain.NotificationDetails;
 import us.dit.fkbroker.service.services.fhir.FhirService;
 import us.dit.fkbroker.service.services.fhir.NotificationService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionService;
@@ -55,8 +49,6 @@ public class NotificationController {
 
     private static final Logger logger = LogManager.getLogger();
 
-    private final KieServerService kieServerService;
-    private final SignalService signalService;
     private final SubscriptionService subscriptionService;
     private final NotificationService notificationService;
 
@@ -64,20 +56,13 @@ public class NotificationController {
      * Constructor que inyecta los servicios {@link FhirService},
      * {@link KieServerService} y {@link SignalService}.
      * 
-     * @param kieServerService    servicio para gestionar las operaciones sobre las
-     *                            entidades {@link KieServer}.
-     * @param signalService       servicio para gestionar las operaciones sobre las
-     *                            entidades {@link Signal}.
      * @param subscriptionService servicio para gestionar las operaciones sobre las
      *                            entidades {@link SubscriptionData}.
      * @param notificationService servicio para gestionar las notificaciones de
      *                            subscripciones.
      */
     @Autowired
-    public NotificationController(KieServerService kieServerService, SignalService signalService,
-            SubscriptionService subscriptionService, NotificationService notificationService) {
-        this.kieServerService = kieServerService;
-        this.signalService = signalService;
+    public NotificationController(SubscriptionService subscriptionService, NotificationService notificationService) {
         this.subscriptionService = subscriptionService;
         this.notificationService = notificationService;
     }
@@ -85,45 +70,24 @@ public class NotificationController {
     /**
      * Método que maneja las notificaciones. Llama al método para enviar las señales
      * a los servidores kie y responde al servidor FHIR indicando que se ha recibido
-     * la notificación
+     * la notificación.
      * 
-     * @param id   el ID de la notificación.
-     * @param json el JSON que contiene los detalles de la notificación.
+     * @param id      identificador del endpoint de la notificación.
+     * @param message mensaje que contiene los detalles de la notificación.
      * @return una respuesta HTTP con el cuerpo del JSON proporcionado.
      */
     @PostMapping("/{id}")
     public ResponseEntity<String> sendNotification(@PathVariable Long id, @RequestBody String message) {
-        Optional<SubscriptionData> optionalSubscription = subscriptionService.findById(id);
-        if (optionalSubscription.isPresent()) {
-            // Responder inmediatamente con 200 OK
-            CompletableFuture.runAsync(() -> {
-                logger.info("Se recibe un mensaje de notificación: {}", message);
-                SubscriptionData subscription = optionalSubscription.get();
+        logger.info("Se recibe un mensaje de notificación: {}", message);
 
-                // Se obtienen los recursos de las notificaciones
-                NotificationDetails notification = notificationService.processNotification(message, subscription);
+        // Obtiene los datos de la subscripción
+        SubscriptionData subscription = subscriptionService.getSubscriptionData(id);
 
-                if (notification.getHasNewEvents()) {
-                    // Actualiza el número de eventos recibidos
-                    subscription.setEvents(notification.getLastEvent());
-                    subscriptionService.saveSubscription(subscription);
+        // Procesa el mensaje de notificación, obtiene los detalles de la subscripción
+        subscription = notificationService.processNotification(message, subscription);
 
-                    // Se obtiene la señal que se debe enviar
-                    Optional<Signal> optionalSignal = signalService.getSignalByResourceAndInteraction(
-                            subscription.getResource(), subscription.getInteraction());
-                    if (optionalSignal.isPresent()) {
-                        // Se envía una señal a todos los servidores KIE por cada recurso notificado
-                        for (String resource : notification.getReferenceEvents()) {
-                            logger.info("Llamamos a sendsignal. Id del recurso: {}", resource);
-                            kieServerService.sendSignalToAllKieServers(optionalSignal.get(), resource);
-                        }
-                    }
-                }
-            });
-        } else {
-            // Manejar el caso cuando no se encuentra la entidad
-            throw new RuntimeException("NotificationEP not found with id: " + id);
-        }
+        // Actualiza la subscripción con los detalles de la notificación
+        subscriptionService.updateSubscription(subscription);
 
         return ResponseEntity.ok(message);
     }

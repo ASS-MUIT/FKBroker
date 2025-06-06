@@ -65,10 +65,10 @@
                 <td th:text="${signal.id}">ID</td>
                 <td th:text="${signal.resource}">Resource</td>
                 <td th:text="${signal.interaction}">Interaction</td>
-                <td th:text="${signal.signalName}">Signal Name</td>
+                <td th:text="${signal.name}">Signal Name</td>
                 <td>
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#editSignal" 
-						th:attr="data-id=${signal.id},data-signalname=${signal.signalName}" title="Editar Señal">
+						th:attr="data-id=${signal.id},data-name=${signal.name}" title="Editar Señal">
 							<i class="fas fa-edit"></i>
 					</button>
                     <form th:action="@{/kie/signals/delete}" method="post" th:id="'deleteSignalForm-' + ${signal.id}" style="display:inline;">
@@ -132,8 +132,8 @@
 	                <div class="modal-body">
 	                    <input type="hidden" id="editId" name="id">
 	                    <div class="form-group">
-	                        <label for="editSignalName">Signal Name:</label>
-	                        <input type="text" class="form-control" id="editSignalName" name="signalName" required>
+	                        <label for="editName">Signal Name:</label>
+	                        <input type="text" class="form-control" id="editName" name="name" required>
 	                    </div>
 	                </div>
 	                <div class="modal-footer">
@@ -159,15 +159,16 @@
 					<div class="modal-body">
 						<div class="form-group">
 				            <label for="resource">Resource:</label>
-				            <input type="text" class="form-control" id="resource" name="resource" required>
+							<select class="form-control" id="idTrigger" name="idTrigger" required>
+			                    <option value="">Selecciona un trigger</option>
+			                    <option th:each="trigger : ${triggers}" th:value="${trigger.id}" 
+									th:text="|Recurso: ${trigger.resource} Interacción: ${trigger.interaction}|">
+								</option>
+			                </select>
 				        </div>
 				        <div class="form-group">
-				            <label for="interaction">Interaction:</label>
-				            <input type="text" class="form-control" id="interaction" name="interaction" required>
-				        </div>
-				        <div class="form-group">
-				            <label for="signalName">Signal Name:</label>
-				            <input type="text" class="form-control" id="signalName" name="signalName" required>
+				            <label for="name">Signal Name:</label>
+				            <input type="text" class="form-control" id="name" name="name" required>
 				        </div>
 					</div>
 					<div class="modal-footer">
@@ -183,11 +184,11 @@
 	    $('#editSignal').on('show.bs.modal', function (event) {
 	        var button = $(event.relatedTarget);
 	        var id = button.data('id');
-	        var signalName = button.data('signalname');
+	        var name = button.data('name');
 
 	        var modal = $(this);
 	        modal.find('#editId').val(id);
-	        modal.find('#editSignalName').val(signalName);
+	        modal.find('#editName').val(name);
 	    });
 		
 		function messageConfirm(message, formId) {

@@ -32,5 +32,5 @@ import us.dit.fkbroker.service.entities.db.Signal;
  * @date Mar 2025
  */
 public interface SignalRepository extends JpaRepository<Signal, Long> {
-    Optional<Signal> findByResourceAndInteraction(String resource, String interaction);
+    Optional<Signal> findByIdTrigger(Long idTrigger);
 }

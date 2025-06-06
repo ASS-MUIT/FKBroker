@@ -23,9 +23,15 @@
 					<td th:text="${topic.resource}"></td>
 					<td th:text="${topic.interaction}"></td>
                     <td>
-						<form th:action="@{/fhir/servers/{id}/subscriptions/form(id=${fhirServer.id})}" method="post">
+						<a class="btn btn-info" title="Ver detalles" 
+							th:href="@{/fhir/servers/{idServer}/topics/{idTopic}(idServer=${idServer},idTopic=${topic.id})}">
+								<i class="fas fa-eye"></i>
+						</a>
+						<form th:action="@{/fhir/servers/{id}/subscriptions/form(id=${fhirServer.id})}" method="post" style="display:inline;">
 							<input type="hidden" id="idTopic" name="idTopic" th:value="${topic.id}" />
-							<button type="submit" class="btn btn-info">Subscribirse</button>
+							<button type="submit" class="btn btn-info" title="Subscribirse">
+								<i class="fa-regular fa-square-plus"></i>
+							</button>
 						</form>
 					</td>
                 </tr>

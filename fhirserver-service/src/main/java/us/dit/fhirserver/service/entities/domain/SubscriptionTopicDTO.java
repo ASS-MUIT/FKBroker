@@ -1,5 +1,12 @@
 package us.dit.fhirserver.service.entities.domain;
 
+/**
+ * Objeto del dominio que representa los datos de un tema de una subscripción,
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date May 2025
+ */
 public class SubscriptionTopicDTO {
 
     private Long id;

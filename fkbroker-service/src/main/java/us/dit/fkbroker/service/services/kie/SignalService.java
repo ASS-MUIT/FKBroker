@@ -17,6 +17,7 @@
 **/
 package us.dit.fkbroker.service.services.kie;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import us.dit.fkbroker.service.entities.db.Signal;
+import us.dit.fkbroker.service.entities.db.Trigger;
+import us.dit.fkbroker.service.entities.domain.SignalDetails;
 import us.dit.fkbroker.service.repositories.SignalRepository;
+import us.dit.fkbroker.service.repositories.TriggerRepository;
+import us.dit.fkbroker.service.services.mapper.SignalMapper;
 
 /**
  * Servicio para gestionar las operaciones sobre las entidades {@link Signal}.
@@ -32,53 +37,98 @@ import us.dit.fkbroker.service.repositories.SignalRepository;
  * @author juanmabrazo98
  * @author josperbel - Nueva ubicación de entidades
  * @version 1.1
- * @date Mar 2025
+ * @date May 2025
  */
 @Service
 public class SignalService {
 
-    @Autowired
-    private SignalRepository signalRepository;
+    private final SignalRepository signalRepository;
+    private final SignalMapper signalMapper;
+    private final TriggerRepository triggerRepository;
 
     /**
-     * Obtiene todas las entidades {@link Signal}.
+     * Constructor que inyecta los repositorios {@link SignalRepository} y
+     * {@link TriggerRepository} y el componente {@link signalMapper}.
      * 
-     * @return una lista de objetos {@link Signal} que representan todas las
-     *         entidades {@link Signal}.
+     * @param signalRepository  repositorio JPA de la entidad {@link Signal}.
+     * @param signalMapper      componente que transforma entidades y objetos de
+     *                          dominio de señales.
+     * @param triggerRepository repositorio JPA de la entidad {@link Trigger}.
      */
-    public List<Signal> getAllSignals() {
-        return signalRepository.findAll();
+    @Autowired
+    public SignalService(SignalRepository signalRepository, SignalMapper signalMapper,
+            TriggerRepository triggerRepository) {
+        this.signalRepository = signalRepository;
+        this.signalMapper = signalMapper;
+        this.triggerRepository = triggerRepository;
     }
 
     /**
-     * Guarda una entidad {@link Signal} en la base de datos.
+     * Obtiene todas las señales guardadas en la base de datos.
      * 
-     * @param notificationEP el objeto {@link Signal} a guardar.
+     * @return una lista de objetos {@link SignalDetails} que representan todas las
+     *         señales guardadas en la base de datos.
+     */
+    public List<SignalDetails> getAllSignals() {
+        List<Signal> signals = signalRepository.findAll();
+        List<SignalDetails> signalsDetails = new ArrayList<SignalDetails>();
+
+        for (Signal signal : signals) {
+            Trigger trigger = triggerRepository.getById(signal.getIdTrigger());
+            SignalDetails signalDetails = signalMapper.toDetails(signal, trigger);
+            signalsDetails.add(signalDetails);
+        }
+
+        return signalsDetails;
+    }
+
+    /**
+     * Guarda una nueva entidad {@link Signal} en la base de datos.
+     * 
+     * @param idTrigger identificador del trigger de la señal.
+     * @param name      nombre de la señal.
      * @return el objeto {@link Signal} guardado.
      */
-    public Signal saveSignal(Signal signal) {
+    public Signal saveSignal(Long idTrigger, String name) {
+        Signal signal = new Signal();
+        signal.setName(name);
+        signal.setIdTrigger(idTrigger);
         return signalRepository.save(signal);
     }
 
     /**
      * Elimina una entidad {@link Signal} de la base de datos por su ID.
      * 
-     * @param id el ID de la entidad {@link Signal} a eliminar.
+     * @param id identificador de la señal a eliminar.
      */
     public void deleteSignal(Long id) {
         signalRepository.deleteById(id);
     }
 
     /**
-     * Obtiene una entidad {@link Signal} por su recurso e interacción.
+     * Actualiza el nombre de una entidad {@link Signal} en la base de datos.
      * 
-     * @param resource    el recurso de la entidad {@link Signal}.
-     * @param interaction la interacción de la entidad {@link Signal}.
+     * @param id   identificador de la señal a actualizar.
+     * @param name nuevo nombre de la señal.
+     */
+    public void updateSignal(Long id, String name) {
+        Optional<Signal> optionalSignal = findById(id);
+        if (optionalSignal.isPresent()) {
+            Signal signal = optionalSignal.get();
+            signal.setName(name);
+            signalRepository.save(signal);
+        }
+    }
+
+    /**
+     * Obtiene una entidad {@link Signal} por el identificador del trigger.
+     * 
+     * @param idTrigger    identificador del trigger de la señal.
      * @return un Optional que contiene la entidad {@link Signal} si se encuentra, o
      *         un Optional vacío si no.
      */
-    public Optional<Signal> getSignalByResourceAndInteraction(String resource, String interaction) {
-        return signalRepository.findByResourceAndInteraction(resource, interaction);
+    public Optional<Signal> getSignalByTrigger(Long idTrigger) {
+        return signalRepository.findByIdTrigger(idTrigger);
     }
 
     /**

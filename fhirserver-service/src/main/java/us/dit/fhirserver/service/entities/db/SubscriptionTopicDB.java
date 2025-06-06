@@ -5,6 +5,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+/**
+ * Entidad que representa los datos de un tema de una subscripción,
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date May 2025
+ */
 @Entity(name = "TOPIC")
 public class SubscriptionTopicDB {
 

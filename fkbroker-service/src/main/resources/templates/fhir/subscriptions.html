@@ -10,17 +10,25 @@
                 <thead>
                     <tr>
 						<th>ID</th>
-                        <th>Endpoint</th>
-                        <th>Topic</th>
+						<th>ID Topic</th>
+                        <th>Estado</th>
+                        <th>Eventos Recibidos</th>
+						<th>Última Actualización</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="subscription : ${subscriptions}">
 						<td th:text="${subscription.id}"></td>
-                        <td th:text="${subscription.endpoint}"></td>
-                        <td th:text="${subscription.topic}"></td>
+						<td th:text="${subscription.idTopic}"></td>
+                        <td th:text="${subscription.status}"></td>
+                        <td th:text="${subscription.events}"></td>
+						<td th:text="${subscription.lastUpdate}"></td>
                         <td>
+							<a class="btn btn-info" title="Ver detalles" 
+								th:href="@{/fhir/servers/{idServer}/subscriptions/{idSubs}(idServer=${fhirServer.id},idSubs=${subscription.id})}">
+									<i class="fas fa-eye"></i>
+							</a>
                             <form th:action="@{/fhir/servers/{idServer}/subscriptions/{idSubs}/delete(idServer=${fhirServer.id},idSubs=${subscription.id})}"
 								method="post" th:id="'deleteSubscriptionForm-' + ${subscription.id}" style="display:inline;">
                                 	<button type="button" class="btn btn-danger" title="Eliminar Subscripción"

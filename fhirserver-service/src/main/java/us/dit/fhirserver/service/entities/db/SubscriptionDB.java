@@ -7,7 +7,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-
+/**
+ * Entidad que representa los datos de una subscripción,
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date May 2025
+ */
 @Entity(name = "SUBSCRIPTION")
 public class SubscriptionDB {
 

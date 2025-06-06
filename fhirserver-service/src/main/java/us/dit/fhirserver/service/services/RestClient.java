@@ -8,6 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Servicio utilizado para gestionar las operaciones REST.
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date May 2025
+ */
 @Service
 public class RestClient {
 
@@ -28,6 +35,12 @@ public class RestClient {
         return headers;
     }
 
+    /**
+     * Envía un mensaje POST a una URL.
+     * 
+     * @return true, en el caso de respuesta satisfactoria, o false, en el caso
+     *         contrario.
+     */
     public Boolean sendMessage(String url, String message) {
         try {
             HttpHeaders headers = createHeaders();

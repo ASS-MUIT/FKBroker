@@ -20,17 +20,35 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ca.uhn.fhir.context.FhirContext;
 
+/**
+ * Controlador REST que gestiona las llamadas a la operación de metadata.
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date May 2025
+ */
 @RestController
 @RequestMapping("/fhir/metadata")
 public class MetadataController {
 
     private final FhirContext fhirContext;
 
+    /**
+     * Constructor que inyecta {@link FhirContext}.
+     * 
+     * @param fhirContext contexto de FHIR.
+     */
     @Autowired
     public MetadataController(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
     }
 
+    /**
+     * Maneja las solicitudes GET al recurso de metadata.
+     * 
+     * @return el recurso FHIR {@link CapabilityStatement} con la información de
+     *         metadata del servidor.
+     */
     @GetMapping
     public ResponseEntity<String> getMetadata() {
         CapabilityStatement capability = new CapabilityStatement();
@@ -54,7 +72,7 @@ public class MetadataController {
 
         rest.addResource(subscription);
         capability.addRest(rest);
-        
+
         String response = fhirContext.newJsonParser().encodeResourceToString(capability);
 
         return ResponseEntity.ok().contentType(MediaType.valueOf("application/fhir+json")).body(response);

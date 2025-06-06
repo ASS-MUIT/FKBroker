@@ -10,13 +10,19 @@
 <div th:replace="layout/topnav :: topnav"></div>
 <div class="container">
 	<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Subscripciones')"></div>
-    <h2>Crear nueva Subscripción</h2>
+    
+	<h2>
+		<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${fhirServer.id})}" title="Volver">
+			<i class="fas fa-arrow-left"></i>
+		</a>
+		<strong>Crear nueva Subscripción</strong>
+	</h2>
+	
     <p>Topic URL: <span th:text="${topic.url}"></span></p>
 
-    <form th:action="@{/fhir/servers/{id}/subscriptions/create(id=${idServer})}" method="post" th:object="${subscriptionForm}">
-        <input type="hidden" th:field="*{topicUrl}" th:value="${topic.url}">
-        <input type="hidden" th:field="*{resource}" th:value="${topic.resource}">
-		<input type="hidden" th:field="*{interaction}" th:value="${topic.interaction}">
+    <form th:action="@{/fhir/servers/{id}/subscriptions/create(id=${fhirServer.id})}" method="post" th:object="${subscriptionForm}">
+        <input type="hidden" th:field="*{idTopic}" th:value="${topic.id}">
+		<input type="hidden" th:field="*{urlTopic}" th:value="${topic.url}">
 
 		<!-- Campos genérigos de la subscripción -->
 		<div class="form-group">
@@ -67,7 +73,6 @@
 		<p th:if="${#lists.isEmpty(topic.filters)}">No hay filtros disponibles</p>
 
         <button class="btn btn-primary" type="submit">Crear</button>
-		<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${idServer})}">Cancelar</a>
     </form>
 </div>
 </body>

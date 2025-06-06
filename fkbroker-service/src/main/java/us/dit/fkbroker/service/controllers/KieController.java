@@ -20,7 +20,7 @@
 **/
 package us.dit.fkbroker.service.controllers;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,10 +32,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import us.dit.fkbroker.service.entities.db.KieServer;
-import us.dit.fkbroker.service.entities.db.Signal;
+import us.dit.fkbroker.service.entities.db.Trigger;
+import us.dit.fkbroker.service.entities.domain.SignalDetails;
+import us.dit.fkbroker.service.services.fhir.TriggerService;
 import us.dit.fkbroker.service.services.kie.KieServerService;
 import us.dit.fkbroker.service.services.kie.SignalService;
-
 
 /**
  * Controlador para gestionar las operaciones sobre los servidores KIE.
@@ -51,29 +52,46 @@ public class KieController {
 
     private final KieServerService kieServerService;
     private final SignalService signalService;
+    private final TriggerService triggerService;
 
     /**
-     * Constructor que inyecta el servicio KieServerService.
+     * Constructor que inyecta los servicios {@link KieServerService},
+     * {@link SignalService} y {@link TriggerService}.
      * 
-     * @param kieServerService el servicio para gestionar los servidores KIE.
+     * @param kieServerService servicio utilizado para gestionar los servidores KIE.
+     * @param signalService    servicio utilizado para gestionar las señales.
+     * @param triggerService   servicio utilizado para gestionar los triggers.
      */
     @Autowired
-    public KieController(KieServerService kieServerService, SignalService signalService) {
+    public KieController(KieServerService kieServerService, SignalService signalService,
+            TriggerService triggerService) {
         this.kieServerService = kieServerService;
         this.signalService = signalService;
+        this.triggerService = triggerService;
     }
 
     /**
-     * Maneja las solicitudes GET para obtener la lista de servidores KIE.
+     * Maneja las solicitudes GET de la página principal de gestión KIE. Obtiene la
+     * lista de servidores KIE, las señales y los triggers disponibles y los añade
+     * en el modelo.
      * 
-     * @param model el modelo de Spring para añadir atributos.
-     * @return el nombre de la vista "kieServers".
+     * @param model el modelo de Spring para añadir los atributos.
+     * @return el nombre de la vista de la página principal de gestión KIE..
      */
     @GetMapping
     public String getKieServers(Model model) {
-        model.addAttribute("kieServers", kieServerService.getAllKieServers());
-        model.addAttribute("signals", signalService.getAllSignals());
-        
+        // Obtiene los datos de los servidores KIE y los añade al modelo
+        List<KieServer> kieServers = kieServerService.getAllKieServers();
+        model.addAttribute("kieServers", kieServers);
+
+        // Obtiene los datos de las señales y los añade al modelo
+        List<SignalDetails> signals = signalService.getAllSignals();
+        model.addAttribute("signals", signals);
+
+        // Obtiene los datos de los triggers y los añade al modelo
+        List<Trigger> triggers = triggerService.getAllTriggers();
+        model.addAttribute("triggers", triggers);
+
         return "kie/kieServers";
     }
 
@@ -81,7 +99,7 @@ public class KieController {
      * Maneja las solicitudes POST para añadir un nuevo servidor KIE.
      * 
      * @param kieServer el objeto KieServer a añadir.
-     * @return una redirección a la página de servidores KIE.
+     * @return una redirección a la página principal de gestión KIE.
      */
     @PostMapping("/servers/add")
     public String addKieServer(@ModelAttribute KieServer kieServer) {
@@ -90,22 +108,24 @@ public class KieController {
     }
 
     /**
-     * Maneja las solicitudes POST para añadir una nueva entidad {@link Signal}.
+     * Maneja las solicitudes POST para añadir una nueva señal.
      * 
-     * @param notificationEP el objeto {@link Signal} a añadir.
-     * @return una redirección a la página de entidades {@link Signal}.
+     * @param idTrigger identificador del trigger que se quiere asociar a la nueva
+     *                  señal.
+     * @param name      nombre de la nueva señal.
+     * @return una redirección a la página principal de gestión KIE.
      */
     @PostMapping("/signals/add")
-    public String addSignal(@ModelAttribute Signal signal) {
-        signalService.saveSignal(signal);
+    public String addSignal(@RequestParam Long idTrigger, @RequestParam String name) {
+        signalService.saveSignal(idTrigger, name);
         return "redirect:/kie";
     }
 
     /**
      * Maneja las solicitudes POST para eliminar un servidor KIE.
      * 
-     * @param url la URL del servidor KIE a eliminar.
-     * @return una redirección a la página de servidores KIE.
+     * @param url URL del servidor KIE a eliminar.
+     * @return una redirección a la página principal de gestión KIE.
      */
     @PostMapping("/servers/delete")
     public String deleteKieServer(@RequestParam String url) {
@@ -114,10 +134,10 @@ public class KieController {
     }
 
     /**
-     * Maneja las solicitudes POST para eliminar una entidad {@link Signal}.
+     * Maneja las solicitudes POST para eliminar una señal.
      * 
-     * @param id el ID de la entidad NotificationEP a eliminar.
-     * @return una redirección a la página de entidades {@link Signal}.
+     * @param id identificador de la señal a eliminar.
+     * @return una redirección a la página principal de gestión KIE.
      */
     @PostMapping("/signals/delete")
     public String deleteSignal(@RequestParam Long id) {
@@ -126,20 +146,15 @@ public class KieController {
     }
 
     /**
-     * Maneja las solicitudes POST para editar una entidad {@link Signal}.
+     * Maneja las solicitudes POST para editar una señal.
      * 
-     * @param id el ID de la entidad NotificationEP a editar.
-     * @param signalName el nuevo nombre de la señal.
-     * @return una redirección a la página de entidades {@link Signal}.
+     * @param id   identificador de la señal a editar.
+     * @param name nuevo nombre de la señal.
+     * @return una redirección a la página principal de gestión KIE.
      */
     @PostMapping("/signals/edit")
-    public String editSignal(@RequestParam Long id, @RequestParam String signalName) {
-        Optional<Signal> optionalSignal = signalService.findById(id);
-        if (optionalSignal.isPresent()) {
-            Signal signal = optionalSignal.get();
-            signal.setSignalName(signalName);
-            signalService.saveSignal(signal);
-        }
+    public String editSignal(@RequestParam Long id, @RequestParam String name) {
+        signalService.updateSignal(id, name);
         return "redirect:/kie";
     }
 }

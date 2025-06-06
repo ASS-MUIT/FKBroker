@@ -6,12 +6,11 @@ import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.domain.FhirServerDetails;
 
 /**
- * Componente que transforma objetos {@link FhirServerDetails} en
- * {@link FhirServer} y viceversa.
+ * Componente que transforma entidades en objetos del dominio y viceversa.
  * 
  * @author josperbel
  * @version 1.0
- * @date Mar 2025
+ * @date May 2025
  */
 @Component
 public class FhirServerMapper {
@@ -23,7 +22,7 @@ public class FhirServerMapper {
      *               {@link FhirServerDetails}.
      * @return el objeto {@link FhirServerDetails}.
      */
-    public FhirServerDetails toDTO(FhirServer server) {
+    public FhirServerDetails toDetails(FhirServer server) {
         return new FhirServerDetails(server.getId(), server.getName(), server.getUrl(), server.getHeartbeat(),
                 server.getQueryOperations());
     }

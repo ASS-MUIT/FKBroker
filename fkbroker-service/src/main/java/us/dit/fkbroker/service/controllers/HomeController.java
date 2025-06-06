@@ -18,7 +18,7 @@ public class HomeController {
      * Maneja las solicitudes GET para obtener la página principal.
      * 
      * @param model el modelo de Spring para añadir atributos.
-     * @return el nombre de la vista "index".
+     * @return el nombre de la vista de la página principal.
      */
     @GetMapping("/")
     public String getHomePage(Model model) {

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import us.dit.fhirserver.service.entities.db.SubscriptionDB;
 import us.dit.fhirserver.service.repositories.SubscriptionRepository;
-import us.dit.fhirserver.service.services.SubscriptionSchedulerManager;
-import us.dit.fhirserver.service.services.SubscriptionService;
+import us.dit.fhirserver.service.services.fhir.EventService;
+import us.dit.fhirserver.service.services.fhir.SubscriptionSchedulerManager;
 
 /**
  * Componente ejecutado al iniciar la aplicación.
@@ -25,14 +25,14 @@ public class BrokerRunner implements ApplicationRunner {
 
     private final SubscriptionSchedulerManager subscriptionSchedulerManager;
     private final SubscriptionRepository subscriptionRepository;
-    private final SubscriptionService subscriptionService;
+    private final EventService eventService;
 
     @Autowired
     public BrokerRunner(SubscriptionSchedulerManager subscriptionSchedulerManager,
-            SubscriptionRepository subscriptionRepository, SubscriptionService subscriptionService) {
+            SubscriptionRepository subscriptionRepository, EventService eventService) {
         this.subscriptionSchedulerManager = subscriptionSchedulerManager;
         this.subscriptionRepository = subscriptionRepository;
-        this.subscriptionService = subscriptionService;
+        this.eventService = eventService;
     }
 
     @Override
@@ -40,9 +40,8 @@ public class BrokerRunner implements ApplicationRunner {
         List<SubscriptionDB> subscriptionDBs = subscriptionRepository.findAll();
 
         for (SubscriptionDB subscriptionDB : subscriptionDBs) {
-            subscriptionSchedulerManager.iniciarTarea(subscriptionDB.getId(),
-                    subscriptionDB.getHeartbeatPeriod() * 1000,
-                    () -> subscriptionService.sendHeartbeat(subscriptionDB.getId()));
+            subscriptionSchedulerManager.iniciarTarea(subscriptionDB.getId(), subscriptionDB.getHeartbeatPeriod(),
+                    () -> eventService.sendHeartbeat(subscriptionDB.getId()));
         }
     }
 

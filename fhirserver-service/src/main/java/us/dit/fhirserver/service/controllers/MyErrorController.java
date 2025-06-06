@@ -26,23 +26,24 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Controlador que gestiona las llamadas a los métodos necesarios al navegar por la interfaz web.
+ * Controlador que gestiona las llamadas a los métodos necesarios al navegar por
+ * la interfaz web.
+ * 
  * @author juanmabrazo98
  * @version 1.0
  * @date jul 2024
- * 
  */
 @Controller
 public class MyErrorController implements ErrorController {
 
-	/**
-	 * This code has been found on:
-	 * https://www.baeldung.com/spring-boot-custom-error-page
-	 */
-	@RequestMapping("/error")
-	public String handleError(HttpServletRequest request,Model model) {
-		Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-		model.addAttribute("status", status);
-		return "error";
-	}
+    /**
+     * This code has been found on:
+     * https://www.baeldung.com/spring-boot-custom-error-page
+     */
+    @RequestMapping("/error")
+    public String handleError(HttpServletRequest request, Model model) {
+        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        model.addAttribute("status", status);
+        return "error";
+    }
 }

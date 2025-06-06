@@ -1,126 +1,71 @@
 package us.dit.fkbroker.service.conf;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
-import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
-import us.dit.fkbroker.service.entities.db.KieServer;
-import us.dit.fkbroker.service.entities.db.Signal;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
-import us.dit.fkbroker.service.services.fhir.FhirService;
 import us.dit.fkbroker.service.services.fhir.NotificationService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionService;
-import us.dit.fkbroker.service.services.kie.KieServerService;
-import us.dit.fkbroker.service.services.kie.SignalService;
 
 /**
  * Componente ejecutado al iniciar la aplicación.
  * 
- * 
+ *
  * @author josperbel
  * @version 1.0
- * @date Mar 2025
+ * @date May 2025
  */
 @Component
 public class BrokerRunner implements ApplicationRunner {
 
     private static final Logger logger = LogManager.getLogger();
 
-    private final FhirService fhirService;
-    private final SubscriptionService subscriptionService;
-    private final KieServerService kieServerService;
-    private final SignalService signalService;
-    private final NotificationService notificationService;
     private final FhirServerService fhirServerService;
+    private final SubscriptionService subscriptionService;
+    private final NotificationService notificationService;
 
     /**
-     * Constructor que inyecta los servicios {@link FhirService},
-     * {@link SubscriptionService} y {@link NotificationService}.
+     * Constructor que inyecta los servicios {@link FhirServerService} y
+     * {@link SubscriptionService}.
      * 
-     * @param fhirService         servicio para gestionar operaciones que se
-     *                            realizan sobre elementos FHIR.
-     * @param subscriptionService servicio para gestionar las operaciones sobre las
-     *                            entidades {@link SubscriptionData}.
-     * @param kieServerService    servicio para gestionar las operaciones sobre las
-     *                            entidades {@link KieServer}.
-     * @param signalService       servicio para gestionar las operaciones sobre las
-     *                            entidades {@link Signal}.
+     * @param fhirServerService   servicio utilizado para gestionar los servidores
+     *                            FHIR.
+     * @param subscriptionService servicio utilizado para gestionar las
+     *                            subscripciones.
      * @param notificationService servicio para gestionar las notificaciones de
      *                            subscripciones.
      */
     @Autowired
-    public BrokerRunner(FhirService fhirService, SubscriptionService subscriptionService,
-            KieServerService kieServerService, SignalService signalService, NotificationService notificationService,
-            FhirServerService fhirServerService) {
-        this.fhirService = fhirService;
-        this.subscriptionService = subscriptionService;
-        this.kieServerService = kieServerService;
-        this.signalService = signalService;
-        this.notificationService = notificationService;
+    public BrokerRunner(FhirServerService fhirServerService, SubscriptionService subscriptionService,
+            NotificationService notificationService) {
         this.fhirServerService = fhirServerService;
+        this.subscriptionService = subscriptionService;
+        this.notificationService = notificationService;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        logger.debug("Se comprueba el estado de las subscripciones de los servidores FHIR configurados.");
 
-        List<FhirServer> servers = fhirServerService.getAllFhirServers();
+        // Obtiene todos los servidores guardados en la base de datos
+        List<FhirServer> fhirServers = fhirServerService.getAllFhirServers();
 
-        for (FhirServer server : servers) {
-            if (server.getQueryOperations()) {
-                // Obtiene de base de datos todas las subscripciones que deben estar activas
-                List<SubscriptionData> subscriptions = subscriptionService.findByServerId(server.getId());
+        for (FhirServer fhirServer : fhirServers) {
+            // Obtiene todas las subscripciones del servidor FHIR
+            List<SubscriptionData> subscriptionDatas = subscriptionService.getSubscriptions(fhirServer.getId());
 
-                for (SubscriptionData subscription : subscriptions) {
-                    // Ontiene el estado de las subscripciones de cada servidor
-                    SubscriptionStatus status = fhirService.getStatus(subscription.getServer().getUrl(),
-                            subscription.getSubscription());
-
-                    // TODO comprobar si se debe añadir otros estados
-                    // Compruebar que estén activas, sino vuelve a activarlas
-                    if (status.getStatus() == SubscriptionStatusCodes.ERROR) {
-                        fhirService.updateSubscriptionStatus(server.getUrl(), subscription.getId().toString());
-                    }
-
-                    // Comprueba que no se haya perdido ninguna subscripción
-                    Long lastEventSent = status.getEventsSinceSubscriptionStart();
-                    Long lastEventReceived = subscription.getEvents();
-                    if (lastEventSent > lastEventReceived) {
-                        // En caso de detectar perdida, recupera estos eventos
-                        logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
-
-                        SubscriptionStatus LostEvents = fhirService.getLostEvents(subscription.getServer().getUrl(),
-                                subscription.getSubscription(), lastEventReceived + 1, lastEventSent);
-
-                        List<String> resources = notificationService.getNotifications(LostEvents);
-
-                        if (resources.size() > 0) {
-                            // Actualiza el número de eventos recibidos
-                            subscription.setEvents(lastEventSent);
-                            subscriptionService.saveSubscription(subscription);
-
-                            // Se obtiene la señal que se debe enviar
-                            Optional<Signal> optionalSignal = signalService.getSignalByResourceAndInteraction(
-                                    subscription.getResource(), subscription.getInteraction());
-                            if (optionalSignal.isPresent()) {
-                                // Se envía una señal a todos los servidores KIE por cada recurso notificado
-                                for (String resource : resources) {
-                                    logger.info("Llamamos a sendsignal. Id del recurso: {}", resource);
-                                    kieServerService.sendSignalToAllKieServers(optionalSignal.get(), resource);
-                                }
-                            }
-                        }
-                    }
-                }
+            for (SubscriptionData subscriptionData : subscriptionDatas) {
+                // Actualiza la información de la subscripción
+                subscriptionData = notificationService.updateSubscriptionStatus(fhirServer, subscriptionData);
+                subscriptionService.updateSubscription(subscriptionData);
             }
         }
     }

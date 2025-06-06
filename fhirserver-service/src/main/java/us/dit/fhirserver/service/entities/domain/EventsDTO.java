@@ -3,6 +3,13 @@ package us.dit.fhirserver.service.entities.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Objeto del dominio que representa un listado de eventos,
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date May 2025
+ */
 public class EventsDTO {
 
     private List<EventDTO> events;

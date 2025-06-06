@@ -17,6 +17,7 @@
 **/
 package us.dit.fkbroker.service.entities.db;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -34,12 +35,13 @@ import javax.persistence.Id;
  */
 @Entity
 public class Signal {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    private String resource;
-    private String interaction;
-    private String signalName;
+    private String name;
+    @Column(name = "ID_TRIGGER")
+    private Long idTrigger;
 
     public long getId() {
         return id;
@@ -49,28 +51,20 @@ public class Signal {
         this.id = id;
     }
 
-    public String getResource() {
-        return resource;
+    public String getName() {
+        return name;
     }
 
-    public void setResource(String resource) {
-        this.resource = resource;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getInteraction() {
-        return interaction;
+    public Long getIdTrigger() {
+        return idTrigger;
     }
 
-    public void setInteraction(String interaction) {
-        this.interaction = interaction;
-    }
-
-    public String getSignalName() {
-        return signalName;
-    }
-
-    public void setSignalName(String signalName) {
-        this.signalName = signalName;
+    public void setIdTrigger(Long idTrigger) {
+        this.idTrigger = idTrigger;
     }
 
 }

@@ -56,7 +56,9 @@ public class SubscriptionDetails {
     private String id;
     private List<FilterDetail> filters;
 
-    // Constructor, getters y setters
+    public SubscriptionDetails() {
+    }
+    
     public SubscriptionDetails(String endpoint, String topic, String id, List<FilterDetail> filters) {
         this.endpoint = endpoint;
         this.topic = topic;

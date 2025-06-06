@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import us.dit.fkbroker.service.entities.db.KieServer;
-import us.dit.fkbroker.service.entities.db.Signal;
 import us.dit.fkbroker.service.repositories.KieServerRepository;
 
 /**
@@ -85,11 +84,10 @@ public class KieServerService {
      * método específico para enviar a UN servidor KIE e invocar a este desde
      * sendSignalToAllKieServers
      * 
-     * @param signal el objeto {@link Signal} que contiene los detalles de
-     *                       la señal.
-     * @param mensaje        el mensaje a enviar como señal.
+     * @param signal  nombre de la señal a enviar.
+     * @param message mensaje a enviar como señal.
      */
-    public void sendSignalToAllKieServers(Signal signal, String mensaje) {
+    public void sendSignalToAllKieServers(String signal, String message) {
         List<KieServer> kieServers = getAllKieServers();
         for (KieServer kieServer : kieServers) {
             String serverUrl = kieServer.getUrl();
@@ -114,8 +112,8 @@ public class KieServerService {
                 KieContainerResourceList containersList = kieServicesClient.listContainers().getResult();
                 List<KieContainerResource> kieContainers = containersList.getContainers();
                 for (KieContainerResource container : kieContainers) {
-                    logger.info("Enviando a " + serverUrl + ". la señal " + signal.getSignalName());
-                    processClient.signal(container.getContainerId(), signal.getSignalName(), mensaje);
+                    logger.info("Enviando a " + serverUrl + ". la señal " + signal);
+                    processClient.signal(container.getContainerId(), signal, message);
                 }
             } catch (Exception e) {
                 logger.error("Error enviando señal a los contenedores: ", e);

@@ -29,13 +29,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(
-        prefix = "system")
-@Lazy(
-        value = false)
+@ConfigurationProperties(prefix = "system")
+@Lazy(value = false)
 public class SystemPropertiesInjector {
 
-	private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger();
 
     Map<String, String> properties;
 
@@ -44,8 +42,7 @@ public class SystemPropertiesInjector {
         if (properties != null) {
 
             for (Entry<String, String> property : properties.entrySet()) {
-                logger.info("Injecting Property with Name: {} and Value: {} into System Properties",
-                        property.getKey(),
+                logger.info("Injecting Property with Name: {} and Value: {} into System Properties", property.getKey(),
                         property.getValue());
                 System.setProperty(property.getKey(), property.getValue());
             }

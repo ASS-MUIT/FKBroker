@@ -2,6 +2,7 @@ package us.dit.fkbroker.service.services.fhir;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,40 +41,65 @@ public class FhirServerService {
     }
 
     /**
-     * Obtiene un servidor FHIR de la base de datos por su ID.
+     * Obtiene un servidor FHIR de la base de datos por su identificador. Si no
+     * existe ningún servidor con ese identificador lanza una excepción.
      * 
-     * @param id el id del servidor FHIR a obtener.
+     * @param id identificador del servidor FHIR a obtener.
      * @return el servidor FHIR obtenido.
+     * @throws RuntimeException si no encuentra el servidor FHIR.
      */
-    public Optional<FhirServer> getFhirServer(Long id) {
-        return fhirServerRepository.findById(id);
+    public FhirServer getFhirServer(Long id) {
+        Optional<FhirServer> optionalServer = fhirServerRepository.findById(id);
+
+        if (optionalServer.isPresent()) {
+            return optionalServer.get();
+        } else {
+            throw new RuntimeException("FhirServer not found with id: " + id);
+        }
     }
 
     /**
-     * Obtiene todos los servidores FHIR.
+     * Obtiene todos los servidores FHIR guardadeos en la base de datos.
      * 
-     * @return una lista de objetos {@link FhirServerDetails} que representan todos los
-     *         servidores FHIR.
+     * @return una lista de objetos {@link FhirServer}.
      */
     public List<FhirServer> getAllFhirServers() {
         return fhirServerRepository.findAll();
     }
 
     /**
+     * Obtiene todos los servidores FHIR guardadeos en la base de datos.
+     * 
+     * @return una lista de objetos {@link FhirServerDetails}.
+     */
+    public List<FhirServerDetails> getAllFhirServersDetails() {
+        return getAllFhirServers().stream().map(fhirServerMapper::toDetails).collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene todos los servidores FHIR guardadeos en la base de datos con el campo
+     * Heartbeat a TRUE
+     * 
+     * @return una lista de objetos {@link FhirServer}.
+     */
+    public List<FhirServer> getFhirServersWithHeartbeat() {
+        return fhirServerRepository.findByHeartbeat(true);
+    }
+
+    /**
      * Guarda un servidor FHIR en la base de datos.
      * 
-     * @param dto el servidor FHIR a guardar.
-     * @return el servidor FHIR guardado.
+     * @param serverDetails servidor FHIR a guardar.
      */
-    public void saveFhirServer(FhirServerDetails dto) {
-        FhirServer server = fhirServerMapper.toEntity(dto);
+    public void saveFhirServer(FhirServerDetails serverDetails) {
+        FhirServer server = fhirServerMapper.toEntity(serverDetails);
         server = fhirServerRepository.save(server);
     }
 
     /**
-     * Elimina un servidor FHIR de la base de datos por su ID.
+     * Elimina un servidor FHIR de la base de datos.
      * 
-     * @param id el id del servidor FHIR a eliminar.
+     * @param id identificador del servidor FHIR a eliminar.
      */
     public void deleteFhirServer(Long id) {
         fhirServerRepository.deleteById(id);

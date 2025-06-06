@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Subscription</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<link rel="stylesheet" th:href="@{/form-styles.css}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+	<div th:replace="layout/topnav :: topnav"></div>
+	<div class="container">
+		<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Subscripciones')"></div>
+		
+		<h2>
+			<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${fhirServer.id})}" title="Volver">
+				<i class="fas fa-arrow-left"></i>
+			</a>
+			<strong>Subscription</strong>
+		</h2>
+		
+		<p><strong>ID:</strong> <span th:text="${subscription.id}"></span></p>
+	    <p><strong>Topic URL:</strong> <span th:text="${subscription.topic}"></span></p>
+		<p><strong>Endpoint:</strong> <span th:text="${subscription.endpoint}"></span></p>
+	
+		<!-- Filtros -->
+		<h4>Filtros</h4>
+		<table th:if="${not #lists.isEmpty(subscription.filters)}" class="table mb-3">
+	        <thead>
+	            <tr>
+					<th>Parámetro</th>
+					<th>Valor</th>
+					<th>Comparador</th>
+					<th>Modificador</th>
+	            </tr>
+	        </thead>
+	        <tbody>
+	            <tr th:each="filter: ${subscription.filters}">
+					<td th:text="${filter.filterParameter}"></td>
+					<td th:text="${filter.value}"></td>
+					<td th:text="${filter.comparator}"></td>
+					<td th:text="${filter.modifier}"></td>
+	            </tr>
+	        </tbody>
+	    </table>
+		<p th:if="${#lists.isEmpty(subscription.filters)}">No hay filtros disponibles</p>
+	</div>
+</body>
+</html>

@@ -29,12 +29,16 @@ import java.util.List;
  * @date Mar 2025
  */
 public class SubscriptionTopicDetails {
+
+    private String id;
     private String name;
     private String url;
-    private String id;
     private String resource;
     private String interaction;
     private List<FilterDetail> filters;
+
+    public SubscriptionTopicDetails() {
+    }
 
     public SubscriptionTopicDetails(String name, String id, String url, String resource, String interaction,
             List<FilterDetail> filters) {
@@ -46,20 +50,20 @@ public class SubscriptionTopicDetails {
         this.filters = filters;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUrl() {
@@ -99,6 +103,9 @@ public class SubscriptionTopicDetails {
         private String filterParameter;
         private List<String> comparators;
         private List<String> modifiers;
+
+        public FilterDetail() {
+        }
 
         public FilterDetail(String description, String filterParameter, List<String> comparators,
                 List<String> modifiers) {

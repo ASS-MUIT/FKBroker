@@ -7,6 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import us.dit.fhirserver.service.entities.db.EventDB;
 
+/**
+ * Repositorio JPA de la entidad {@link EventDB}
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date May 2025
+ */
 @Repository
 public interface EventRepository extends JpaRepository<EventDB, Long> {
     List<EventDB> findByIdSubscriptionAndIdEventBetweenOrderByIdEvent(Long idSubscription, Long min, Long max);

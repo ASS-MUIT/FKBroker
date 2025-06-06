@@ -9,17 +9,10 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Enumeration;
-import org.hl7.fhir.r5.model.Enumerations.SearchComparator;
-import org.hl7.fhir.r5.model.Enumerations.SearchModifierCode;
-import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Integer64Type;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Subscription;
-import org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent;
-import org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,9 +21,6 @@ import org.springframework.stereotype.Service;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
-import us.dit.fkbroker.service.entities.domain.SubscriptionForm;
-import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 
 /**
  * Esta clase desarrolla las distintas operaciones que se realizan sobre
@@ -46,7 +36,7 @@ import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
  */
 @Service
 public class FhirService {
-
+    
     @Value("${application.address}")
     private String applicationAddress;
 
@@ -81,7 +71,7 @@ public class FhirService {
      * @param fhirUrl la URL del servidor FHIR.
      * @return una lista de SubscriptionTopics.
      */
-    public List<SubscriptionTopicDetails> getSubscriptionTopics(String fhirUrl) {
+    public List<SubscriptionTopic> getSubscriptionTopics(String fhirUrl) {
         // Obtiene los SubscriptionTopics del servidor FHIR
         IGenericClient client = getClient(fhirUrl);
         Bundle bundle = client.search().forResource(SubscriptionTopic.class).returnBundle(Bundle.class).execute();
@@ -89,76 +79,10 @@ public class FhirService {
         // Comprueba si obtengo respuesta y no está vacía
         if (bundle == null || bundle.getEntry().isEmpty()) {
             return Collections.emptyList();
+        } else {
+            return bundle.getEntry().stream().map(entry -> (SubscriptionTopic) entry.getResource())
+                    .collect(Collectors.toList());
         }
-
-        // Mapea los SubscriptionTopic
-        List<SubscriptionTopicDetails> topicDetails = bundle.getEntry().stream().map(entry -> {
-            SubscriptionTopic topic = (SubscriptionTopic) entry.getResource();
-            String name = topic.getTitle();
-            String id = topic.getIdElement().getIdPart();
-            String topicUrl = topic.getUrl();
-            String resource = topic.getResourceTriggerFirstRep().getResource();
-            String interaction = topic.getResourceTriggerFirstRep().getSupportedInteraction().get(0).asStringValue();
-
-            // Mapea los filtros
-            List<SubscriptionTopicDetails.FilterDetail> filters = topic.getCanFilterBy().stream()
-                    .map(filterComponent -> {
-                        String description = filterComponent.getDescription();
-                        String filterParameter = filterComponent.getFilterParameter();
-
-                        // Mapea los comparadores y modificadores
-                        List<String> comparators = filterComponent.getComparator().stream().map(Enumeration::getCode)
-                                .collect(Collectors.toList());
-
-                        List<String> modifiers = filterComponent.getModifier().stream().map(Enumeration::getCode)
-                                .collect(Collectors.toList());
-
-                        return new SubscriptionTopicDetails.FilterDetail(description, filterParameter, comparators,
-                                modifiers);
-                    }).collect(Collectors.toList());
-
-            return new SubscriptionTopicDetails(name, id, topicUrl, resource, interaction, filters);
-        }).collect(Collectors.toList());
-
-        return topicDetails;
-    }
-
-    /**
-     * Obtiene una lista de suscripciones desde un servidor FHIR.
-     * 
-     * @param fhirUrl la URL del servidor FHIR.
-     * @return una lista de suscripciones.
-     */
-    public List<SubscriptionDetails> getSubscriptions(String fhirUrl) {
-        // Obtiene los Subscriptions del servidor FHIR
-        IGenericClient client = getClient(fhirUrl);
-        Bundle bundle = client.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
-
-        // Comprueba si obtengo respuesta y no está vacía
-        if (bundle == null || bundle.getEntry().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // Mapea las suscripciones
-        List<SubscriptionDetails> subscriptionDetails = bundle.getEntry().stream()
-                .map(entry -> (Subscription) entry.getResource())
-                .filter(subscription -> subscription.getEndpoint().startsWith(applicationAddress)).map(subscription -> {
-                    String endpoint = subscription.getEndpoint();
-                    String topicTitle = subscription.getTopic();
-                    String id = subscription.getIdElement().getIdPart();
-
-                    // Mapea los filtros
-                    List<SubscriptionDetails.FilterDetail> filters = subscription.getFilterBy().stream()
-                            .map(filter -> new SubscriptionDetails.FilterDetail(filter.getFilterParameter(),
-                                    filter.getComparator() != null ? filter.getComparator().toCode() : null,
-                                    filter.getModifier() != null ? filter.getModifier().toCode() : null,
-                                    filter.getValue()))
-                            .collect(Collectors.toList());
-
-                    return new SubscriptionDetails(endpoint, topicTitle, id, filters);
-                }).collect(Collectors.toList());
-
-        return subscriptionDetails;
     }
 
     /**
@@ -168,31 +92,42 @@ public class FhirService {
      * @param url la URL del servidor FHIR.
      * @return detalles de un SubscriptionTopic
      */
-    public SubscriptionTopicDetails getSubscriptionTopic(String id, String fhirUrl) {
+    public SubscriptionTopic getSubscriptionTopic(String fhirUrl, String id) {
         IGenericClient client = getClient(fhirUrl);
-        SubscriptionTopic topic = client.read().resource(SubscriptionTopic.class).withId(id).execute();
+        return client.read().resource(SubscriptionTopic.class).withId(id).execute();
+    }
+    
+    /**
+     * Obtiene una lista de suscripciones desde un servidor FHIR.
+     * 
+     * @param fhirUrl la URL del servidor FHIR.
+     * @return una lista de suscripciones.
+     */
+    public List<Subscription> getSubscriptions(String fhirUrl) {
+        // Obtiene los Subscriptions del servidor FHIR
+        IGenericClient client = getClient(fhirUrl);
+        Bundle bundle = client.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
 
-        String name = topic.getTitle();
-        String url = topic.getUrl();
-        String resource = topic.getResourceTriggerFirstRep().getResource();
-        String interaction = topic.getResourceTriggerFirstRep().getSupportedInteraction().get(0).asStringValue();
-
-        // Mapea los filtros
-        List<SubscriptionTopicDetails.FilterDetail> filters = topic.getCanFilterBy().stream().map(filterComponent -> {
-            String description = filterComponent.getDescription();
-            String filterParameter = filterComponent.getFilterParameter();
-
-            // Mapea los comparadores y modificadores
-            List<String> comparators = filterComponent.getComparator().stream().map(Enumeration::getCode)
+        // Comprueba si obtengo respuesta y no está vacía
+        if (bundle == null || bundle.getEntry().isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return bundle.getEntry().stream().map(entry -> (Subscription) entry.getResource())
                     .collect(Collectors.toList());
+        }
+    }
 
-            List<String> modifiers = filterComponent.getModifier().stream().map(Enumeration::getCode)
-                    .collect(Collectors.toList());
-
-            return new SubscriptionTopicDetails.FilterDetail(description, filterParameter, comparators, modifiers);
-        }).collect(Collectors.toList());
-
-        return new SubscriptionTopicDetails(name, id, url, resource, interaction, filters);
+    /**
+     * Obtiene los detalles de un SubscriptionTopic desde un servidor FHIR.
+     * 
+     * @param id  el id del recurso SubscriptionTopic.
+     * @param url la URL del servidor FHIR.
+     * @return detalles de un SubscriptionTopic
+     */
+    public Subscription getSubscription(String fhirUrl, String id) {
+        IGenericClient client = getClient(fhirUrl);
+        Subscription subscription = client.read().resource(Subscription.class).withId(id).execute();
+        return subscription;
     }
 
     /**
@@ -204,42 +139,8 @@ public class FhirService {
      * @param fhirUrl  la URL del servidor FHIR.
      * @param endpoint el endpoint de la suscripción.
      */
-    public Subscription createSubscription(String fhirUrl, Long idSubs, SubscriptionForm subscriptionForm) {
+    public Subscription createSubscription(String fhirUrl, Subscription subscription) {
         logger.debug("Entro en createSubscription del fhirClient");
-
-        // Contruye el recurso Subscription
-        Subscription subscription = new Subscription();
-        subscription.setStatus(SubscriptionStatusCodes.REQUESTED);
-        subscription.setTopic(subscriptionForm.getTopicUrl());
-
-        Coding coding = new Coding();
-        coding.setCode("rest-hook");
-        subscription.setChannelType(coding);
-
-        subscription.setEndpoint(applicationAddress + "notification/" + idSubs);
-        subscription.setHeartbeatPeriod(60);
-        subscription.setTimeout(300);
-        subscription.setContent(SubscriptionPayloadContent.fromCode(subscriptionForm.getPayload()));
-        subscription.setContentType("application/fhir+json");
-
-        // Mapea los filtros
-        if (subscriptionForm.getFilters() != null) {
-            SubscriptionFilterByComponent filterBy = new SubscriptionFilterByComponent();
-            subscriptionForm.getFilters().stream().filter(filter -> filter.getActive()).forEach(filter -> {
-                filterBy.setFilterParameter(filter.getParameter());
-
-                if (filter.getComparator() != null && !filter.getComparator().isEmpty()) {
-                    filterBy.setComparator(SearchComparator.fromCode(filter.getComparator()));
-                }
-
-                if (filter.getModifier() != null && !filter.getModifier().isEmpty()) {
-                    filterBy.setModifier(SearchModifierCode.fromCode(filter.getModifier()));
-                }
-
-                filterBy.setValue(filter.getValue());
-            });
-            subscription.setFilterBy(Collections.singletonList(filterBy));
-        }
 
         // Envía el recurso Subscription al servidor FHIR
         IGenericClient client = getClient(fhirUrl);
@@ -258,9 +159,9 @@ public class FhirService {
      * @param subscriptionId el ID de la suscripción a eliminar.
      * @param fhirUrl        la URL del servidor FHIR.
      */
-    public void deleteSubscription(String subscriptionId, String fhirUrl) {
+    public void deleteSubscription(String fhirUrl, String id) {
         IGenericClient client = getClient(fhirUrl);
-        client.delete().resourceById("Subscription", subscriptionId).execute();
+        client.delete().resourceById("Subscription", id).execute();
     }
 
     /**
@@ -338,7 +239,7 @@ public class FhirService {
         }
     }
 
-    public void updateSubscriptionStatus(String fhirUrl, String subscriptionId) {
+    public Subscription updateSubscriptionStatus(String fhirUrl, String subscriptionId) {
         IGenericClient client = getClient(fhirUrl);
 
         String patchBody = "[{ \"op\": \"replace\", \"path\": \"/status\", \"value\": \"requested\" }]";
@@ -348,8 +249,11 @@ public class FhirService {
                 .withId(new IdType("Subscription", subscriptionId)).encodedJson().preferResponseType(Subscription.class)
                 .execute();
 
-        logger.info("Respuesta del servidor: {}",
-                fhirContext.newJsonParser().encodeResourceToString(methodOutcome.getResource()));
+        Subscription subscription = (Subscription) methodOutcome.getResource();
+
+        logger.info("Respuesta del servidor: {}", fhirContext.newJsonParser().encodeResourceToString(subscription));
+
+        return subscription;
     }
 
 }

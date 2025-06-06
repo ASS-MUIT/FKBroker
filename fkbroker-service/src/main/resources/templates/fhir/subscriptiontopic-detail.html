@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Subscription Topic</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<link rel="stylesheet" th:href="@{/form-styles.css}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+	<div th:replace="layout/topnav :: topnav"></div>
+	<div class="container">
+		<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Subscripciones')"></div>
+	    
+		<h2>
+			<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${fhirServer.id})}" title="Volver">
+				<i class="fas fa-arrow-left"></i>
+			</a>
+			<strong>Subscription Topic</strong>
+		</h2>
+		
+		<p><strong>Nombre:</strong> <span th:text="${topic.name}"></span></p>
+	    <p><strong>Topic URL:</strong> <span th:text="${topic.url}"></span></p>
+		<p><strong>Recurso:</strong> <span th:text="${topic.resource}"></span></p>
+		<p><strong>Interacción:</strong> <span th:text="${topic.interaction}"></span></p>
+	
+		<!-- Filtros -->
+		<h4>Filtros</h4>
+		<table th:if="${not #lists.isEmpty(topic.filters)}" class="table mb-3">
+	        <thead>
+	            <tr>
+					<th>Descripción</th>
+					<th>Parámetro</th>
+					<th>Comparadores</th>
+					<th>Modificadores</th>
+	            </tr>
+	        </thead>
+	        <tbody>
+	            <tr th:each="filter: ${topic.filters}">
+					<td th:text="${filter.description}"></td>
+					<td th:text="${filter.filterParameter}"></td>
+					<td>
+						<ul>
+                            <li th:each="comparator : ${filter.comparators}">
+                                <span th:text="${comparator}"></span>
+                            </li>
+                        </ul>
+					</td>
+					<td>
+						<ul>
+					        <li th:each="modifier : ${filter.modifiers}">
+					            <span th:text="${modifier}"></span>
+					        </li>
+					    </ul>
+					</td>
+	            </tr>
+	        </tbody>
+	    </table>
+		<p th:if="${#lists.isEmpty(topic.filters)}">No hay filtros disponibles</p>
+	</div>
+</body>
+</html>

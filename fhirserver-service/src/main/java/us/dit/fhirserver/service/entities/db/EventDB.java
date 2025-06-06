@@ -6,6 +6,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+/**
+ * Entidad que representa los datos de un evento,
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date May 2025
+ */
 @Entity(name = "EVENT")
 public class EventDB {
 

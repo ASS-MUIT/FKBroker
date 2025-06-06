@@ -17,7 +17,12 @@
 **/
 package us.dit.fkbroker.service.entities.db;
 
+import java.util.Date;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -33,15 +38,23 @@ import javax.persistence.ManyToOne;
 public class SubscriptionData {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String subscription;
-    private String resource;
-    private String interaction;
+    @Column(name = "ID_SUBSCRIPTION")
+    private String idSubscription;
+    @Column(name = "ID_ENDPOINT")
+    private Long idEndpoint;
     private Long events;
+    private String status;
+    private Date updated;
 
     @ManyToOne
     @JoinColumn(name = "ID_SERVER")
     private FhirServer server;
+    
+    @ManyToOne
+    @JoinColumn(name = "ID_TOPIC")
+    private Topic topic;
 
     public Long getId() {
         return id;
@@ -51,28 +64,20 @@ public class SubscriptionData {
         this.id = id;
     }
 
-    public String getSubscription() {
-        return subscription;
+    public String getIdSubscription() {
+        return idSubscription;
     }
 
-    public void setSubscription(String subscription) {
-        this.subscription = subscription;
+    public void setIdSubscription(String idSubscription) {
+        this.idSubscription = idSubscription;
     }
 
-    public String getResource() {
-        return resource;
+    public Long getIdEndpoint() {
+        return idEndpoint;
     }
 
-    public void setResource(String resource) {
-        this.resource = resource;
-    }
-
-    public String getInteraction() {
-        return interaction;
-    }
-
-    public void setInteraction(String interaction) {
-        this.interaction = interaction;
+    public void setIdEndpoint(Long idEndpoint) {
+        this.idEndpoint = idEndpoint;
     }
 
     public Long getEvents() {
@@ -89,5 +94,29 @@ public class SubscriptionData {
 
     public void setServer(FhirServer server) {
         this.server = server;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Topic getTopic() {
+        return topic;
+    }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
     }
 }
