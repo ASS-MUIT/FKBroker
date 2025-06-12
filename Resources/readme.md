@@ -6,6 +6,8 @@ El bróker interactúa con servidores FHIR y servidores KIE. Se proporciona un f
 
 Además se proporcionan ficheros para facilitar la creación de recursos FHIR desde Postman y los bpmn de dos procesos configurados para recibir señales
 
+También se proporciona un simulador de servidor FHIR que implementa toda la lógica de subscripciones, incluyendo mensajes de handshake y heartbeat y las operaciones especiales $status y $events
+
 ## Contenidos
 
 - `Solicitudes servidor FHIR.postman_collection.json`: Colección de Postman para realizar pruebas y validar las funcionalidades del servicio. Permite crear SuscriptionTopics en un servidor FHIR
@@ -58,6 +60,10 @@ Si prefiere levantar el servidor FHIR local sin usar docker puede seguir estas i
    - El puerto donde queremos que esté disponible el servidor (server.port:8888)
    - Habilitar las suscripciones restHook (hapi.fhir.suscription.resthook_enabled:true)
 3. Arrancar el servidor:  mvn spring-boot:run   
+
+### Simulador de servidor FHIR local (Alternativa)
+
+Si también quiere levantar el simulador de servidor FHIR local seguiendo las instrucciones de `fhirserver-service`.
 
 ### Colección de Postman
 

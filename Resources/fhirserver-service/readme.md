@@ -25,7 +25,7 @@ Este proyecto es una aplicación para simular la gestión de suscripciones de un
 
    ```bash
    git clone https://github.com/tfg-projects-dit-us/FKBroker
-   cd fhirserver-service
+   cd Resources/fhirserver-service
    ```
 
 2. Configurar la base de datos PostgreSQL
