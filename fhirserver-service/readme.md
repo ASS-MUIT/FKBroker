@@ -2,7 +2,7 @@
 
 ## Descripción
 
-Este proyecto es una aplicación para simular la gestión de suscripciones de un servidor FHIR, Kie Server y Spring Boot. La aplicación permite gestionar subscripciones y temas de subscripción a través de operaciones REST, visualizar y gestionar eventos de las subscripciónes a través de una interfaz web.
+Este proyecto es una aplicación para simular la gestión de suscripciones de un servidor FHIR. La aplicación permite gestionar subscripciones y temas de subscripción a través de operaciones REST, visualizar y gestionar eventos de las subscripciónes a través de una interfaz web.
 
 ## Características
 
@@ -53,7 +53,7 @@ Este proyecto es una aplicación para simular la gestión de suscripciones de un
    Desde el directorio raiz de la aplicación ejecutar el siguiente comando:
 
    ```bash
-  mvn clean install
-  mvn sprint-boot:run -Ppostgres 
+    mvn clean install
+    mvn sprint-boot:run -Ppostgres 
    ```
  

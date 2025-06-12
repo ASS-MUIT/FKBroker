@@ -53,7 +53,7 @@ Este proyecto es una aplicación para la gestión de suscripciones utilizando FH
    Desde el directorio raiz de la aplicación ejecutar el siguiente comando:
 
    ```bash
-  mvn clean install
-  mvn sprint-boot:run -Ppostgres 
+    mvn clean install
+    mvn sprint-boot:run -Ppostgres 
    ```
  
