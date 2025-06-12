@@ -63,7 +63,7 @@ Si prefiere levantar el servidor FHIR local sin usar docker puede seguir estas i
 
 ### Simulador de servidor FHIR local (Alternativa)
 
-Si también quiere levantar el simulador de servidor FHIR local seguiendo las instrucciones de `fhirserver-service`.
+Si también quiere puede levantar el simulador de servidor FHIR local siguiendo las instrucciones de `fhirserver-service`.
 
 ### Colección de Postman
 
