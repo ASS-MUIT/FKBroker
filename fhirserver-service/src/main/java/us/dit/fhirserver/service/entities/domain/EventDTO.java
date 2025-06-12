@@ -10,7 +10,7 @@ package us.dit.fhirserver.service.entities.domain;
 public class EventDTO {
 
     private Long id;
-    private Long idEvent;
+    private Long number;
     private Long idSubscription;
     private Long idResource;
 
@@ -22,12 +22,12 @@ public class EventDTO {
         this.id = id;
     }
 
-    public Long getIdEvent() {
-        return idEvent;
+    public Long getNumber() {
+        return number;
     }
 
-    public void setIdEvent(Long idEvent) {
-        this.idEvent = idEvent;
+    public void setNumber(Long number) {
+        this.number = number;
     }
 
     public Long getIdSubscription() {

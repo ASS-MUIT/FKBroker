@@ -1,5 +1,6 @@
 package us.dit.fhirserver.service.entities.db;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,14 +13,18 @@ import javax.persistence.Id;
  * @version 1.0
  * @date May 2025
  */
-@Entity(name = "TOPIC")
+@Entity(name = "TOPICS")
 public class SubscriptionTopicDB {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private Long id;
+    @Column(name = "NAME")
     private String name;
+    @Column(name = "RESOURCE")
     private String resource;
+    @Column(name = "OPERATION")
     private String operation;
 
     public Long getId() {

@@ -8,18 +8,19 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionStatus.SubscriptionNotificationType;
 import org.hl7.fhir.r5.model.SubscriptionStatus.SubscriptionStatusNotificationEventComponent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ca.uhn.fhir.parser.IParser;
 import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
-import us.dit.fkbroker.service.services.kie.KieServerService;
 import us.dit.fkbroker.service.services.kie.KieService;
-import us.dit.fkbroker.service.services.kie.SignalService;
 
 /**
  * Servicio que procesa los distintos tipos de notificaciones FHIR
@@ -36,21 +37,25 @@ public class NotificationService {
 
     private final FhirService fhirService;
     private final KieService kieService;
+    private final IParser jsonParser;
 
     private final Set<SubscriptionNotificationType> validTypes;
 
     /**
-     * Constructor que inyecta los servicios {@link FhirService},
-     * {@link KieServerService} y {@link SignalService}
+     * Constructor que inyecta los servicios {@link FhirService} y
+     * {@link KieService}.
      * 
      * @param fhirService servicio para gestionar operaciones que se realizan sobre
      *                    elementos FHIR.
      * @param kieService  servicio para gestionar las operaciones sobre los
      *                    servidores y las señales KIE.
+     * @param jsonParser
      */
-    public NotificationService(FhirService fhirService, KieService kieService) {
+    @Autowired
+    public NotificationService(FhirService fhirService, KieService kieService, IParser jsonParser) {
         this.fhirService = fhirService;
         this.kieService = kieService;
+        this.jsonParser = jsonParser;
         this.validTypes = EnumSet.of(SubscriptionNotificationType.EVENTNOTIFICATION,
                 SubscriptionNotificationType.HEARTBEAT, SubscriptionNotificationType.HANDSHAKE);
     }
@@ -65,8 +70,17 @@ public class NotificationService {
         Long idTrigger = subscriptionData.getTopic().getTrigger().getId();
         FhirServer server = subscriptionData.getServer();
 
-        // Obtiene el estado de la subscripción de la notificación recibida
-        SubscriptionStatus subscriptionStatus = fhirService.getSubscriptionStatus(mesagge);
+        // Obtiene el Bundle de la notificación recibida
+        Bundle bundle = jsonParser.parseResource(Bundle.class, mesagge);
+
+        // Comprueba que tenga SubscriptionStatus y lo extrae
+        SubscriptionStatus subscriptionStatus;
+        if (bundle.getEntry().isEmpty() || !bundle.getEntryFirstRep().hasResource()
+                || bundle.getEntryFirstRep().getResource().getClass() != SubscriptionStatus.class) {
+            throw new RuntimeException("Mensaje incorrecto. Bundle sin SubscriptionStatus.");
+        } else {
+            subscriptionStatus = (SubscriptionStatus) bundle.getEntryFirstRep().getResource();
+        }
 
         // Comprueba que sea un tipo de notificación válido, sino lanza una excepción
         SubscriptionNotificationType notificationType = subscriptionStatus.getType();

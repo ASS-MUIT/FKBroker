@@ -1,8 +1,6 @@
 package us.dit.fkbroker.service.services.mapper;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations.SearchComparator;
@@ -11,11 +9,12 @@ import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.Subscription.SubscriptionFilterByComponent;
 import org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import ca.uhn.fhir.parser.IParser;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
-import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
 import us.dit.fkbroker.service.entities.domain.SubscriptionEntry;
 import us.dit.fkbroker.service.entities.domain.SubscriptionForm;
 
@@ -31,6 +30,18 @@ public class SubscriptionMapper {
 
     @Value("${fhir.subscription.heartbeat.period}")
     private Integer heartbeatPeriod;
+    
+    private final IParser jsonParser;
+
+    /**
+     * Constructor que inyecta {@link IParser}.
+     * 
+     * @param jsonParser
+     */
+    @Autowired
+    public SubscriptionMapper(IParser jsonParser) {
+        this.jsonParser = jsonParser;
+    }
 
     /**
      * Transforma una entidad {@link SubscriptionData} en un objeto de dominio
@@ -50,29 +61,6 @@ public class SubscriptionMapper {
         subscriptionEntry.setLastUpdate(subscription.getUpdated());
 
         return subscriptionEntry;
-    }
-
-    /**
-     * Transforma un objeto FHIR {@link Subscription} en el objeto de dominio
-     * {@link SubscriptionDetails}
-     * 
-     * @param subscription objeto FHIR con datos de la subscripción que se desea
-     *                     transformar en {@link SubscriptionDetails}.
-     * @return el objeto {@link SubscriptionDetails}.
-     */
-    public SubscriptionDetails toDetails(Subscription subscription) {
-        String endpoint = subscription.getEndpoint();
-        String topicTitle = subscription.getTopic();
-        String id = subscription.getId();
-
-        // Mapea los filtros
-        List<SubscriptionDetails.FilterDetail> filters = subscription.getFilterBy().stream()
-                .map(filter -> new SubscriptionDetails.FilterDetail(filter.getFilterParameter(),
-                        filter.getComparator() != null ? filter.getComparator().toCode() : null,
-                        filter.getModifier() != null ? filter.getModifier().toCode() : null, filter.getValue()))
-                .collect(Collectors.toList());
-
-        return new SubscriptionDetails(endpoint, topicTitle, id, filters);
     }
 
     /**
@@ -117,6 +105,16 @@ public class SubscriptionMapper {
             subscription.setFilterBy(Collections.singletonList(filterBy));
         }
         return subscription;
+    }
+    
+    /**
+     * Transforma un objeto FHIR {@link Subscription} en una cadena de texto.
+     * 
+     * @param subscription objeto FHIR con los datos de la subscripción.
+     * @return la cadena de texto con los datos de la subscripción.
+     */
+    public String toString(Subscription subscription) {
+        return jsonParser.setPrettyPrint(true).encodeResourceToString(subscription);
     }
 
 }

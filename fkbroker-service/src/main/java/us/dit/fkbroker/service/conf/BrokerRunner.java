@@ -64,8 +64,13 @@ public class BrokerRunner implements ApplicationRunner {
 
             for (SubscriptionData subscriptionData : subscriptionDatas) {
                 // Actualiza la información de la subscripción
-                subscriptionData = notificationService.updateSubscriptionStatus(fhirServer, subscriptionData);
-                subscriptionService.updateSubscription(subscriptionData);
+                try {
+                    subscriptionData = notificationService.updateSubscriptionStatus(fhirServer, subscriptionData);
+                    subscriptionService.updateSubscription(subscriptionData);
+                } catch (Exception e) {
+                    logger.warn("No se ha podido actualizar la subscripción {} del servidor {}.",
+                            subscriptionData.getIdSubscription(), fhirServer.getId());
+                }
             }
         }
     }

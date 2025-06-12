@@ -18,7 +18,6 @@
 package us.dit.fkbroker.service.repositories;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -33,8 +32,6 @@ import us.dit.fkbroker.service.entities.db.SubscriptionData;
  * @date May 2025
  */
 public interface SubscriptionRepository extends JpaRepository<SubscriptionData, Long> {
-    Optional<SubscriptionData> findByIdEndpoint(Long idEndpoint);
-
     void deleteByServerAndIdSubscription(FhirServer server, String idSubscription);
 
     List<SubscriptionData> findByServerId(Long serverId);

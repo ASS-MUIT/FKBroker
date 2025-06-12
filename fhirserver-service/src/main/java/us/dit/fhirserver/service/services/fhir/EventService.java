@@ -69,7 +69,7 @@ public class EventService {
      * @return el listado con los datos de todos los eventos de la subscripción.
      */
     public List<EventDTO> getEventsDTO(Long idSubscription) {
-        List<EventDB> eventDBs = eventRepository.findByIdSubscriptionOrderByIdEvent(idSubscription);
+        List<EventDB> eventDBs = eventRepository.findByIdSubscriptionOrderByNumber(idSubscription);
 
         List<EventDTO> eventDTOs = eventDBs.stream().map(eventMapper::toDTO).collect(Collectors.toList());
 

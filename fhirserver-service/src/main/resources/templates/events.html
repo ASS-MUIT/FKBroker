@@ -72,14 +72,14 @@
 			            <thead>
 			                <tr>
 								<th>ID</th>
-			                    <th>ID Evento</th>
+			                    <th>Número</th>
 								<th>ID Recurso</th>
 			                </tr>
 			            </thead>
 			            <tbody>
 			                <tr th:each="event : ${events}">
 								<td th:text="${event.id}"></td>
-			                    <td th:text="${event.idEvent}"></td>
+			                    <td th:text="${event.number}"></td>
 								<td th:text="${event.idResource}"></td>
 			                </tr>
 			            </tbody>

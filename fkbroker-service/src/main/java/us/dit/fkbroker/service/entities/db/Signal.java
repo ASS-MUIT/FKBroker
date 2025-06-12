@@ -33,12 +33,14 @@ import javax.persistence.Id;
  * @version 1.1
  * @date Mar 2025
  */
-@Entity
+@Entity(name = "SIGNALS")
 public class Signal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private long id;
+    @Column(name = "NAME")
     private String name;
     @Column(name = "ID_TRIGGER")
     private Long idTrigger;

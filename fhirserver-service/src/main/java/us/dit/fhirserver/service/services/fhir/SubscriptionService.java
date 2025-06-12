@@ -217,7 +217,7 @@ public class SubscriptionService {
      */
     public String getEvents(Long idSubscription, Long eventsSinceNumber, Long eventsUntilNumber) {
         SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
-        List<EventDB> events = eventRepository.findByIdSubscriptionAndIdEventBetweenOrderByIdEvent(
+        List<EventDB> events = eventRepository.findByIdSubscriptionAndNumberBetweenOrderByNumber(
                 subscriptionDB.getId(), eventsSinceNumber, eventsUntilNumber);
 
         Bundle bundle = subscriptionMapper.toBundleEvents(subscriptionDB, events);

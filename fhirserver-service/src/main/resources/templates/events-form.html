@@ -20,9 +20,9 @@
 		<table class="table mb-3">
             <thead>
                 <tr>
-					<th>ID Subscripción</th>
-					<th>ID Evento</th>
-                    <th>ID Recurso</th>
+					<th>Identificador de la subscripción</th>
+					<th>Número del evento</th>
+                    <th>Identificador de recurso</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +31,7 @@
 				    <input type="number" th:field="*{events[__${iterStat.index}__].idSubscription}" class="form-control" readonly />
 				</td>
 				<td>
-				    <input type="number" th:field="*{events[__${iterStat.index}__].idEvent}" class="form-control" readonly />
+				    <input type="number" th:field="*{events[__${iterStat.index}__].number}" class="form-control" readonly />
 				</td>
                 <td>
                     <input type="number" th:field="*{events[__${iterStat.index}__].idResource}" class="form-control" required />

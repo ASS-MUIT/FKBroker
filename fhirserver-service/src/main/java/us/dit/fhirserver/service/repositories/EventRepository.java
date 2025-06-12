@@ -16,6 +16,6 @@ import us.dit.fhirserver.service.entities.db.EventDB;
  */
 @Repository
 public interface EventRepository extends JpaRepository<EventDB, Long> {
-    List<EventDB> findByIdSubscriptionAndIdEventBetweenOrderByIdEvent(Long idSubscription, Long min, Long max);
-    List<EventDB> findByIdSubscriptionOrderByIdEvent(Long idSubscription);
+    List<EventDB> findByIdSubscriptionAndNumberBetweenOrderByNumber(Long idSubscription, Long min, Long max);
+    List<EventDB> findByIdSubscriptionOrderByNumber(Long idSubscription);
 }

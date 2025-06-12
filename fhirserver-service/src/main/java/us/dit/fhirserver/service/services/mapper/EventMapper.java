@@ -43,7 +43,7 @@ public class EventMapper {
         EventDB eventDB = new EventDB();
 
         eventDB.setId(eventDTO.getId());
-        eventDB.setIdEvent(eventDTO.getIdEvent());
+        eventDB.setNumber(eventDTO.getNumber());
         eventDB.setIdResource(eventDTO.getIdResource());
         eventDB.setIdSubscription(eventDTO.getIdSubscription());
 
@@ -61,7 +61,7 @@ public class EventMapper {
         EventDTO eventDTO = new EventDTO();
 
         eventDTO.setId(eventDB.getId());
-        eventDTO.setIdEvent(eventDB.getIdEvent());
+        eventDTO.setNumber(eventDB.getNumber());
         eventDTO.setIdResource(eventDB.getIdResource());
         eventDTO.setIdSubscription(eventDB.getIdSubscription());
 
@@ -78,7 +78,7 @@ public class EventMapper {
      */
     public SubscriptionStatusNotificationEventComponent toNotificationEvent(EventDB event, String resource) {
         SubscriptionStatusNotificationEventComponent notificationEvent = new SubscriptionStatusNotificationEventComponent();
-        notificationEvent.setEventNumber(event.getIdEvent());
+        notificationEvent.setEventNumber(event.getNumber());
         String urlResource = fhirServerUrl + "/" + resource + "/" + event.getIdResource();
         Reference referenceResource = new Reference(urlResource);
         notificationEvent.setFocus(referenceResource);

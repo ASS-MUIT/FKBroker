@@ -13,14 +13,18 @@ import javax.persistence.Id;
  * @version 1.0
  * @date Mar 2025
  */
-@Entity
+@Entity(name = "FHIR_SERVERS")
 public class FhirServer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private Long id;
+    @Column(name = "NAME")
     private String name;
+    @Column(name = "URL")
     private String url;
+    @Column(name = "HEARTBEAT")
     private Boolean heartbeat;
     @Column(name = "QUERY_OPERATIONS")
     private Boolean queryOperations;

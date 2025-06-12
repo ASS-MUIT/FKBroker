@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
-import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionTopicService;
 
@@ -78,7 +77,7 @@ public class SubscriptionTopicController {
         model.addAttribute("fhirServer", server);
 
         // Obtiene los detalles del SubscriptionTopic y los añade al modelo
-        SubscriptionTopicDetails topic = subscriptionTopicService.getSubscriptionTopicDetails(server.getUrl(), idTopic);
+        String topic = subscriptionTopicService.getSubscriptionTopicString(server.getUrl(), idTopic);
         model.addAttribute("topic", topic);
 
         return "fhir/subscriptiontopic-detail";

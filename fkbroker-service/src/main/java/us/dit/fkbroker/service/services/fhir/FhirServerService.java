@@ -6,8 +6,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
+import us.dit.fkbroker.service.entities.db.SubscriptionData;
 import us.dit.fkbroker.service.entities.domain.FhirServerDetails;
 import us.dit.fkbroker.service.repositories.FhirServerRepository;
 import us.dit.fkbroker.service.services.mapper.FhirServerMapper;
@@ -22,6 +24,8 @@ import us.dit.fkbroker.service.services.mapper.FhirServerMapper;
 @Service
 public class FhirServerService {
 
+    private final SubscriptionService subscriptionService;
+    private final SubscriptionTopicService subscriptionTopicService;
     private final FhirServerRepository fhirServerRepository;
     private final FhirServerMapper fhirServerMapper;
 
@@ -35,7 +39,10 @@ public class FhirServerService {
      *                             viceversa.
      */
     @Autowired
-    public FhirServerService(FhirServerRepository fhirServerRepository, FhirServerMapper fhirServerMapper) {
+    public FhirServerService(SubscriptionService subscriptionService, SubscriptionTopicService subscriptionTopicService,
+            FhirServerRepository fhirServerRepository, FhirServerMapper fhirServerMapper) {
+        this.subscriptionService = subscriptionService;
+        this.subscriptionTopicService = subscriptionTopicService;
         this.fhirServerRepository = fhirServerRepository;
         this.fhirServerMapper = fhirServerMapper;
     }
@@ -97,11 +104,29 @@ public class FhirServerService {
     }
 
     /**
-     * Elimina un servidor FHIR de la base de datos.
+     * Elimina un servidor FHIR de la base de datos. También elimina todas las
+     * subscripciones del servidor FHIR y de la base de datos y todos los temas de
+     * subscripción de la base de datos.
      * 
      * @param id identificador del servidor FHIR a eliminar.
      */
+    @Transactional
     public void deleteFhirServer(Long id) {
+        // Obtiene el servidor a eliminar
+        FhirServer fhirServer = fhirServerRepository.getById(id);
+
+        // Obtiene todas las subscripciones del servidor a eliminar
+        List<SubscriptionData> subscriptionDatas = subscriptionService.getSubscriptions(id);
+
+        // Elimina todas las subscripciones del servidor FHIR y de la base de datos
+        for (SubscriptionData subscriptionData : subscriptionDatas) {
+            subscriptionService.deleteSubscription(fhirServer, subscriptionData.getIdSubscription());
+        }
+
+        // Elimina todos los temas de subscripción de la base de datos
+        subscriptionTopicService.deleteSubscriptionTopics(fhirServer);
+
+        // Elimina los datos del servidor de la base de datos
         fhirServerRepository.deleteById(id);
     }
 }

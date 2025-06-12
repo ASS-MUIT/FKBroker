@@ -1,5 +1,6 @@
 package us.dit.fhirserver.service.entities.db;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,15 +15,20 @@ import javax.persistence.ManyToOne;
  * @version 1.0
  * @date May 2025
  */
-@Entity(name = "SUBSCRIPTION")
+@Entity(name = "SUBSCRIPTIONS")
 public class SubscriptionDB {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private Long id;
+    @Column(name = "ENDPOINT")
     private String endpoint;
+    @Column(name = "HEARTBEAT_PERIOD")
     private Integer heartbeatPeriod;
+    @Column(name = "STATUS")
     private String status;
+    @Column(name = "LAST_EVENT")
     private Integer lastEvent;
     @ManyToOne
     @JoinColumn(name = "ID_TOPIC")

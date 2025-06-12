@@ -15,7 +15,8 @@ import us.dit.fkbroker.service.entities.db.Topic;
  * @date May 2025
  */
 public interface SubscriptionTopicRepository extends JpaRepository<Topic, Long> {
-
+    void deleteAllByServer(FhirServer server);
+    
     List<Topic> findByServer(FhirServer server);
 
     Topic findByIdTopicAndServer(String idTopic, FhirServer server);

@@ -34,27 +34,40 @@ import javax.persistence.ManyToOne;
  * @version 1.0
  * @date Abr 2025
  */
-@Entity
+@Entity(name = "SUBSCRIPTIONS")
 public class SubscriptionData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private Long id;
     @Column(name = "ID_SUBSCRIPTION")
     private String idSubscription;
-    @Column(name = "ID_ENDPOINT")
-    private Long idEndpoint;
+    @Column(name = "EVENTS")
     private Long events;
+    @Column(name = "STATUS")
     private String status;
+    @Column(name = "UPDATED")
     private Date updated;
 
     @ManyToOne
     @JoinColumn(name = "ID_SERVER")
     private FhirServer server;
-    
+
     @ManyToOne
     @JoinColumn(name = "ID_TOPIC")
     private Topic topic;
+
+    public SubscriptionData() {
+
+    }
+
+    public SubscriptionData(FhirServer server, Topic topic) {
+        this.server = server;
+        this.topic = topic;
+        this.events = 0l;
+        this.updated = new Date();
+    }
 
     public Long getId() {
         return id;
@@ -70,14 +83,6 @@ public class SubscriptionData {
 
     public void setIdSubscription(String idSubscription) {
         this.idSubscription = idSubscription;
-    }
-
-    public Long getIdEndpoint() {
-        return idEndpoint;
-    }
-
-    public void setIdEndpoint(Long idEndpoint) {
-        this.idEndpoint = idEndpoint;
     }
 
     public Long getEvents() {

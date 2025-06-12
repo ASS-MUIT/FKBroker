@@ -5,6 +5,9 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
 	<link rel="stylesheet" th:href="@{/form-styles.css}">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet"/>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 </head>
 <body>
 	<div th:replace="layout/topnav :: topnav"></div>
@@ -18,44 +21,11 @@
 			<strong>Subscription Topic</strong>
 		</h2>
 		
-		<p><strong>Nombre:</strong> <span th:text="${topic.name}"></span></p>
-	    <p><strong>Topic URL:</strong> <span th:text="${topic.url}"></span></p>
-		<p><strong>Recurso:</strong> <span th:text="${topic.resource}"></span></p>
-		<p><strong>Interacción:</strong> <span th:text="${topic.interaction}"></span></p>
-	
-		<!-- Filtros -->
-		<h4>Filtros</h4>
-		<table th:if="${not #lists.isEmpty(topic.filters)}" class="table mb-3">
-	        <thead>
-	            <tr>
-					<th>Descripción</th>
-					<th>Parámetro</th>
-					<th>Comparadores</th>
-					<th>Modificadores</th>
-	            </tr>
-	        </thead>
-	        <tbody>
-	            <tr th:each="filter: ${topic.filters}">
-					<td th:text="${filter.description}"></td>
-					<td th:text="${filter.filterParameter}"></td>
-					<td>
-						<ul>
-                            <li th:each="comparator : ${filter.comparators}">
-                                <span th:text="${comparator}"></span>
-                            </li>
-                        </ul>
-					</td>
-					<td>
-						<ul>
-					        <li th:each="modifier : ${filter.modifiers}">
-					            <span th:text="${modifier}"></span>
-					        </li>
-					    </ul>
-					</td>
-	            </tr>
-	        </tbody>
-	    </table>
-		<p th:if="${#lists.isEmpty(topic.filters)}">No hay filtros disponibles</p>
+		<p><strong>Mensaje JSON obtenido del Servidor FHIR:</strong></p>
+		<div class="json-box">
+		    <pre><code class="language-json" th:text="${topic}"></code></pre>
+		</div>
+		
 	</div>
 </body>
 </html>

@@ -1,17 +1,17 @@
-# Gestión de Suscripciones
+# Simulador de Servidor FHIR
 
 ## Descripción
 
-Este proyecto es una aplicación para la gestión de suscripciones utilizando FHIR, Kie Server y Spring Boot. La aplicación permite crear, visualizar, modificar y eliminar suscripciones y notificaciones a través de una interfaz web.
+Este proyecto es una aplicación para simular la gestión de suscripciones de un servidor FHIR, Kie Server y Spring Boot. La aplicación permite gestionar subscripciones y temas de subscripción a través de operaciones REST, visualizar y gestionar eventos de las subscripciónes a través de una interfaz web.
 
 ## Características
 
-- Gestión de Kie Servers.
-- Gestión de Notification EPs.
-- Creación y eliminación de suscripciones.
-- Visualización y filtrado de suscripciones.
-- Integración con FHIR y Kie Server.
-- Configuración a través de `application.properties`.
+- Gestión de subscripciones mediante API REST.
+- Gestión de temas de subscripción mediante API REST.
+- Implementación de operaciones especiales $status y $events.
+- Implementación de mensajes de handshake y heartbeat.
+- Visualización de suscripciones y temas de subscripción mediante interfaz web.
+- Viasualización y creación personalizada de eventos de subscripciones mediante interfaz web.
 
 ## Requisitos
 
@@ -25,7 +25,7 @@ Este proyecto es una aplicación para la gestión de suscripciones utilizando FH
 
    ```bash
    git clone https://github.com/tfg-projects-dit-us/FKBroker
-   cd broker-service
+   cd fhirserver-service
    ```
 
 2. Configurar la base de datos PostgreSQL
@@ -33,19 +33,19 @@ Este proyecto es una aplicación para la gestión de suscripciones utilizando FH
    Crear la base de datos
 
    ```bash
-    sudo -u postgres createdb fkbroker
+    sudo -u postgres createdb fhirserver
    ```
    Otorgar todos los privilegios al usuario jbpm (O el que se configure como usuario en application.properties )
 
    ```bash
-    GRANT ALL PRIVILEGES ON DATABASE fkbroker TO jbpm;
+    GRANT ALL PRIVILEGES ON DATABASE fhirserver TO jbpm;
    ```
    Configurar application.properties
 
    ```bash
    spring.datasource.username=jbpm
    spring.datasource.password=jbpm
-   spring.datasource.url=jdbc:postgresql://localhost:5432/fkbroker
+   spring.datasource.url=jdbc:postgresql://localhost:5432/fhirserver
    spring.datasource.driver-class-name=org.postgresql.xa.PGXADataSource
    ```
 4. Compilar y ejecutar la aplicación

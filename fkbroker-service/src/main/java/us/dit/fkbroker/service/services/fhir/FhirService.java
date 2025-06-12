@@ -15,10 +15,12 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
@@ -36,23 +38,27 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
  */
 @Service
 public class FhirService {
-    
+
     @Value("${application.address}")
     private String applicationAddress;
 
     private static final Logger logger = LogManager.getLogger(FhirService.class);
 
     private final FhirContext fhirContext;
+    private final IParser jsonParser;
 
     private final ConcurrentMap<String, IGenericClient> client = new ConcurrentHashMap<>();
 
     /**
-     * Constructor que inyecta FhirContext.
+     * Constructor que inyecta {@link FhirContext} y {@link IParser}.
      * 
      * @param fhirContext
+     * @param jsonParser
      */
-    public FhirService(FhirContext fhirContext) {
+    @Autowired
+    public FhirService(FhirContext fhirContext, IParser jsonParser) {
         this.fhirContext = fhirContext;
+        this.jsonParser = jsonParser;
     }
 
     /**
@@ -96,7 +102,7 @@ public class FhirService {
         IGenericClient client = getClient(fhirUrl);
         return client.read().resource(SubscriptionTopic.class).withId(id).execute();
     }
-    
+
     /**
      * Obtiene una lista de suscripciones desde un servidor FHIR.
      * 
@@ -148,7 +154,7 @@ public class FhirService {
                 .getResource();
 
         logger.info("Suscripción creada: {}",
-                fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdSubscription));
+                jsonParser.setPrettyPrint(true).encodeResourceToString(createdSubscription));
 
         return createdSubscription;
     }
@@ -185,7 +191,7 @@ public class FhirService {
         Bundle bundle = (Bundle) client.operation().onInstance(new IdType("Subscription", subscriptionId))
                 .named("$events").withParameters(inputParams).useHttpGet().returnResourceType(Bundle.class).execute();
 
-        logger.info("Respuesta del servidor: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
+        logger.info("Respuesta del servidor: {}", jsonParser.encodeResourceToString(bundle));
 
         // Comprueba que tenga SubscriptionStatus y lo extrae
         if (bundle.getEntry().isEmpty() || !bundle.getEntryFirstRep().hasResource()
@@ -211,24 +217,6 @@ public class FhirService {
                 .execute();
 
         logger.info("Respuesta del servidor: {}", fhirContext.newJsonParser().encodeResourceToString(bundle));
-
-        // Comprueba que tenga SubscriptionStatus y lo extrae
-        if (bundle.getEntry().isEmpty() || !bundle.getEntryFirstRep().hasResource()
-                || bundle.getEntryFirstRep().getResource().getClass() != SubscriptionStatus.class) {
-            throw new RuntimeException("Mensaje incorrecto. Bundle sin SubscriptionStatus.");
-        } else {
-            return (SubscriptionStatus) bundle.getEntryFirstRep().getResource();
-        }
-    }
-
-    /**
-     * Obtiene el SubscriptionStatus que contiene el mensaje.
-     * 
-     * @param mesagge el JSON que contiene el SubscriptionStatus.
-     * @return el recurso el SubscriptionStatus.
-     */
-    public SubscriptionStatus getSubscriptionStatus(String mesagge) {
-        Bundle bundle = fhirContext.newJsonParser().parseResource(Bundle.class, mesagge);
 
         // Comprueba que tenga SubscriptionStatus y lo extrae
         if (bundle.getEntry().isEmpty() || !bundle.getEntryFirstRep().hasResource()

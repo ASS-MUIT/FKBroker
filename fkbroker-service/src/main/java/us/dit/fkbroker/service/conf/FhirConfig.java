@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 
 /**
  * Permite definir un bean único para FhirContext, asegurando que toda la
@@ -20,6 +21,11 @@ public class FhirConfig {
     @Bean
     public FhirContext fhirContext() {
         return FhirContext.forR5();
+    }
+
+    @Bean
+    public IParser jsonParser(FhirContext fhirContext) {
+        return fhirContext.newJsonParser();
     }
 
 }

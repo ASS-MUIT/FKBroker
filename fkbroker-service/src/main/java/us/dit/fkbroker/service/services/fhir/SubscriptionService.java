@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
@@ -21,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
 import us.dit.fkbroker.service.entities.db.Topic;
-import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
 import us.dit.fkbroker.service.entities.domain.SubscriptionEntry;
 import us.dit.fkbroker.service.entities.domain.SubscriptionForm;
 import us.dit.fkbroker.service.repositories.SubscriptionRepository;
@@ -43,7 +40,6 @@ public class SubscriptionService {
     private static final Logger logger = LogManager.getLogger();
 
     private final FhirService fhirService;
-    private final EntityManager entityManager;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionMapper subscriptionMapper;
 
@@ -52,32 +48,29 @@ public class SubscriptionService {
      * 
      * @param subscriptionRepository repositorio JPA de la entidad
      *                               {@link SubscriptionData}.
-     * @param entityManager          interfaz usada para interaccionar con el
-     *                               contexto de persistencia.
      */
     @Autowired
-    public SubscriptionService(SubscriptionRepository subscriptionRepository, EntityManager entityManager,
-            FhirService fhirService, SubscriptionMapper subscriptionMapper) {
-        this.subscriptionRepository = subscriptionRepository;
-        this.entityManager = entityManager;
+    public SubscriptionService(FhirService fhirService, SubscriptionRepository subscriptionRepository,
+            SubscriptionMapper subscriptionMapper) {
         this.fhirService = fhirService;
+        this.subscriptionRepository = subscriptionRepository;
         this.subscriptionMapper = subscriptionMapper;
     }
 
     /**
      * Obtiene una subscripción de la base de datos por su identificador.
      * 
-     * @param idEndpoint identificador del endpoint de la subscripción.
+     * @param idEndpoint identificador de la subscripción.
      * @return la subscripción obtenida.
      * @throws RuntimeException si no encuentra la subscripción.
      */
-    public SubscriptionData getSubscriptionData(Long idEndpoint) {
-        Optional<SubscriptionData> optionalSubscription = subscriptionRepository.findByIdEndpoint(idEndpoint);
+    public SubscriptionData getSubscriptionData(Long id) {
+        Optional<SubscriptionData> optionalSubscription = subscriptionRepository.findById(id);
 
         if (optionalSubscription.isPresent()) {
             return optionalSubscription.get();
         } else {
-            throw new RuntimeException("Subscription not found with endpoint id: " + idEndpoint);
+            throw new RuntimeException("Subscription not found with id: " + id);
         }
     }
 
@@ -88,9 +81,9 @@ public class SubscriptionService {
      * @param id     identificador de la subscripción.
      * @return los detalles de la subscripción obtenida.
      */
-    public SubscriptionDetails getSubscriptionDetails(FhirServer server, String id) {
+    public String getSubscriptionDetails(FhirServer server, String id) {
         Subscription subscription = fhirService.getSubscription(server.getUrl(), id);
-        return subscriptionMapper.toDetails(subscription);
+        return subscriptionMapper.toString(subscription);
     }
 
     /**
@@ -162,23 +155,21 @@ public class SubscriptionService {
      * @param subscriptionForm datos de la subscripción que se desea crear.
      */
     public void createSubscription(FhirServer server, Topic topic, SubscriptionForm subscriptionForm) {
-        // Obtiene un identificador único (usado para crear el endpoint)
-        Long idEndpoint = ((Number) entityManager.createNativeQuery("SELECT nextval('sub_seq')").getSingleResult())
-                .longValue();
-        String endpoint = applicationAddress + "notification/" + idEndpoint;
+        // Crea en base de datos la subscripción
+        SubscriptionData subscriptionData = new SubscriptionData(server, topic);
+        subscriptionData = subscriptionRepository.save(subscriptionData);
+
+        // Obtiene la dirección del endpoint de la subscripción
+        String endpoint = applicationAddress + "notification/" + subscriptionData.getId();
 
         // Crea la subscripción en el servidor FHIR
         Subscription subscription = subscriptionMapper.toSubscription(subscriptionForm, endpoint);
         Subscription createdSubscription = fhirService.createSubscription(server.getUrl(), subscription);
 
-        // Guarda los datos de la subscripción en la base de datos
-        SubscriptionData subscriptionData = new SubscriptionData();
-        subscriptionData.setIdEndpoint(idEndpoint);
-        subscriptionData.setServer(server);
-        subscriptionData.setTopic(topic);
+        // Actualiza la subscripción con el identificador y el estado de la subscripción
+        // que se acaba de crear en el servidor FHIR
         subscriptionData.setIdSubscription(createdSubscription.getIdElement().getIdPart());
-        subscriptionData.setEvents((long) 0);
-        subscriptionData.setUpdated(new Date());
+        subscriptionData.setStatus(createdSubscription.getStatus().toCode());
         subscriptionRepository.save(subscriptionData);
     }
 

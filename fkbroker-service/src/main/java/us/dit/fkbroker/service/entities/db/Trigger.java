@@ -1,17 +1,28 @@
 package us.dit.fkbroker.service.entities.db;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-@Entity
+/**
+ * Entidad que representa los datos de los disparadores de eventos
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date Abr 2025
+ */
+@Entity(name = "TRIGGERS")
 public class Trigger {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private Long id;
+    @Column(name = "RESOURCE")
     private String resource;
+    @Column(name = "INTERACTION")
     private String interaction;
 
     public Long getId() {

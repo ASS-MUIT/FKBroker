@@ -84,6 +84,21 @@ public class SubscriptionTopicService {
     }
 
     /**
+     * Obtiene los detalles de un Subscription Topic de un servidor FHIR.
+     * 
+     * @param fhirUrl URL del servidor FHIR.
+     * @param id      identificador del Subscription Topic a obtener.
+     * @return los detalles del Subscription Topic.
+     */
+    public String getSubscriptionTopicString(String fhirUrl, String id) {
+        // Obtiene el SubscriptionTopic del servidor FHIR
+        SubscriptionTopic subscriptionTopic = fhirService.getSubscriptionTopic(fhirUrl, id);
+
+        // Mapea el SubscriptionTopic
+        return subscriptionTopicMapper.toString(subscriptionTopic);
+    }
+
+    /**
      * Obtiene los datos de los Subscription Topic de un servidor FHIR y actualiza
      * la base de datos con dicha información si es necesario.
      * 
@@ -142,6 +157,15 @@ public class SubscriptionTopicService {
 
         // Mapea los SubscriptionTopic
         return serverTopics.stream().map(subscriptionTopicMapper::toEntry).collect(Collectors.toList());
+    }
+
+    /**
+     * Elimina todos los temas de subscripción de la base de datos de un servidor.
+     * 
+     * @param server información del servidor FHIR.
+     */
+    public void deleteSubscriptionTopics(FhirServer server) {
+        subscriptionTopicRepository.deleteAllByServer(server);
     }
 
 }

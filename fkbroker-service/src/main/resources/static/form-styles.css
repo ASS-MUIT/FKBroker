@@ -119,3 +119,13 @@ body {
 .checkbox-group label input[type=checkbox] {
   margin-right: 5px;
 }
+
+.json-box {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #f8f8f8;
+  max-height: 500px;
+  overflow: auto;
+  font-size: 0.9rem;
+}

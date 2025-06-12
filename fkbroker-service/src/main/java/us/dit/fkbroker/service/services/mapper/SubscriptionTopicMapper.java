@@ -4,8 +4,10 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import ca.uhn.fhir.parser.IParser;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails.FilterDetail;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicEntry;
@@ -19,6 +21,18 @@ import us.dit.fkbroker.service.entities.domain.SubscriptionTopicEntry;
  */
 @Component
 public class SubscriptionTopicMapper {
+
+    private final IParser jsonParser;
+
+    /**
+     * Constructor que inyecta {@link IParser}.
+     * 
+     * @param jsonParser
+     */
+    @Autowired
+    public SubscriptionTopicMapper(IParser jsonParser) {
+        this.jsonParser = jsonParser;
+    }
 
     /**
      * Transforma un objeto FHIR {@link SubscriptionTopic} en el objeto de dominio
@@ -80,4 +94,15 @@ public class SubscriptionTopicMapper {
 
         return subscriptionTopicDetails;
     }
+
+    /**
+     * Transforma un objeto FHIR {@link SubscriptionTopic} en una cadena de texto.
+     * 
+     * @param subscriptionTopic objeto FHIR con los datos del tema de subscripción.
+     * @return la cadena de texto con los datos del tema de subscripción.
+     */
+    public String toString(SubscriptionTopic subscriptionTopic) {
+        return jsonParser.setPrettyPrint(true).encodeResourceToString(subscriptionTopic);
+    }
+
 }

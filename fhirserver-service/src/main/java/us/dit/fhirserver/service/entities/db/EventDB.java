@@ -13,16 +13,17 @@ import javax.persistence.Id;
  * @version 1.0
  * @date May 2025
  */
-@Entity(name = "EVENT")
+@Entity(name = "EVENTS")
 public class EventDB {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private Long id;
-    @Column(name = "ID_EVENT")
-    private Long idEvent;
     @Column(name = "ID_SUBSCRIPTION")
     private Long idSubscription;
+    @Column(name = "NUMBER")
+    private Long number;
     @Column(name = "ID_RESOURCE")
     private Long idResource;
 
@@ -34,12 +35,12 @@ public class EventDB {
         this.id = id;
     }
 
-    public Long getIdEvent() {
-        return idEvent;
+    public Long getNumber() {
+        return number;
     }
 
-    public void setIdEvent(Long idEvent) {
-        this.idEvent = idEvent;
+    public void setNumber(Long number) {
+        this.number = number;
     }
 
     public Long getIdSubscription() {

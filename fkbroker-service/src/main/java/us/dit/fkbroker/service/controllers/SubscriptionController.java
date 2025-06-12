@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.Topic;
-import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
 import us.dit.fkbroker.service.entities.domain.SubscriptionEntry;
 import us.dit.fkbroker.service.entities.domain.SubscriptionForm;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
@@ -187,7 +186,7 @@ public class SubscriptionController {
         model.addAttribute("fhirServer", server);
 
         // Obtiene los datos de la subscripción y los añade al modelo
-        SubscriptionDetails subscription = subscriptionService.getSubscriptionDetails(server, idSubs);
+        String subscription = subscriptionService.getSubscriptionDetails(server, idSubs);
         model.addAttribute("subscription", subscription);
 
         return "fhir/subscription-detail";

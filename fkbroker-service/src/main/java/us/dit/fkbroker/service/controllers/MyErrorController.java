@@ -17,16 +17,24 @@
 **/
 package us.dit.fkbroker.service.controllers;
 
+import java.net.ConnectException;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import us.dit.fkbroker.service.services.fhir.FhirService;
+
 /**
- * Controlador que gestiona las llamadas a los métodos necesarios al navegar por la interfaz web.
+ * Controlador que gestiona las llamadas a los métodos necesarios al navegar por
+ * la interfaz web.
+ * 
  * @author juanmabrazo98
  * @version 1.0
  * @date jul 2024
@@ -35,14 +43,56 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class MyErrorController implements ErrorController {
 
-	/**
-	 * This code has been found on:
-	 * https://www.baeldung.com/spring-boot-custom-error-page
-	 */
-	@RequestMapping("/error")
-	public String handleError(HttpServletRequest request,Model model) {
-		Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-		model.addAttribute("status", status);
-		return "error";
-	}
+    private static final Logger logger = LogManager.getLogger(FhirService.class);
+
+    @RequestMapping("/error")
+    public String handleError(HttpServletRequest request, Model model) {
+        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+
+        int statusCode = status != null ? Integer.parseInt(status.toString()) : 500;
+
+        String error = null;
+        if (exception instanceof Throwable) {
+            Throwable root = getRootCause((Throwable) exception);
+
+            if (root instanceof ConnectException) {
+                error = "No se pudo establecer la conexión con el servidor FHIR";
+            } else {
+                error = "Error desconocido: " + root.getClass().getSimpleName();
+            }
+        } else {
+            error = "No se pudo determinar el tipo de error";
+        }
+
+        model.addAttribute("status", getErrorName(statusCode));
+        model.addAttribute("error", error);
+
+        logger.error("Error {} - {}", statusCode, error);
+
+        return "error";
+    }
+
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause;
+    }
+
+    private String getErrorName(int statusCode) {
+        if (statusCode == 400)
+            return "Solicitud incorrecta (400)";
+        else if (statusCode == 401)
+            return "No autorizado (401)";
+        else if (statusCode == 403)
+            return "Prohibido (403)";
+        else if (statusCode == 404)
+            return "No encontrado (404)";
+        else if (statusCode == 500)
+            return "Error interno del servidor (500)";
+        else
+            return "Error desconocido";
+    }
 }

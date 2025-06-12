@@ -8,11 +8,19 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-@Entity
+/**
+ * Entidad que representa los datos de los temas de subscripción
+ * 
+ * @author josperbel
+ * @version 1.0
+ * @date Abr 2025
+ */
+@Entity(name = "TOPICS")
 public class Topic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private Long id;
     @Column(name = "ID_TOPIC")
     private String idTopic;
