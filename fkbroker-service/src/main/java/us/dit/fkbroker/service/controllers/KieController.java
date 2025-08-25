@@ -92,7 +92,7 @@ public class KieController {
         List<Trigger> triggers = triggerService.getAllTriggers();
         model.addAttribute("triggers", triggers);
 
-        return "kie/kieServers";
+        return "kie/kie-manager";
     }
 
     /**
