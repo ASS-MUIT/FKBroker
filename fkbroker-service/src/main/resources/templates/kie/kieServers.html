@@ -18,7 +18,7 @@
 		<h2>Servidores KIE</h2>
 		<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addKieServer">Agregar servidor</button>
 	</div>
-    <table class="table">
+    <table th:if="${not #lists.isEmpty(kieServers)}" class="table">
         <thead>
             <tr>
                 <th>URL</th>
@@ -37,7 +37,7 @@
 					<form th:action="@{/kie/servers/delete}" method="post" th:id="'deleteServerForm-' + ${kieServer.url}" style="display:inline;">
 						<input type="hidden" name="url" th:value="${kieServer.url}">
                     	<button type="button" class="btn btn-danger" title="Eliminar Servidor"
-							th:attr="onclick='messageConfirm(\'' + #{message.confirm.server} + '\', \'deleteServerForm-' + ${kieServer.url} + '\')'">
+							th:attr="onclick='messageConfirm(\'' + #{message.confirm.server.kie} + '\', \'deleteServerForm-' + ${kieServer.url} + '\')'">
 								<i class="fas fa-trash-alt"></i>
 						</button>
                     </form>
@@ -45,12 +45,13 @@
             </tr>
         </tbody>
     </table>
+	<p th:if="${#lists.isEmpty(kieServers)}">No hay servidores KIE disponibles</p>
 	
 	<div class="d-flex justify-content-between align-items-center mt-3">
 		<h2>Señales</h2>
 		<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addSignal">Agregar señal</button>
 	</div>
-    <table class="table">
+    <table th:if="${not #lists.isEmpty(signals)}" class="table">
         <thead>
             <tr>
                 <th>ID</th>
@@ -82,6 +83,7 @@
             </tr>
         </tbody>
     </table>
+	<p th:if="${#lists.isEmpty(signals)}">No hay señales disponibles</p>
 </div>
 
 	<!-- Modal para crear un servidor KIE  -->
