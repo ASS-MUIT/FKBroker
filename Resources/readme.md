@@ -2,15 +2,16 @@
 
 En esta carpeta, encontrarás una colección de recursos que facilitan la verificación del servicio.
 
-El bróker interactúa con servidores FHIR y servidores KIE. Se proporciona un fichero docker compose que permite la ejecución de un servidor HAPIFHIR y de Business Central en docker
+El bróker interactúa con servidores FHIR y servidores KIE. Se proporciona un fichero docker compose que permite la ejecución de un servidor HAPIFHIR y de Business Central en docker.
 
-Además se proporcionan ficheros para facilitar la creación de recursos FHIR desde Postman y los bpmn de dos procesos configurados para recibir señales
+Además se proporcionan ficheros para facilitar la creación de recursos FHIR desde Postman y los bpmn de dos procesos configurados para recibir señales.
 
-También se proporciona un simulador de servidor FHIR que implementa toda la lógica de subscripciones, incluyendo mensajes de handshake y heartbeat y las operaciones especiales $status y $events
+También se proporciona un **Simulador de Servidor FHIR** que implementa toda la lógica de subscripciones, incluyendo mensajes de handshake y heartbeat y las operaciones especiales $status y $events.
 
 ## Contenidos
 
 - `Solicitudes servidor FHIR.postman_collection.json`: Colección de Postman para realizar pruebas y validar las funcionalidades del servicio. Permite crear SuscriptionTopics en un servidor FHIR
+- `Solicitudes Simulador Servidor FHIR.postman_collection.json`: Colección de Postman para realizar pruebas y validar las funcionalidades del simulador de Servidor FHIR desarrollado. Permite crear, visualizar y eliminar recursos SuscriptionTopic y crear, visualizar, editar y eliminar recursos Suscription.
 - `create-ServiceRequest.bpmn`: Activo con el proceso de negocio que recibe la señal "create-ServiceRequest".
 - `update-ServiceRequest.bpmn`: Activo con el proceso de negocio que recibe la señal "update-ServiceRequest"
 - `application.yaml`: Fichero de configuración del servidor FHIR (R5 y suscripciones con resthooks)
@@ -65,15 +66,14 @@ Si prefiere levantar el servidor FHIR local sin usar docker puede seguir estas i
 
 Si también quiere puede levantar el simulador de servidor FHIR local siguiendo las instrucciones de `fhirserver-service`.
 
-### Colección de Postman
+### Colecciones de Postman
 
 1. **Instalar Postman**: Asegure tener Postman instalado
 2. **Importar la Colección**:
    - Abrir Postman.
    - Hacer clic en el botón "Importar" en la parte superior izquierda.
-   - Seleccionar el archivo `Solicitudes servidor FHIR.postman_collection.json`.
+   - Seleccionar el archivo `Solicitudes servidor FHIR.postman_collection.json` y/o el archivo `Solicitudes Simulador Servidor FHIR.postman_collection.json`.
 3. **Ejecutar Requests**:
    - Navegar por las carpetas y requests dentro de la colección importada.
    - Seleccionar el request que se desea ejecutar y hacer clic en "Send" para realizar la llamada al servicio.
-   - Estos Request se encuentran enumerados en orden de uso.
 

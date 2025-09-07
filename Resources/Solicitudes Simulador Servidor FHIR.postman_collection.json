@@ -1,0 +1,340 @@
+{
+	"info": {
+		"_postman_id": "3ee0e1bc-cf18-4c0e-b402-f1305112fd60",
+		"name": "Solicitudes Simulador Servidor FHIR",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5898844",
+		"_collection_link": "https://winter-crater-3837.postman.co/workspace/PVU~b7d1b796-c466-4b7e-8b82-da61f753ed9a/collection/5898844-3ee0e1bc-cf18-4c0e-b402-f1305112fd60?action=share&source=collection_link&creator=5898844"
+	},
+	"item": [
+		{
+			"name": "Post SubscriptionTopic",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "wbadmin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "wbadmin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"resourceType\": \"SubscriptionTopic\",\r\n    \"title\": \"Creación de ServiceRequest\",\r\n    \"status\": \"active\",\r\n    \"description\": \"Creación de ServiceRequest\",\r\n    \"resourceTrigger\": [\r\n        {\r\n            \"description\": \"Creación de ServiceRequest\",\r\n            \"resource\": \"ServiceRequest\",\r\n            \"supportedInteraction\": [\r\n                \"update\"\r\n            ]\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/fhir/SubscriptionTopic",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"fhir",
+						"SubscriptionTopic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get SubscriptionTopic",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "wbadmin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "wbadmin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/fhir/SubscriptionTopic",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"fhir",
+						"SubscriptionTopic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete SubscriptionTopic",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "wbadmin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "wbadmin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/fhir/SubscriptionTopic/21",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"fhir",
+						"SubscriptionTopic",
+						"21"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post Subscription",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "wbadmin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "wbadmin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"resourceType\": \"Subscription\",\r\n    \"status\": \"requested\",\r\n    \"topic\": \"http://localhost:8888/fhir/SubscriptionTopic/6\",\r\n    \"channelType\": {\r\n        \"code\": \"rest-hook\"\r\n    },\r\n    \"endpoint\": \"http://localhost:8090/notification/15\",\r\n    \"heartbeatPeriod\": 300,\r\n    \"contentType\": \"application/fhir+json\",\r\n    \"content\": \"id-only\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/fhir/Subscription",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"fhir",
+						"Subscription"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Subscription",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "wbadmin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "wbadmin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/fhir/Subscription",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"fhir",
+						"Subscription"
+					],
+					"query": [
+						{
+							"key": "eventsSinceNumber",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "eventsUntilNumber",
+							"value": "6",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch Subscription",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "wbadmin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "wbadmin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n        \"op\": \"replace\",\r\n        \"path\": \"/status\",\r\n        \"value\": \"requested\"\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/fhir/Subscription/22",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"fhir",
+						"Subscription",
+						"22"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Subscription",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "wbadmin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "wbadmin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/fhir+json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/fhir/Subscription/22",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"fhir",
+						"Subscription",
+						"22"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
