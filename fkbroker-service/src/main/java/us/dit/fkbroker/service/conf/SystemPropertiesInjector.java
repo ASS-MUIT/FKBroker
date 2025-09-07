@@ -14,6 +14,9 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.conf;
 
@@ -29,10 +32,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(
-        prefix = "system")
-@Lazy(
-        value = false)
+@ConfigurationProperties(prefix = "system")
+@Lazy(value = false)
 public class SystemPropertiesInjector {
 
 	private static final Logger logger = LogManager.getLogger();

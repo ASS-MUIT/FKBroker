@@ -1,4 +1,3 @@
-
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
 *  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
@@ -15,6 +14,9 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.conf;
 
