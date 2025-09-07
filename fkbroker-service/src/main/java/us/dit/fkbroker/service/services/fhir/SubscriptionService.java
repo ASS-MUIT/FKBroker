@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
 import org.hl7.fhir.r5.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +34,6 @@ public class SubscriptionService {
 
     @Value("${application.address}")
     private String applicationAddress;
-
-    private static final Logger logger = LogManager.getLogger();
 
     private final FhirService fhirService;
     private final SubscriptionRepository subscriptionRepository;

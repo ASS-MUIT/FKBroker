@@ -12,7 +12,7 @@
 <body>
 	<div th:replace="layout/topnav :: topnav"></div>
 	<div class="container">
-		<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Subscripciones')"></div>
+		<div th:replace="layout/header :: header('Servidores FHIR y Suscripciones','Administración de Suscripciones')"></div>
 	    
 		<h2>
 			<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${fhirServer.id})}" title="Volver">

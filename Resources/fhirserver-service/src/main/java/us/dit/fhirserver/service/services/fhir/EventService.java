@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
-import us.dit.fhirserver.service.entities.db.EventDB;
-import us.dit.fhirserver.service.entities.db.SubscriptionDB;
+import us.dit.fhirserver.service.entities.db.Event;
+import us.dit.fhirserver.service.entities.db.Subs;
 import us.dit.fhirserver.service.entities.domain.EventDTO;
 import us.dit.fhirserver.service.repositories.EventRepository;
 import us.dit.fhirserver.service.repositories.SubscriptionRepository;
@@ -44,9 +44,8 @@ public class EventService {
      * {@link FhirContext} y el servicio {@link RestClient}.
      * 
      * @param fhirContext            componente que contiene el contexto FHIR.
-     * @param eventRepository        repositorio JPA de la entidad {@link EventDB}.
-     * @param subscriptionRepository repositorio JPA de la entidad
-     *                               {@link SubscriptionDB}.
+     * @param eventRepository        repositorio JPA de la entidad {@link Event}.
+     * @param subscriptionRepository repositorio JPA de la entidad {@link Subs}.
      * @param eventMapper            componente que transforma entidades, objetos
      *                               del dominio y recursos FHIR relacionados con
      *                               los eventos.
@@ -69,9 +68,9 @@ public class EventService {
      * @return el listado con los datos de todos los eventos de la subscripción.
      */
     public List<EventDTO> getEventsDTO(Long idSubscription) {
-        List<EventDB> eventDBs = eventRepository.findByIdSubscriptionOrderByNumber(idSubscription);
+        List<Event> events = eventRepository.findByIdSubscriptionOrderByNumber(idSubscription);
 
-        List<EventDTO> eventDTOs = eventDBs.stream().map(eventMapper::toDTO).collect(Collectors.toList());
+        List<EventDTO> eventDTOs = events.stream().map(eventMapper::toDTO).collect(Collectors.toList());
 
         return eventDTOs;
     }
@@ -85,26 +84,27 @@ public class EventService {
      */
     public void sendEvents(Long idSubscription, List<EventDTO> eventDTOs) {
         // Obtiene la información
-        SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
-        subscriptionDB.setLastEvent(subscriptionDB.getLastEvent() + eventDTOs.size());
-        List<EventDB> eventDBs = eventDTOs.stream().map(eventMapper::toEntity).collect(Collectors.toList());
+        Subs subs = subscriptionRepository.getById(idSubscription);
+        subs.setLastEvent(subs.getLastEvent() + eventDTOs.size());
+        List<Event> events = eventDTOs.stream().map(dto -> eventMapper.toEntity(idSubscription, dto))
+                .collect(Collectors.toList());
 
         // Genera el mensaje de notificación
-        Bundle bundle = eventMapper.toBundleNotification(subscriptionDB, eventDBs);
+        Bundle bundle = eventMapper.toBundleNotification(subs, events);
         String message = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 
         // Notifica al cliente
-        Boolean send = restClient.sendMessage(subscriptionDB.getEndpoint(), message);
+        Boolean send = restClient.sendMessage(subs.getEndpoint(), message);
 
         if (send) {
-            subscriptionDB.setStatus(SubscriptionStatusCodes.ACTIVE.toCode());
+            subs.setStatus(SubscriptionStatusCodes.ACTIVE.toCode());
         } else {
-            subscriptionDB.setStatus(SubscriptionStatusCodes.ERROR.toCode());
+            subs.setStatus(SubscriptionStatusCodes.ERROR.toCode());
         }
 
         // Guarda la información en BBDD
-        subscriptionRepository.save(subscriptionDB);
-        eventRepository.saveAll(eventDBs);
+        subscriptionRepository.save(subs);
+        eventRepository.saveAll(events);
     }
 
     /**
@@ -118,21 +118,21 @@ public class EventService {
      */
     @Transactional
     public void sendHandshake(Long idSubscription) {
-        SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
+        Subs subs = subscriptionRepository.getById(idSubscription);
         // Genera el mensaje
-        Bundle bundle = eventMapper.toBundleHandshake(subscriptionDB);
+        Bundle bundle = eventMapper.toBundleHandshake(subs);
         String message = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 
         // Notifica al cliente
-        if (restClient.sendMessage(subscriptionDB.getEndpoint(), message)) {
+        if (restClient.sendMessage(subs.getEndpoint(), message)) {
             logger.info("Handshake satisfactorio para la subscripción con ID: {}", idSubscription);
-            subscriptionDB.setStatus(SubscriptionStatusCodes.ACTIVE.toCode());
+            subs.setStatus(SubscriptionStatusCodes.ACTIVE.toCode());
         } else {
             logger.info("Handshake erroneo para la subscripción con ID: {}", idSubscription);
-            subscriptionDB.setStatus(SubscriptionStatusCodes.ERROR.toCode());
+            subs.setStatus(SubscriptionStatusCodes.ERROR.toCode());
         }
 
-        subscriptionRepository.save(subscriptionDB);
+        subscriptionRepository.save(subs);
     }
 
     /**
@@ -146,22 +146,22 @@ public class EventService {
      */
     @Transactional
     public void sendHeartbeat(Long idSubscription) {
-        SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
+        Subs subs = subscriptionRepository.getById(idSubscription);
 
         // Genera el mensaje de notificación
-        Bundle bundle = eventMapper.toBundleHeartbeat(subscriptionDB);
+        Bundle bundle = eventMapper.toBundleHeartbeat(subs);
         String message = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 
         // Notifica al cliente
-        if (restClient.sendMessage(subscriptionDB.getEndpoint(), message)) {
+        if (restClient.sendMessage(subs.getEndpoint(), message)) {
             logger.info("Heartbeat satisfactorio para la subscripción con ID: {}", idSubscription);
-            subscriptionDB.setStatus(SubscriptionStatusCodes.ACTIVE.toCode());
+            subs.setStatus(SubscriptionStatusCodes.ACTIVE.toCode());
         } else {
             logger.info("Heartbeat erroneo para la subscripción con ID: {}", idSubscription);
-            subscriptionDB.setStatus(SubscriptionStatusCodes.ERROR.toCode());
+            subs.setStatus(SubscriptionStatusCodes.ERROR.toCode());
         }
 
-        subscriptionRepository.save(subscriptionDB);
+        subscriptionRepository.save(subs);
     }
 
 }

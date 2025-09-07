@@ -1,7 +1,6 @@
 package us.dit.fhirserver.service.services.fhir;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
@@ -11,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ca.uhn.fhir.context.FhirContext;
-import us.dit.fhirserver.service.entities.db.SubscriptionTopicDB;
-import us.dit.fhirserver.service.entities.domain.SubscriptionTopicDTO;
+import us.dit.fhirserver.service.entities.db.Topic;
 import us.dit.fhirserver.service.repositories.SubscriptionTopicRepository;
 import us.dit.fhirserver.service.services.mapper.SubscriptionTopicMapper;
 
@@ -37,7 +35,7 @@ public class SubscriptionTopicService {
      * 
      * @param fhirContext                 componente que contiene el contexto FHIR.
      * @param subscriptionTopicRepository repositorio JPA de la entidad
-     *                                    {@link SubscriptionTopicDB}.
+     *                                    {@link Topic}.
      * @param subscriptionTopicMapper     componente que transforma entidades,
      *                                    objetos del dominio y recursos FHIR
      *                                    relacionados con los temas de
@@ -62,10 +60,10 @@ public class SubscriptionTopicService {
         SubscriptionTopic subscriptionTopic = fhirContext.newJsonParser().parseResource(SubscriptionTopic.class,
                 message);
 
-        SubscriptionTopicDB subscriptionTopicDB = subscriptionTopicMapper.toEntity(subscriptionTopic);
-        subscriptionTopicDB = subscriptionTopicRepository.save(subscriptionTopicDB);
+        Topic topic = subscriptionTopicMapper.toEntity(subscriptionTopic);
+        topic = subscriptionTopicRepository.save(topic);
 
-        subscriptionTopic = subscriptionTopicMapper.toFhir(subscriptionTopicDB);
+        subscriptionTopic = subscriptionTopicMapper.toFhir(topic);
 
         return fhirContext.newJsonParser().encodeResourceToString(subscriptionTopic);
     }
@@ -78,8 +76,8 @@ public class SubscriptionTopicService {
      * @return información del tema de subscripción solicitado.
      */
     public String getTopic(Long idTopic) {
-        SubscriptionTopicDB subscriptionTopicDB = subscriptionTopicRepository.getById(idTopic);
-        SubscriptionTopic subscriptionTopic = subscriptionTopicMapper.toFhir(subscriptionTopicDB);
+        Topic topic = subscriptionTopicRepository.getById(idTopic);
+        SubscriptionTopic subscriptionTopic = subscriptionTopicMapper.toFhir(topic);
         return fhirContext.newJsonParser().encodeResourceToString(subscriptionTopic);
     }
 
@@ -90,13 +88,13 @@ public class SubscriptionTopicService {
      * @return información de todos los temas de subscripción.
      */
     public String getTopics() {
-        List<SubscriptionTopicDB> subscriptionTopicDBs = subscriptionTopicRepository.findAll();
+        List<Topic> topics = subscriptionTopicRepository.findAll();
 
         Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
-        for (SubscriptionTopicDB subscriptionTopicDB : subscriptionTopicDBs) {
-            SubscriptionTopic subscriptionTopic = subscriptionTopicMapper.toFhir(subscriptionTopicDB);
+        for (Topic topic : topics) {
+            SubscriptionTopic subscriptionTopic = subscriptionTopicMapper.toFhir(topic);
 
             BundleEntryComponent entry = new BundleEntryComponent();
             entry.setResource(subscriptionTopic);
@@ -122,32 +120,24 @@ public class SubscriptionTopicService {
 
     /**
      * Obtiene todos los temas de subscripción de la base de datos del servidor,
-     * creando un listado de objetos de dominio {@link SubscriptionTopicDTO} con la
-     * información correspondiente.
+     * creando un listado de objetos de dominio {@link Topic} con la información
+     * correspondiente.
      * 
      * @return información de todos los temas de subscripción.
      */
-    public List<SubscriptionTopicDTO> getTopicsDTO() {
-        List<SubscriptionTopicDB> subscriptionTopicDBs = subscriptionTopicRepository.findAll();
-
-        List<SubscriptionTopicDTO> subscriptionTopicDTOs = subscriptionTopicDBs.stream()
-                .map(subscriptionTopicMapper::toDTO).collect(Collectors.toList());
-
-        return subscriptionTopicDTOs;
+    public List<Topic> getTopicsDTO() {
+        return subscriptionTopicRepository.findAll();
     }
 
     /**
      * Obtiene un tema de subscripción de la base de datos del servidor, creando un
-     * objeto de dominio {@link SubscriptionTopicDTO} con la información
-     * correspondiente.
+     * objeto de dominio {@link Topic} con la información correspondiente.
      * 
      * @param idTopic identificador del tema de subscripción a obtener.
      * @return información del tema de subscripción solicitado.
      */
-    public SubscriptionTopicDTO getTopicDTO(Long idTopic) {
-        SubscriptionTopicDB subscriptionTopicDB = subscriptionTopicRepository.getById(idTopic);
-
-        return subscriptionTopicMapper.toDTO(subscriptionTopicDB);
+    public Topic getTopicDTO(Long idTopic) {
+        return subscriptionTopicRepository.getById(idTopic);
     }
 
 }

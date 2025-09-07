@@ -11,7 +11,7 @@
 <body>
 	<div th:replace="layout/topnav :: topnav"></div>
 	<div class="container">
-		<div th:replace="layout/header :: header('Servidores FHIR y Subscripciones','Administración de Servidores FHIR')"></div>
+		<div th:replace="layout/header :: header('Servidores FHIR y Suscripciones','Administración de Servidores FHIR')"></div>
 		<div class="d-flex justify-content-between align-items-center">
 			<h2>Servidores FHIR</h2>
 			<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addFhirServer">Agregar servidor</button>
@@ -34,7 +34,7 @@
 		            <td th:text="${fhirServer.queryOperations ? 'Sí' : 'No'}"></td>
 	                <td>
 						<a class="btn btn-info" th:href="@{/fhir/servers/{id}/subscriptions(id=${fhirServer.id})}"
-							 title="Configuración de Subscripciones">
+							 title="Configuración de Suscripciones">
 								<i class="fas fa-cog"></i>
 						</a>
 						<button type="button" class="btn btn-info" data-toggle="modal" data-target="#editFhirServer" 

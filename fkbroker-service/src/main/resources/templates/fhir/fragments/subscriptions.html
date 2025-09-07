@@ -31,7 +31,7 @@
 							</a>
                             <form th:action="@{/fhir/servers/{idServer}/subscriptions/{idSubs}/delete(idServer=${fhirServer.id},idSubs=${subscription.id})}"
 								method="post" th:id="'deleteSubscriptionForm-' + ${subscription.id}" style="display:inline;">
-                                	<button type="button" class="btn btn-danger" title="Eliminar Subscripción"
+                                	<button type="button" class="btn btn-danger" title="Eliminar Suscripción"
 										th:attr="onclick='messageConfirm(\'' + #{message.confirm.subscription} + '\', \'deleteSubscriptionForm-' + ${subscription.id} + '\')'">
 											<i class="fas fa-trash-alt"></i>
 									</button>
@@ -40,7 +40,7 @@
                     </tr>
                 </tbody>
             </table>
-			<p th:if="${#lists.isEmpty(subscriptions)}">No hay subscripciones disponibles</p>
+			<p th:if="${#lists.isEmpty(subscriptions)}">No hay suscripciones disponibles</p>
         </div>
 		
 		<!-- Cambio de icono -->

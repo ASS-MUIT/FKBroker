@@ -7,7 +7,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import us.dit.fhirserver.service.entities.db.SubscriptionDB;
+import us.dit.fhirserver.service.entities.db.Subs;
 import us.dit.fhirserver.service.repositories.SubscriptionRepository;
 import us.dit.fhirserver.service.services.fhir.EventService;
 import us.dit.fhirserver.service.services.fhir.SubscriptionSchedulerManager;
@@ -21,14 +21,14 @@ import us.dit.fhirserver.service.services.fhir.SubscriptionSchedulerManager;
  * @date Mar 2025
  */
 @Component
-public class BrokerRunner implements ApplicationRunner {
+public class ServerRunner implements ApplicationRunner {
 
     private final SubscriptionSchedulerManager subscriptionSchedulerManager;
     private final SubscriptionRepository subscriptionRepository;
     private final EventService eventService;
 
     @Autowired
-    public BrokerRunner(SubscriptionSchedulerManager subscriptionSchedulerManager,
+    public ServerRunner(SubscriptionSchedulerManager subscriptionSchedulerManager,
             SubscriptionRepository subscriptionRepository, EventService eventService) {
         this.subscriptionSchedulerManager = subscriptionSchedulerManager;
         this.subscriptionRepository = subscriptionRepository;
@@ -37,9 +37,9 @@ public class BrokerRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        List<SubscriptionDB> subscriptionDBs = subscriptionRepository.findAll();
+        List<Subs> subscriptionDBs = subscriptionRepository.findAll();
 
-        for (SubscriptionDB subscriptionDB : subscriptionDBs) {
+        for (Subs subscriptionDB : subscriptionDBs) {
             subscriptionSchedulerManager.iniciarTarea(subscriptionDB.getId(), subscriptionDB.getHeartbeatPeriod(),
                     () -> eventService.sendHeartbeat(subscriptionDB.getId()));
         }

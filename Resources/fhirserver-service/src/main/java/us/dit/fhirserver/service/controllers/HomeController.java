@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import us.dit.fhirserver.service.entities.db.Topic;
 import us.dit.fhirserver.service.entities.domain.EventDTO;
 import us.dit.fhirserver.service.entities.domain.EventsDTO;
 import us.dit.fhirserver.service.entities.domain.SubscriptionDTO;
-import us.dit.fhirserver.service.entities.domain.SubscriptionTopicDTO;
 import us.dit.fhirserver.service.services.fhir.EventService;
 import us.dit.fhirserver.service.services.fhir.SubscriptionService;
 import us.dit.fhirserver.service.services.fhir.SubscriptionTopicService;
@@ -73,7 +73,7 @@ public class HomeController {
     @GetMapping("/subscriptions")
     public String getSubscriptionsPage(Model model) {
 
-        List<SubscriptionTopicDTO> subscriptionTopics = subscriptionTopicService.getTopicsDTO();
+        List<Topic> subscriptionTopics = subscriptionTopicService.getTopicsDTO();
         List<SubscriptionDTO> subscriptions = subscriptionService.getSubscriptionsDTO();
 
         model.addAttribute("subscriptionTopics", subscriptionTopics);
@@ -95,7 +95,7 @@ public class HomeController {
     public String getEventsPage(Model model, @PathVariable Long idSubscription) {
 
         SubscriptionDTO subscription = subscriptionService.getSubscriptionDTO(idSubscription);
-        SubscriptionTopicDTO subscriptionTopic = subscriptionTopicService.getTopicDTO(subscription.getIdTopic());
+        Topic subscriptionTopic = subscriptionTopicService.getTopicDTO(subscription.getIdTopic());
         List<EventDTO> events = eventService.getEventsDTO(idSubscription);
 
         model.addAttribute("subscription", subscription);
@@ -119,9 +119,9 @@ public class HomeController {
     public String getEventFormPage(Model model, @PathVariable Long idSubscription, @RequestParam Long number) {
 
         SubscriptionDTO subscription = subscriptionService.getSubscriptionDTO(idSubscription);
-        SubscriptionTopicDTO subscriptionTopic = subscriptionTopicService.getTopicDTO(subscription.getIdTopic());
+        Topic subscriptionTopic = subscriptionTopicService.getTopicDTO(subscription.getIdTopic());
 
-        EventsDTO eventsDTO = new EventsDTO(idSubscription, (long) subscription.getLastEvent(), number);
+        EventsDTO eventsDTO = new EventsDTO((long) subscription.getLastEvent(), number);
 
         model.addAttribute("idSubscription", idSubscription);
         model.addAttribute("resource", subscriptionTopic.getResource());

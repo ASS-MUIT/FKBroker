@@ -16,7 +16,7 @@ import javax.persistence.ManyToOne;
  * @date May 2025
  */
 @Entity(name = "SUBSCRIPTIONS")
-public class SubscriptionDB {
+public class Subs {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,7 +32,7 @@ public class SubscriptionDB {
     private Integer lastEvent;
     @ManyToOne
     @JoinColumn(name = "ID_TOPIC")
-    private SubscriptionTopicDB topic;
+    private Topic topic;
 
     public Long getId() {
         return id;
@@ -74,11 +74,11 @@ public class SubscriptionDB {
         this.lastEvent = lastEvent;
     }
 
-    public SubscriptionTopicDB getTopic() {
+    public Topic getTopic() {
         return topic;
     }
 
-    public void setTopic(SubscriptionTopicDB topic) {
+    public void setTopic(Topic topic) {
         this.topic = topic;
     }
 }

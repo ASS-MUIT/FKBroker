@@ -3,8 +3,6 @@ package us.dit.fhirserver.service.services.fhir;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Enumerations.SubscriptionStatusCodes;
 import org.hl7.fhir.r5.model.OperationOutcome;
@@ -13,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ca.uhn.fhir.context.FhirContext;
-import us.dit.fhirserver.service.entities.db.EventDB;
-import us.dit.fhirserver.service.entities.db.SubscriptionDB;
-import us.dit.fhirserver.service.entities.db.SubscriptionTopicDB;
+import us.dit.fhirserver.service.entities.db.Event;
+import us.dit.fhirserver.service.entities.db.Subs;
+import us.dit.fhirserver.service.entities.db.Topic;
 import us.dit.fhirserver.service.entities.domain.SubscriptionDTO;
 import us.dit.fhirserver.service.repositories.EventRepository;
 import us.dit.fhirserver.service.repositories.SubscriptionRepository;
@@ -33,8 +31,6 @@ import us.dit.fhirserver.service.services.mapper.SubscriptionMapper;
 @Service
 public class SubscriptionService {
 
-    private static final Logger logger = LogManager.getLogger();
-
     private final FhirContext fhirContext;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionTopicRepository subscriptionTopicRepository;
@@ -51,11 +47,11 @@ public class SubscriptionService {
      * 
      * @param fhirContext                  componente que contiene el contexto FHIR.
      * @param subscriptionRepository       repositorio JPA de la entidad
-     *                                     {@link SubscriptionDB}.
+     *                                     {@link Subscription}.
      * @param subscriptionTopicRepository  repositorio JPA de la entidad
-     *                                     {@link SubscriptionTopicDB}.
+     *                                     {@link Topic}.
      * @param eventRepository              repositorio JPA de la entidad
-     *                                     {@link EventDB}.
+     *                                     {@link Event}.
      * @param SubscriptionMapper           componente que transforma entidades,
      *                                     objetos del dominio y recursos FHIR
      *                                     relacionados con las subscripciones.
@@ -98,20 +94,20 @@ public class SubscriptionService {
 
         String[] parts = subscription.getTopic().split("/");
         Long idSubscriptionTopic = Long.valueOf(parts[parts.length - 1]);
-        SubscriptionTopicDB subscriptionTopicDB = subscriptionTopicRepository.getById(idSubscriptionTopic);
+        Topic subscriptionTopicDB = subscriptionTopicRepository.getById(idSubscriptionTopic);
 
-        SubscriptionDB subscriptionDB = subscriptionMapper.toEntity(subscription, subscriptionTopicDB);
-        subscriptionDB = subscriptionRepository.save(subscriptionDB);
+        Subs subs = subscriptionMapper.toEntity(subscription, subscriptionTopicDB);
+        subs = subscriptionRepository.save(subs);
 
-        Long idSub = subscriptionDB.getId();
-        Integer heartbeatPeriod = subscriptionDB.getHeartbeatPeriod();
+        Long idSub = subs.getId();
+        Integer heartbeatPeriod = subs.getHeartbeatPeriod();
 
         // Programa una tarea para comprobar la conexión con el endpoint e inicia una
         // tarea programada para enviar los heartbeats
         subscriptionschedulerManager.programaTarea(() -> eventService.sendHandshake(idSub), 30);
         subscriptionschedulerManager.iniciarTarea(idSub, heartbeatPeriod, () -> eventService.sendHeartbeat(idSub));
 
-        subscription = subscriptionMapper.toSubscription(subscriptionDB);
+        subscription = subscriptionMapper.toSubscription(subs);
         return fhirContext.newJsonParser().encodeResourceToString(subscription);
     }
 
@@ -123,9 +119,9 @@ public class SubscriptionService {
      * @return información de la subscripción.
      */
     public String getSubscription(Long idSubscription) {
-        SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
+        Subs subs = subscriptionRepository.getById(idSubscription);
 
-        Subscription subscription = subscriptionMapper.toSubscription(subscriptionDB);
+        Subscription subscription = subscriptionMapper.toSubscription(subs);
 
         return fhirContext.newJsonParser().encodeResourceToString(subscription);
     }
@@ -137,9 +133,9 @@ public class SubscriptionService {
      * @return información de todas las subscripciones.
      */
     public String getSubscriptions() {
-        List<SubscriptionDB> subscriptionDBs = subscriptionRepository.findAll();
+        List<Subs> subscriptions = subscriptionRepository.findAll();
 
-        Bundle bundle = subscriptionMapper.toBundleSubscription(subscriptionDBs);
+        Bundle bundle = subscriptionMapper.toBundleSubscription(subscriptions);
 
         return fhirContext.newJsonParser().encodeResourceToString(bundle);
     }
@@ -173,19 +169,19 @@ public class SubscriptionService {
      * @return información de la subscripción actualizada.
      */
     public String updateSubscription(Long idSubscription) {
-        SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
-        subscriptionDB.setStatus(SubscriptionStatusCodes.REQUESTED.toCode());
-        subscriptionDB = subscriptionRepository.save(subscriptionDB);
+        Subs subs = subscriptionRepository.getById(idSubscription);
+        subs.setStatus(SubscriptionStatusCodes.REQUESTED.toCode());
+        subs = subscriptionRepository.save(subs);
 
-        Long idSub = subscriptionDB.getId();
-        Integer heartbeatPeriod = subscriptionDB.getHeartbeatPeriod();
+        Long idSub = subs.getId();
+        Integer heartbeatPeriod = subs.getHeartbeatPeriod();
 
         // Programa una tarea para comprobar la conexión con el endpoint e inicia una
         // tarea programada para enviar los heartbeats
         subscriptionschedulerManager.programaTarea(() -> eventService.sendHandshake(idSub), 30);
         subscriptionschedulerManager.iniciarTarea(idSub, heartbeatPeriod, () -> eventService.sendHeartbeat(idSub));
 
-        Subscription subscription = subscriptionMapper.toSubscription(subscriptionDB);
+        Subscription subscription = subscriptionMapper.toSubscription(subs);
 
         return fhirContext.newJsonParser().encodeResourceToString(subscription);
     }
@@ -198,9 +194,9 @@ public class SubscriptionService {
      * @return información del estado de la subscripción.
      */
     public String getStatus(Long idSubscription) {
-        SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
+        Subs subscription = subscriptionRepository.getById(idSubscription);
 
-        Bundle bundle = subscriptionMapper.toBundleStatus(subscriptionDB);
+        Bundle bundle = subscriptionMapper.toBundleStatus(subscription);
 
         return fhirContext.newJsonParser().encodeResourceToString(bundle);
     }
@@ -216,11 +212,11 @@ public class SubscriptionService {
      * @return información de los eventos de la subscripción solicitado.
      */
     public String getEvents(Long idSubscription, Long eventsSinceNumber, Long eventsUntilNumber) {
-        SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
-        List<EventDB> events = eventRepository.findByIdSubscriptionAndNumberBetweenOrderByNumber(
-                subscriptionDB.getId(), eventsSinceNumber, eventsUntilNumber);
+        Subs subs = subscriptionRepository.getById(idSubscription);
+        List<Event> events = eventRepository.findByIdSubscriptionAndNumberBetweenOrderByNumber(subs.getId(),
+                eventsSinceNumber, eventsUntilNumber);
 
-        Bundle bundle = subscriptionMapper.toBundleEvents(subscriptionDB, events);
+        Bundle bundle = subscriptionMapper.toBundleEvents(subs, events);
 
         return fhirContext.newJsonParser().encodeResourceToString(bundle);
     }
@@ -233,9 +229,9 @@ public class SubscriptionService {
      * @return un listado de objetos de dominio con la información correspondiente.
      */
     public List<SubscriptionDTO> getSubscriptionsDTO() {
-        List<SubscriptionDB> subscriptionDBs = subscriptionRepository.findAll();
+        List<Subs> subscriptions = subscriptionRepository.findAll();
 
-        List<SubscriptionDTO> subscriptionDTOs = subscriptionDBs.stream().map(subscriptionMapper::toDTO)
+        List<SubscriptionDTO> subscriptionDTOs = subscriptions.stream().map(subscriptionMapper::toDTO)
                 .collect(Collectors.toList());
 
         return subscriptionDTOs;
@@ -249,8 +245,8 @@ public class SubscriptionService {
      * @return información de la subscripción solicitada.
      */
     public SubscriptionDTO getSubscriptionDTO(Long idSubscription) {
-        SubscriptionDB subscriptionDB = subscriptionRepository.getById(idSubscription);
+        Subs subs = subscriptionRepository.getById(idSubscription);
 
-        return subscriptionMapper.toDTO(subscriptionDB);
+        return subscriptionMapper.toDTO(subs);
     }
 }

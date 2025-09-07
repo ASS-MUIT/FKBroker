@@ -17,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import us.dit.fhirserver.service.entities.db.EventDB;
-import us.dit.fhirserver.service.entities.db.SubscriptionDB;
-import us.dit.fhirserver.service.entities.db.SubscriptionTopicDB;
+import us.dit.fhirserver.service.entities.db.Event;
+import us.dit.fhirserver.service.entities.db.Subs;
+import us.dit.fhirserver.service.entities.db.Topic;
 import us.dit.fhirserver.service.entities.domain.SubscriptionDTO;
 
 /**
@@ -51,60 +51,59 @@ public class SubscriptionMapper {
 
     /**
      * Transforma un objeto un recurso FHIR {@link Subscription} y una entidad
-     * {@link SubscriptionTopicDB} en una entidad {@link SubscriptionDB}
+     * {@link Topic} en una entidad {@link Subs}
      * 
-     * @param subscription        recurso FHIR {@link Subscription}.
-     * @param SubscriptionTopicDB entidad {@link SubscriptionTopicDB}.
-     * @return la entidad {@link SubscriptionDB}.
+     * @param subscription recurso FHIR {@link Subscription}.
+     * @param topic        entidad {@link Topic}.
+     * @return la entidad {@link Subs}.
      */
-    public SubscriptionDB toEntity(Subscription subscription, SubscriptionTopicDB SubscriptionTopicDB) {
-        SubscriptionDB subscriptionDB = new SubscriptionDB();
+    public Subs toEntity(Subscription subscription, Topic topic) {
+        Subs subs = new Subs();
 
-        subscriptionDB.setEndpoint(subscription.getEndpoint());
-        subscriptionDB.setHeartbeatPeriod(subscription.getHeartbeatPeriod());
-        subscriptionDB.setStatus(SubscriptionStatusCodes.REQUESTED.toCode());
-        subscriptionDB.setLastEvent(0);
-        subscriptionDB.setTopic(SubscriptionTopicDB);
+        subs.setEndpoint(subscription.getEndpoint());
+        subs.setHeartbeatPeriod(subscription.getHeartbeatPeriod());
+        subs.setStatus(SubscriptionStatusCodes.REQUESTED.toCode());
+        subs.setLastEvent(0);
+        subs.setTopic(topic);
 
-        return subscriptionDB;
+        return subs;
     }
 
     /**
-     * Transforma una entidad {@link SubscriptionDB} en un objeto del dominio
+     * Transforma una entidad {@link Subs} en un objeto del dominio
      * {@link SubscriptionDTO}.
      * 
-     * @param eventDB entidad {@link SubscriptionDB}.
+     * @param subs entidad {@link Subs}.
      * @return el objeto del dominio {@link SubscriptionDTO}.
      */
-    public SubscriptionDTO toDTO(SubscriptionDB subscriptionDB) {
+    public SubscriptionDTO toDTO(Subs subs) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
 
-        subscriptionDTO.setId(subscriptionDB.getId());
-        subscriptionDTO.setEndpoint(subscriptionDB.getEndpoint());
-        subscriptionDTO.setHeartbeatPeriod(subscriptionDB.getHeartbeatPeriod());
-        subscriptionDTO.setIdTopic(subscriptionDB.getTopic().getId());
-        subscriptionDTO.setLastEvent(subscriptionDB.getLastEvent());
-        subscriptionDTO.setStatus(subscriptionDB.getStatus());
+        subscriptionDTO.setId(subs.getId());
+        subscriptionDTO.setEndpoint(subs.getEndpoint());
+        subscriptionDTO.setHeartbeatPeriod(subs.getHeartbeatPeriod());
+        subscriptionDTO.setIdTopic(subs.getTopic().getId());
+        subscriptionDTO.setLastEvent(subs.getLastEvent());
+        subscriptionDTO.setStatus(subs.getStatus());
 
         return subscriptionDTO;
     }
 
     /**
-     * Transforma una entidad {@link SubscriptionDB} en un recurso FHIR
-     * {@link Subscription}.
+     * Transforma una entidad {@link Subs} en un recurso FHIR {@link Subscription}.
      * 
-     * @param eventDB entidad {@link SubscriptionDB}.
+     * @param subs entidad {@link Subs}.
      * @return el recurso FHIR {@link Subscription}.
      */
-    public Subscription toSubscription(SubscriptionDB subscriptionDB) {
+    public Subscription toSubscription(Subs subs) {
         Subscription subscription = new Subscription();
 
         // Valores guardados en Base de datos
-        subscription.setId(subscriptionDB.getId().toString());
-        subscription.setStatus(SubscriptionStatusCodes.fromCode(subscriptionDB.getStatus()));
-        subscription.setEndpoint(subscriptionDB.getEndpoint());
-        subscription.setHeartbeatPeriod(subscriptionDB.getHeartbeatPeriod());
-        String urlTopic = fhirServerUrl + "/SubscriptionTopic/" + subscriptionDB.getTopic().getId().toString();
+        subscription.setId(subs.getId().toString());
+        subscription.setStatus(SubscriptionStatusCodes.fromCode(subs.getStatus()));
+        subscription.setEndpoint(subs.getEndpoint());
+        subscription.setHeartbeatPeriod(subs.getHeartbeatPeriod());
+        String urlTopic = fhirServerUrl + "/SubscriptionTopic/" + subs.getTopic().getId().toString();
         subscription.setTopic(urlTopic);
 
         // Valores simulados
@@ -118,18 +117,18 @@ public class SubscriptionMapper {
     }
 
     /**
-     * Transforma un listado de entidades {@link SubscriptionDB} en un recurso FHIR
+     * Transforma un listado de entidades {@link Subs} en un recurso FHIR
      * {@link Bundle}.
      * 
-     * @param subscriptionDBs listado de entidades {@link SubscriptionDB}.
+     * @param subscriptions listado de entidades {@link Subs}.
      * @return el recurso FHIR {@link Bundle}.
      */
-    public Bundle toBundleSubscription(List<SubscriptionDB> subscriptionDBs) {
+    public Bundle toBundleSubscription(List<Subs> subscriptions) {
         Bundle bundle = new Bundle();
         bundle.setType(BundleType.SEARCHSET);
 
-        for (SubscriptionDB subscriptionDB : subscriptionDBs) {
-            Subscription subscription = toSubscription(subscriptionDB);
+        for (Subs subs : subscriptions) {
+            Subscription subscription = toSubscription(subs);
 
             BundleEntryComponent entry = new BundleEntryComponent();
             entry.setResource(subscription);
@@ -140,24 +139,24 @@ public class SubscriptionMapper {
     }
 
     /**
-     * Transforma una entidad {@link SubscriptionDB} en un recurso FHIR
-     * {@link Bundle} del tipo QUERYSTATUS.
+     * Transforma una entidad {@link Subs} en un recurso FHIR {@link Bundle} del
+     * tipo QUERYSTATUS.
      * 
-     * @param subscriptionDB entidad {@link SubscriptionDB}.
+     * @param subs entidad {@link Subs}.
      * @return el recurso FHIR {@link Bundle}.
      */
-    public Bundle toBundleStatus(SubscriptionDB subscriptionDB) {
+    public Bundle toBundleStatus(Subs subs) {
         Bundle bundle = new Bundle();
         bundle.setType(BundleType.SUBSCRIPTIONNOTIFICATION);
 
         SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
-        subscriptionStatus.setStatus(SubscriptionStatusCodes.fromCode(subscriptionDB.getStatus()));
+        subscriptionStatus.setStatus(SubscriptionStatusCodes.fromCode(subs.getStatus()));
         subscriptionStatus.setType(SubscriptionNotificationType.QUERYSTATUS);
-        subscriptionStatus.setEventsSinceSubscriptionStart(subscriptionDB.getLastEvent());
-        String urlSubscription = fhirServerUrl + "/Subscription/" + subscriptionDB.getId().toString();
+        subscriptionStatus.setEventsSinceSubscriptionStart(subs.getLastEvent());
+        String urlSubscription = fhirServerUrl + "/Subscription/" + subs.getId().toString();
         Reference reference = new Reference(urlSubscription);
         subscriptionStatus.setSubscription(reference);
-        String urlTopic = fhirServerUrl + "/SubscriptionTopic/" + subscriptionDB.getTopic().getId().toString();
+        String urlTopic = fhirServerUrl + "/SubscriptionTopic/" + subs.getTopic().getId().toString();
         subscriptionStatus.setTopic(urlTopic);
 
         BundleEntryComponent entry = new BundleEntryComponent();
@@ -168,30 +167,30 @@ public class SubscriptionMapper {
     }
 
     /**
-     * Transforma una entidad {@link SubscriptionDB} y un listado de entidades
-     * {@link EventDB} en un recurso FHIR {@link Bundle} del tipo QUERYEVENT.
+     * Transforma una entidad {@link Subs} y un listado de entidades {@link Event}
+     * en un recurso FHIR {@link Bundle} del tipo QUERYEVENT.
      * 
-     * @param subscriptionDB entidad {@link SubscriptionDB}.
-     * @param events         listado de entidades {@link EventDB}.
+     * @param subs   entidad {@link Subs}.
+     * @param events listado de entidades {@link Event}.
      * @return el recurso FHIR {@link Bundle}.
      */
-    public Bundle toBundleEvents(SubscriptionDB subscriptionDB, List<EventDB> events) {
-        SubscriptionTopicDB subscriptionTopicDB = subscriptionDB.getTopic();
+    public Bundle toBundleEvents(Subs subs, List<Event> events) {
+        Topic subscriptionTopicDB = subs.getTopic();
 
         Bundle bundle = new Bundle();
         bundle.setType(BundleType.SUBSCRIPTIONNOTIFICATION);
 
         SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
-        subscriptionStatus.setStatus(SubscriptionStatusCodes.fromCode(subscriptionDB.getStatus()));
+        subscriptionStatus.setStatus(SubscriptionStatusCodes.fromCode(subs.getStatus()));
         subscriptionStatus.setType(SubscriptionNotificationType.QUERYEVENT);
-        subscriptionStatus.setEventsSinceSubscriptionStart(subscriptionDB.getLastEvent());
-        String urlSubscription = fhirServerUrl + "/Subscription/" + subscriptionDB.getId().toString();
+        subscriptionStatus.setEventsSinceSubscriptionStart(subs.getLastEvent());
+        String urlSubscription = fhirServerUrl + "/Subscription/" + subs.getId().toString();
         Reference reference = new Reference(urlSubscription);
         subscriptionStatus.setSubscription(reference);
         String urlTopic = fhirServerUrl + "/SubscriptionTopic/" + subscriptionTopicDB.getId().toString();
         subscriptionStatus.setTopic(urlTopic);
 
-        for (EventDB event : events) {
+        for (Event event : events) {
             SubscriptionStatusNotificationEventComponent notificationEvent = eventMapper.toNotificationEvent(event,
                     subscriptionTopicDB.getResource());
             subscriptionStatus.addNotificationEvent(notificationEvent);

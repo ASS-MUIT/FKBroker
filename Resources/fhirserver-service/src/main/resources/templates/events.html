@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 	<head>
-	    <title>Gestión de eventos</title>
+	    <title>Configuración</title>
 	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	    <meta name="viewport" content="width=device-width, initial-scale=1">
 	    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
 	<body>
 		<div th:replace="layout/topnav :: topnav"></div>
 		<div class="container">
-			<div th:replace="layout/header :: header('Eventos','Administración de Eventos')"></div>
+			<div th:replace="layout/header :: header('Configuración','Administración de eventos')"></div>
 		
 		    <div class="row">
 				<div class="col-12 mb-3">
@@ -66,25 +66,23 @@
 			        <!-- Listado de Eventos -->
 					<div class="d-flex justify-content-between align-items-center mt-3">
 						<h2>Eventos</h2>
-						<button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalEvent">Enviar notificaciones</button>
+						<button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalEvent">Simular notificación de eventos</button>
 					</div>
-			        <table class="table mt-3">
+			        <table th:if="${not #lists.isEmpty(events)}" class="table mt-3">
 			            <thead>
 			                <tr>
-								<th>ID</th>
-			                    <th>Número</th>
-								<th>ID Recurso</th>
+			                    <th>Número del evento</th>
+								<th>Identificador del recurso</th>
 			                </tr>
 			            </thead>
 			            <tbody>
 			                <tr th:each="event : ${events}">
-								<td th:text="${event.id}"></td>
 			                    <td th:text="${event.number}"></td>
 								<td th:text="${event.idResource}"></td>
 			                </tr>
 			            </tbody>
 			        </table>
-					
+					<p th:if="${#lists.isEmpty(events)}">No hay eventos simulados</p>
 				</div>
 		    </div>
 			
@@ -96,20 +94,20 @@
 		        <div class="modal-content">
 		            <form th:action="@{/subscriptions/{id}/events(id=${subscription.id})}" method="post">
 		                <div class="modal-header">
-		                    <h5 class="modal-title" id="modalLabel">Enviar notificaciones</h5>
+		                    <h5 class="modal-title" id="modalLabel">Simular notificación de eventos</h5>
 		                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		                        <span aria-hidden="true">&times;</span>
 		                    </button>
 		                </div>
 		                <div class="modal-body">
 		                    <div class="form-group">
-		                        <label for="number">¿Cuantas notificaciones desea generar?</label>
+		                        <label for="number">¿Cuántos eventos desea que tenga la notificación?</label>
 		                        <input type="number" class="form-control" id="number" name="number" required>
 		                    </div>
 		                </div>
 		                <div class="modal-footer">
 		                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-		                    <button type="submit" class="btn btn-primary">Generar</button>
+		                    <button type="submit" class="btn btn-primary">Generar notificación</button>
 		                </div>
 		            </form>
 		        </div>

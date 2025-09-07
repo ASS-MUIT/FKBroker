@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import us.dit.fkbroker.service.entities.domain.FhirServerDetails;
+import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
 
 /**
@@ -48,7 +48,7 @@ public class FhirServerController {
     @GetMapping
     public String getKieServers(Model model) {
         // Obtiene los datos de los servidores FHIR y los añade al modelo
-        List<FhirServerDetails> fhirServers = fhirServerService.getAllFhirServersDetails();
+        List<FhirServer> fhirServers = fhirServerService.getAllFhirServers();
         model.addAttribute("fhirServers", fhirServers);
 
         return "fhir/servers";
@@ -61,7 +61,7 @@ public class FhirServerController {
      * @return una redirección a la página principal de gestión FHIR.
      */
     @PostMapping
-    public String addKieServer(@ModelAttribute FhirServerDetails fhirServer) {
+    public String addKieServer(@ModelAttribute FhirServer fhirServer) {
         fhirServerService.saveFhirServer(fhirServer);
         return "redirect:/fhir/servers";
     }

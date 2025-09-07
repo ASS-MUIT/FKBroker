@@ -7,8 +7,7 @@ import org.hl7.fhir.r5.model.SubscriptionTopic.SubscriptionTopicResourceTriggerC
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import us.dit.fhirserver.service.entities.db.SubscriptionTopicDB;
-import us.dit.fhirserver.service.entities.domain.SubscriptionTopicDTO;
+import us.dit.fhirserver.service.entities.db.Topic;
 
 /**
  * Componente que transforma entidades, objetos del dominio y recursos FHIR
@@ -26,62 +25,44 @@ public class SubscriptionTopicMapper {
 
     /**
      * Transforma un objeto un recurso FHIR {@link SubscriptionTopic} en una entidad
-     * {@link SubscriptionTopicDB}
+     * {@link Topic}
      * 
      * @param subscription recurso FHIR {@link SubscriptionTopic}.
-     * @return la entidad {@link SubscriptionTopicDB}.
+     * @return la entidad {@link Topic}.
      */
-    public SubscriptionTopicDB toEntity(SubscriptionTopic subscriptionTopic) {
-        SubscriptionTopicDB subscriptionTopicDB = new SubscriptionTopicDB();
+    public Topic toEntity(SubscriptionTopic subscriptionTopic) {
+        Topic topic = new Topic();
 
-        subscriptionTopicDB.setName(subscriptionTopic.getTitle());
-        subscriptionTopicDB.setResource(subscriptionTopic.getResourceTriggerFirstRep().getResource());
-        subscriptionTopicDB.setOperation(
+        topic.setName(subscriptionTopic.getTitle());
+        topic.setResource(subscriptionTopic.getResourceTriggerFirstRep().getResource());
+        topic.setOperation(
                 subscriptionTopic.getResourceTriggerFirstRep().getSupportedInteraction().get(0).asStringValue());
 
-        return subscriptionTopicDB;
+        return topic;
     }
 
     /**
-     * Transforma una entidad {@link subscriptionTopicDB} en un objeto del dominio
-     * {@link SubscriptionTopicDTO}.
-     * 
-     * @param eventDB entidad {@link subscriptionTopicDB}.
-     * @return el objeto del dominio {@link SubscriptionTopicDTO}.
-     */
-    public SubscriptionTopicDTO toDTO(SubscriptionTopicDB subscriptionTopicDB) {
-        SubscriptionTopicDTO subscriptionTopicDTO = new SubscriptionTopicDTO();
-
-        subscriptionTopicDTO.setId(subscriptionTopicDB.getId());
-        subscriptionTopicDTO.setName(subscriptionTopicDB.getName());
-        subscriptionTopicDTO.setOperation(subscriptionTopicDB.getOperation());
-        subscriptionTopicDTO.setResource(subscriptionTopicDB.getResource());
-
-        return subscriptionTopicDTO;
-    }
-
-    /**
-     * Transforma una entidad {@link SubscriptionTopicDB} en un recurso FHIR
+     * Transforma una entidad {@link Topic} en un recurso FHIR
      * {@link SubscriptionTopic}.
      * 
-     * @param eventDB entidad {@link SubscriptionTopicDB}.
+     * @param eventDB entidad {@link Topic}.
      * @return el recurso FHIR {@link SubscriptionTopic}.
      */
-    public SubscriptionTopic toFhir(SubscriptionTopicDB subscriptionTopicDB) {
+    public SubscriptionTopic toFhir(Topic topic) {
         SubscriptionTopic subscriptionTopic = new SubscriptionTopic();
 
         // Valores guardados
-        subscriptionTopic.setId(subscriptionTopicDB.getId().toString());
-        subscriptionTopic.setTitle(subscriptionTopicDB.getName());
-        subscriptionTopic.setDescription(subscriptionTopicDB.getName());
+        subscriptionTopic.setId(topic.getId().toString());
+        subscriptionTopic.setTitle(topic.getName());
+        subscriptionTopic.setDescription(topic.getName());
 
-        String urlTopic = fhirServerUrl + "/SubscriptionTopic/" + subscriptionTopicDB.getId().toString();
+        String urlTopic = fhirServerUrl + "/SubscriptionTopic/" + topic.getId().toString();
         subscriptionTopic.setUrl(urlTopic);
 
         SubscriptionTopicResourceTriggerComponent triggerComponent = new SubscriptionTopicResourceTriggerComponent();
-        triggerComponent.setDescription(subscriptionTopicDB.getName());
-        triggerComponent.setResource(subscriptionTopicDB.getResource());
-        triggerComponent.addSupportedInteraction(InteractionTrigger.fromCode(subscriptionTopicDB.getOperation()));
+        triggerComponent.setDescription(topic.getName());
+        triggerComponent.setResource(topic.getResource());
+        triggerComponent.addSupportedInteraction(InteractionTrigger.fromCode(topic.getOperation()));
         subscriptionTopic.addResourceTrigger(triggerComponent);
 
         // Valores simulados

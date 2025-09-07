@@ -17,12 +17,11 @@ public class EventsDTO {
     public EventsDTO() {
     }
 
-    public EventsDTO(Long idSubscription, Long lastEvent, Long number) {
+    public EventsDTO(Long lastEvent, Long number) {
         events = new ArrayList<EventDTO>();
 
         for (int i = 0; i < number; i++) {
             EventDTO event = new EventDTO();
-            event.setIdSubscription(idSubscription);
             event.setNumber(lastEvent + i + 1);
             events.add(event);
         }

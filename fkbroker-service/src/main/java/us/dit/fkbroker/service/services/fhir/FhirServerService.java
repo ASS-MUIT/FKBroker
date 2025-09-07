@@ -2,7 +2,6 @@ package us.dit.fkbroker.service.services.fhir;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,9 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
-import us.dit.fkbroker.service.entities.domain.FhirServerDetails;
 import us.dit.fkbroker.service.repositories.FhirServerRepository;
-import us.dit.fkbroker.service.services.mapper.FhirServerMapper;
 
 /**
  * Servicio para gestionar las operaciones sobre los servidores FHIR.
@@ -27,7 +24,6 @@ public class FhirServerService {
     private final SubscriptionService subscriptionService;
     private final SubscriptionTopicService subscriptionTopicService;
     private final FhirServerRepository fhirServerRepository;
-    private final FhirServerMapper fhirServerMapper;
 
     /**
      * Constructor que inyecta el repositorio {@link FhirServerRepository} y el
@@ -40,11 +36,10 @@ public class FhirServerService {
      */
     @Autowired
     public FhirServerService(SubscriptionService subscriptionService, SubscriptionTopicService subscriptionTopicService,
-            FhirServerRepository fhirServerRepository, FhirServerMapper fhirServerMapper) {
+            FhirServerRepository fhirServerRepository) {
         this.subscriptionService = subscriptionService;
         this.subscriptionTopicService = subscriptionTopicService;
         this.fhirServerRepository = fhirServerRepository;
-        this.fhirServerMapper = fhirServerMapper;
     }
 
     /**
@@ -75,15 +70,6 @@ public class FhirServerService {
     }
 
     /**
-     * Obtiene todos los servidores FHIR guardadeos en la base de datos.
-     * 
-     * @return una lista de objetos {@link FhirServerDetails}.
-     */
-    public List<FhirServerDetails> getAllFhirServersDetails() {
-        return getAllFhirServers().stream().map(fhirServerMapper::toDetails).collect(Collectors.toList());
-    }
-
-    /**
      * Obtiene todos los servidores FHIR guardadeos en la base de datos con el campo
      * Heartbeat a TRUE
      * 
@@ -96,11 +82,10 @@ public class FhirServerService {
     /**
      * Guarda un servidor FHIR en la base de datos.
      * 
-     * @param serverDetails servidor FHIR a guardar.
+     * @param server servidor FHIR a guardar.
      */
-    public void saveFhirServer(FhirServerDetails serverDetails) {
-        FhirServer server = fhirServerMapper.toEntity(serverDetails);
-        server = fhirServerRepository.save(server);
+    public void saveFhirServer(FhirServer server) {
+        fhirServerRepository.save(server);
     }
 
     /**

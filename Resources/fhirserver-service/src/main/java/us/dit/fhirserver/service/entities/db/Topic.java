@@ -14,7 +14,7 @@ import javax.persistence.Id;
  * @date May 2025
  */
 @Entity(name = "TOPICS")
-public class SubscriptionTopicDB {
+public class Topic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

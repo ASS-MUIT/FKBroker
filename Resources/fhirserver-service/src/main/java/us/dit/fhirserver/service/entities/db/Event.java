@@ -14,7 +14,7 @@ import javax.persistence.Id;
  * @date May 2025
  */
 @Entity(name = "EVENTS")
-public class EventDB {
+public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
