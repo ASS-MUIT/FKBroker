@@ -2,16 +2,16 @@
 
 ## Descripción
 
-Este proyecto es una aplicación para simular la gestión de suscripciones de un servidor FHIR. La aplicación permite gestionar subscripciones y temas de subscripción a través de operaciones REST, visualizar y gestionar eventos de las subscripciónes a través de una interfaz web.
+Este proyecto es una aplicación para simular la gestión de suscripciones de un servidor FHIR. La aplicación permite gestionar suscripciones y temas de suscripción a través de operaciones REST, así como visualizar y gestionar eventos de las suscripciones a través de una interfaz web.
 
 ## Características
 
-- Gestión de subscripciones mediante API REST.
-- Gestión de temas de subscripción mediante API REST.
+- Gestión de suscripciones mediante API REST.
+- Gestión de temas de suscripción mediante API REST.
 - Implementación de operaciones especiales $status y $events.
 - Implementación de mensajes de handshake y heartbeat.
-- Visualización de suscripciones y temas de subscripción mediante interfaz web.
-- Viasualización y creación personalizada de eventos de subscripciones mediante interfaz web.
+- Visualización de suscripciones y temas de suscripción mediante interfaz web.
+- Visualización y creación personalizada de eventos de suscripción mediante interfaz web.
 
 ## Requisitos
 
