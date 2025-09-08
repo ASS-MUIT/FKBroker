@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<!-- Ayuda con edici�n html https://www.w3schools.com/howto/default.asp -->
 <html>
-<head>
-<meta charset="ISO-8859-1">
-<link rel="stylesheet" href="/form-styles.css">
-<title th:text="#{error.title}"></title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body>
-<div th:replace="layout/topnav :: topnav"></div>
-<p th:text="#{error.info}">Error Code</p>
-<p th:text="${status}">task<p>
-</body>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<title th:text="#{error.title}"></title>
+		<link rel="stylesheet" href="/form-styles.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div th:replace="layout/topnav :: topnav"></div>
+		<div class="container">
+			<div th:replace="layout/header :: header('Información de error','Código del error recibido')"></div>
+			<h1 th:text="${status}">Error</h1>
+			<p><span th:text="${error}"></span></p>
+		</div>
+	</body>
 </html>

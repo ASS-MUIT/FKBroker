@@ -14,6 +14,9 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.repositories;
 
@@ -32,5 +35,5 @@ import us.dit.fkbroker.service.entities.db.Signal;
  * @date Mar 2025
  */
 public interface SignalRepository extends JpaRepository<Signal, Long> {
-    Optional<Signal> findByResourceAndInteraction(String resource, String interaction);
+    Optional<Signal> findByIdTrigger(Long idTrigger);
 }

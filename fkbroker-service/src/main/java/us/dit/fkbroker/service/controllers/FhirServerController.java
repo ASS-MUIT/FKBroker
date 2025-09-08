@@ -1,7 +1,26 @@
+/**
+*  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*
+*  FKBroker is free software: you can redistribute it and/or
+*  modify it under the terms of the GNU General Public License as published
+*  by the Free Software Foundation, either version 3 of the License, or (at
+*  your option) any later version.
+*
+*  FKBroker is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+*  Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License along
+*  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
+**/
 package us.dit.fkbroker.service.controllers;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,9 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
-import us.dit.fkbroker.service.entities.domain.FhirServerDetails;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
-import us.dit.fkbroker.service.services.mapper.FhirServerMapper;
 
 /**
  * Controlador para gestionar las operaciones sobre los servidores FHIR.
@@ -29,43 +46,42 @@ import us.dit.fkbroker.service.services.mapper.FhirServerMapper;
 public class FhirServerController {
 
     private final FhirServerService fhirServerService;
-    private final FhirServerMapper fhirServerMapper;
 
     /**
      * Constructor que inyecta el servicio {@link FhirServerService}.
      * 
-     * @param fhirServerService servicio para gestionar los servidores FHIR.
+     * @param fhirServerService servicio utilizado para gestionar los servidores
+     *                          FHIR.
      */
     @Autowired
-    public FhirServerController(FhirServerService fhirServerService, FhirServerMapper fhirServerMapper) {
+    public FhirServerController(FhirServerService fhirServerService) {
         this.fhirServerService = fhirServerService;
-        this.fhirServerMapper = fhirServerMapper;
     }
 
     /**
-     * Maneja las solicitudes GET para obtener la lista de servidores FHIR.
+     * Maneja las solicitudes GET de la página principal de gestión FHIR. Obtiene la
+     * lista de servidores FHIR.
      * 
      * @param model el modelo de Spring para añadir atributos.
-     * @return el nombre de la vista "fhirServers".
+     * @return el nombre de la vista de la página principal de gestión FHIR.
      */
     @GetMapping
     public String getKieServers(Model model) {
-        List<FhirServer> servers = fhirServerService.getAllFhirServers();
-        List<FhirServerDetails> serversDetails = servers.stream().map(fhirServerMapper::toDTO)
-                .collect(Collectors.toList());
+        // Obtiene los datos de los servidores FHIR y los añade al modelo
+        List<FhirServer> fhirServers = fhirServerService.getAllFhirServers();
+        model.addAttribute("fhirServers", fhirServers);
 
-        model.addAttribute("fhirServers", serversDetails);
         return "fhir/servers";
     }
 
     /**
      * Maneja las solicitudes POST para añadir o editar un servidor FHIR.
      * 
-     * @param fhirServer el servidor que se desea añadir o editar.
-     * @return una redirección a la página de servidores FHIR.
+     * @param fhirServer servidor FHIR que se desea añadir o editar.
+     * @return una redirección a la página principal de gestión FHIR.
      */
     @PostMapping
-    public String addKieServer(@ModelAttribute FhirServerDetails fhirServer) {
+    public String addKieServer(@ModelAttribute FhirServer fhirServer) {
         fhirServerService.saveFhirServer(fhirServer);
         return "redirect:/fhir/servers";
     }
@@ -73,8 +89,8 @@ public class FhirServerController {
     /**
      * Maneja las solicitudes POST para eliminar un servidor FHIR.
      * 
-     * @param url la URL del servidor FHIR a eliminar.
-     * @return una redirección a la página de servidores FHIR.
+     * @param id identificador del servidor FHIR a eliminar.
+     * @return una redirección a la página principal de gestión FHIR.
      */
     @PostMapping("/{id}/delete")
     public String deleteKieServer(@PathVariable Long id) {

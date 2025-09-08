@@ -14,9 +14,13 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.entities.db;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -32,14 +36,17 @@ import javax.persistence.Id;
  * @version 1.1
  * @date Mar 2025
  */
-@Entity
+@Entity(name = "SIGNALS")
 public class Signal {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
     private long id;
-    private String resource;
-    private String interaction;
-    private String signalName;
+    @Column(name = "NAME")
+    private String name;
+    @Column(name = "ID_TRIGGER")
+    private Long idTrigger;
 
     public long getId() {
         return id;
@@ -49,28 +56,20 @@ public class Signal {
         this.id = id;
     }
 
-    public String getResource() {
-        return resource;
+    public String getName() {
+        return name;
     }
 
-    public void setResource(String resource) {
-        this.resource = resource;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getInteraction() {
-        return interaction;
+    public Long getIdTrigger() {
+        return idTrigger;
     }
 
-    public void setInteraction(String interaction) {
-        this.interaction = interaction;
-    }
-
-    public String getSignalName() {
-        return signalName;
-    }
-
-    public void setSignalName(String signalName) {
-        this.signalName = signalName;
+    public void setIdTrigger(Long idTrigger) {
+        this.idTrigger = idTrigger;
     }
 
 }

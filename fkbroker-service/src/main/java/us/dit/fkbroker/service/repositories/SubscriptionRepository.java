@@ -14,6 +14,9 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.repositories;
 
@@ -29,11 +32,10 @@ import us.dit.fkbroker.service.entities.db.SubscriptionData;
  * 
  * @author josperbel
  * @version 1.0
- * @date Abr 2025
+ * @date May 2025
  */
 public interface SubscriptionRepository extends JpaRepository<SubscriptionData, Long> {
-
-    void deleteByServerAndSubscription(FhirServer server, String subscription);
+    void deleteByServerAndIdSubscription(FhirServer server, String idSubscription);
 
     List<SubscriptionData> findByServerId(Long serverId);
 }

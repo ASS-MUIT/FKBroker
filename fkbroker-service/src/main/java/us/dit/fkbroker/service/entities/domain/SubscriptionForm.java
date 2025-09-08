@@ -14,6 +14,9 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.entities.domain;
 
@@ -31,10 +34,9 @@ import java.util.List;
  */
 public class SubscriptionForm {
 
-    private String topicUrl;
+    private String idTopic;
+    private String urlTopic;
     private String payload;
-    private String resource;
-    private String interaction;
     private List<FilterDetail> filters;
 
     public SubscriptionForm() {
@@ -42,9 +44,8 @@ public class SubscriptionForm {
     }
 
     public SubscriptionForm(SubscriptionTopicDetails topic) {
-        topicUrl = topic.getUrl();
-        resource = topic.getResource();
-        interaction = topic.getInteraction();
+        idTopic = topic.getId();
+        urlTopic = topic.getUrl();
 
         filters = new ArrayList<SubscriptionForm.FilterDetail>();
 
@@ -56,12 +57,20 @@ public class SubscriptionForm {
         }
     }
 
-    public String getTopicUrl() {
-        return topicUrl;
+    public String getIdTopic() {
+        return idTopic;
     }
 
-    public void setTopicUrl(String topicUrl) {
-        this.topicUrl = topicUrl;
+    public void setIdTopic(String idTopic) {
+        this.idTopic = idTopic;
+    }
+
+    public String getUrlTopic() {
+        return urlTopic;
+    }
+
+    public void setUrlTopic(String urlTopic) {
+        this.urlTopic = urlTopic;
     }
 
     public String getPayload() {
@@ -70,22 +79,6 @@ public class SubscriptionForm {
 
     public void setPayload(String payload) {
         this.payload = payload;
-    }
-
-    public String getResource() {
-        return resource;
-    }
-
-    public void setResource(String resource) {
-        this.resource = resource;
-    }
-
-    public String getInteraction() {
-        return interaction;
-    }
-
-    public void setInteraction(String interaction) {
-        this.interaction = interaction;
     }
 
     public List<FilterDetail> getFilters() {

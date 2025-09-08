@@ -14,9 +14,13 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.entities.db;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -29,8 +33,16 @@ import javax.persistence.Id;
  * @version 1.1
  * @date Mar 2025
  */
-@Entity
+@Entity(name = "KIE_SERVERS")
 public class KieServer {
+
+    @Id
+    @Column(name = "URL")
+    private String url;
+    @Column(name = "USER_NAME")
+    private String usu;
+    @Column(name = "PASSWORD")
+    private String pwd;
 
     public KieServer() {
         super();
@@ -42,11 +54,6 @@ public class KieServer {
         this.usu = usu;
         this.pwd = pwd;
     }
-
-    @Id
-    private String url;
-    private String usu;
-    private String pwd;
 
     public String getUrl() {
         return url;

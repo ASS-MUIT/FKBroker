@@ -14,13 +14,14 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.controllers;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.hl7.fhir.r5.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,13 +33,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
-import us.dit.fkbroker.service.entities.db.SubscriptionData;
-import us.dit.fkbroker.service.entities.domain.SubscriptionDetails;
+import us.dit.fkbroker.service.entities.db.Topic;
+import us.dit.fkbroker.service.entities.domain.SubscriptionEntry;
 import us.dit.fkbroker.service.entities.domain.SubscriptionForm;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
+import us.dit.fkbroker.service.entities.domain.SubscriptionTopicEntry;
 import us.dit.fkbroker.service.services.fhir.FhirServerService;
 import us.dit.fkbroker.service.services.fhir.FhirService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionService;
+import us.dit.fkbroker.service.services.fhir.SubscriptionTopicService;
 
 /**
  * Controlador que gestiona las llamadas a los métodos necesarios al navegar por
@@ -56,26 +59,120 @@ import us.dit.fkbroker.service.services.fhir.SubscriptionService;
 @RequestMapping("/fhir/servers/{idServer}/subscriptions")
 public class SubscriptionController {
 
-    private final FhirService fhirService;
-    private final SubscriptionService subscriptionService;
     private final FhirServerService fhirServerService;
+    private final SubscriptionService subscriptionService;
+    private final SubscriptionTopicService subscriptionTopicService;
 
     /**
-     * Constructor que inyecta los servicios {@link FhirService},
-     * {@link SubscriptionService} y {@link FhirServerService}.
+     * Constructor que inyecta los servicios {@link FhirServerService},
+     * {@link SubscriptionService} y {@link SubscriptionTopicService}.
      * 
-     * @param fhirService         servicio para gestionar operaciones que se
-     *                            realizan sobre elementos FHIR.
-     * @param subscriptionService servicio para gestionar las operaciones sobre las
-     *                            entidades {@link Subscription}.
-     * @param fhirServerService   servicio para gestionar los servidores FHIR.
+     * @param fhirServerService        servicio utilizado para gestionar los
+     *                                 servidores FHIR.
+     * @param subscriptionService      servicio utilizado para gestionar las
+     *                                 subscripciones.
+     * @param subscriptionTopicService servicio utilizado para gestionar los temas
+     *                                 de las subscripciones.
      */
     @Autowired
-    public SubscriptionController(FhirService fhirService, SubscriptionService subscriptionService,
-            FhirServerService fhirServerService) {
-        this.fhirService = fhirService;
-        this.subscriptionService = subscriptionService;
+    public SubscriptionController(FhirServerService fhirServerService, SubscriptionService subscriptionService,
+            SubscriptionTopicService subscriptionTopicService) {
         this.fhirServerService = fhirServerService;
+        this.subscriptionService = subscriptionService;
+        this.subscriptionTopicService = subscriptionTopicService;
+    }
+
+    /**
+     * Maneja las solicitudes GET para obtener la página principal de un servidor
+     * FHIR.
+     * 
+     * @param model    el modelo de Spring para añadir atributos.
+     * @param idServer identificador del servidor FHIR.
+     * @return el nombre de la vista "subscriptions-manager".
+     */
+    @GetMapping
+    public String getAndUpdateSubscriptionsAndTopics(Model model, @PathVariable Long idServer) {
+        // Obtiene los datos del servidor FHIR y los añade al modelo
+        FhirServer server = fhirServerService.getFhirServer(idServer);
+        model.addAttribute("fhirServer", server);
+
+        // Obtiene los datos de los SubscriptionTopics, guardando en la base de datos
+        // aquellos que no se encuentren, y los añade al modelo
+        List<SubscriptionTopicEntry> topics = subscriptionTopicService.getAndUpdateSubscriptionTopics(server);
+        model.addAttribute("subscriptionTopics", topics);
+
+        // Obtiene los datos de los Subscriptions, actualizando el estado si detecta
+        // errores o eventos perdidos, y los añade al modelo
+        List<SubscriptionEntry> subscriptions = subscriptionService.getAndUpdateSubscriptions(server);
+        model.addAttribute("subscriptions", subscriptions);
+
+        return "fhir/subscriptions-manager";
+    }
+
+    /**
+     * Maneja las solicitudes POST para crear una nueva suscripción.
+     * 
+     * @param model    el modelo de Spring para añadir atributos.
+     * @param idServer identificador del servidor FHIR.
+     * @param idTopic  identificador del tema de subscripción al que se desea
+     *                 subscribirse.
+     * @return el nombre de la vista "subscription-form".
+     */
+    @PostMapping("/form")
+    public String subscriptionForm(Model model, @PathVariable Long idServer, @RequestParam String idTopic) {
+        // Obtiene los datos del servidor FHIR y los añade al modelo
+        FhirServer server = fhirServerService.getFhirServer(idServer);
+        model.addAttribute("fhirServer", server);
+
+        // Obtiene los detalles del SubscriptionTopic y los añade al modelo
+        SubscriptionTopicDetails topic = subscriptionTopicService.getSubscriptionTopicDetails(server.getUrl(), idTopic);
+        model.addAttribute("topic", topic);
+
+        // Crea la entidad SubscriptionForm base y la añade al modelo
+        SubscriptionForm subscriptionForm = new SubscriptionForm(topic);
+        model.addAttribute("subscriptionForm", subscriptionForm);
+
+        return "fhir/subscription-form";
+    }
+
+    /**
+     * Maneja las solicitudes POST para eliminar una suscripción.
+     * 
+     * @param idServer identificador del servidor FHIR.
+     * @param idSubs   identificador de la subscripción.
+     * @return una redirección a la página principal.
+     */
+    @PostMapping("/{idSubs}/delete")
+    public String deleteSubscription(@PathVariable Long idServer, @PathVariable String idSubs) {
+        // Obtiene los datos del servidor FHIR
+        FhirServer server = fhirServerService.getFhirServer(idServer);
+
+        // Elimina la subscripción del servidor FHIR y de la base de datos
+        subscriptionService.deleteSubscription(server, idSubs);
+
+        return "redirect:/fhir/servers/" + idServer + "/subscriptions";
+    }
+
+    /**
+     * Maneja las solicitudes POST para enviar los filtros de una suscripción.
+     * 
+     * @param idServer         identificador del servidor FHIR.
+     * @param subscriptionForm atributos del formulario de subscripción.
+     * @return una redirección a la página de suscripciones.
+     */
+    @PostMapping("/create")
+    public String createSubscription(@PathVariable Long idServer,
+            @ModelAttribute("subscriptionForm") SubscriptionForm subscriptionForm) {
+        // Obtiene los datos del servidor FHIR
+        FhirServer server = fhirServerService.getFhirServer(idServer);
+
+        // Obtiene los datos del Subscription Topic
+        Topic topic = subscriptionTopicService.getSubscriptionTopic(server, subscriptionForm.getIdTopic());
+
+        // Crea la subscripción en el servidor FHIR y en la base de datos
+        subscriptionService.createSubscription(server, topic, subscriptionForm);
+
+        return "redirect:/fhir/servers/" + idServer + "/subscriptions";
     }
 
     /**
@@ -85,118 +182,16 @@ public class SubscriptionController {
      * @param idFhirServer el id del servidor FHIR.
      * @return el nombre de la vista "subscriptions-manager".
      */
-    @GetMapping
-    public String getSubscriptionsAndTopics(@PathVariable Long idServer, Model model) {
+    @GetMapping("/{idSubs}")
+    public String getSubscription(@PathVariable Long idServer, @PathVariable String idSubs, Model model) {
+        // Obtiene los datos del servidor FHIR y los añade al modelo
+        FhirServer server = fhirServerService.getFhirServer(idServer);
+        model.addAttribute("fhirServer", server);
 
-        Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
+        // Obtiene los datos de la subscripción y los añade al modelo
+        String subscription = subscriptionService.getSubscriptionDetails(server, idSubs);
+        model.addAttribute("subscription", subscription);
 
-        if (optionalServer.isPresent()) {
-            FhirServer server = optionalServer.get();
-            String urlServer = server.getUrl();
-
-            List<SubscriptionTopicDetails> topics = fhirService.getSubscriptionTopics(urlServer);
-            List<SubscriptionDetails> subscriptions = fhirService.getSubscriptions(urlServer);
-
-            model.addAttribute("fhirServer", server);
-            model.addAttribute("subscriptionTopics", topics);
-            model.addAttribute("subscriptions", subscriptions);
-        } else {
-            // TODO lanzar error
-        }
-
-        return "fhir/subscriptions-manager";
-    }
-
-    /**
-     * Maneja las solicitudes POST para crear una nueva suscripción.
-     * 
-     * @param topicUrl     la URL del tema de la suscripción.
-     * @param payload      el payload de la suscripción.
-     * @param idFhirServer el id del servidor FHIR.
-     * @param model        el modelo de Spring para añadir atributos.
-     * @return el nombre de la vista "subscription-form".
-     */
-    @PostMapping("/form")
-    public String subscriptionForm(@PathVariable Long idServer, @RequestParam String idTopic, Model model) {
-
-        Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
-
-        if (optionalServer.isPresent()) {
-            String urlServer = optionalServer.get().getUrl();
-
-            SubscriptionTopicDetails topicDetails = fhirService.getSubscriptionTopic(idTopic, urlServer);
-            SubscriptionForm subscriptionForm = new SubscriptionForm(topicDetails);
-
-            model.addAttribute("topic", topicDetails);
-            model.addAttribute("subscriptionForm", subscriptionForm);
-            model.addAttribute("idServer", idServer);
-        } else {
-            // TODO lanzar error
-        }
-
-        return "fhir/subscription-form";
-    }
-
-    /**
-     * Maneja las solicitudes POST para eliminar una suscripción.
-     * 
-     * @param subscriptionId el ID de la suscripción a eliminar.
-     * @param idFhirServer   el id del servidor FHIR.
-     * @return una redirección a la página principal.
-     */
-    @PostMapping("/{idSubs}/delete")
-    public String deleteSubscription(@PathVariable Long idServer, @PathVariable String idSubs) {
-
-        Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
-
-        if (optionalServer.isPresent()) {
-            FhirServer server = optionalServer.get();
-            String urlServer = server.getUrl();
-
-            fhirService.deleteSubscription(idSubs, urlServer);
-            subscriptionService.deleteSubscription(server, idSubs);
-        } else {
-            // TODO lanzar error
-        }
-
-        return "redirect:/fhir/servers/" + idServer + "/subscriptions";
-    }
-
-    /**
-     * Maneja las solicitudes POST para enviar los filtros de una suscripción.
-     * 
-     * @param requestParams los parámetros de la solicitud.
-     * @param urlServer     la URL del servidor FHIR.
-     * @return una redirección a la página de suscripciones.
-     */
-    @PostMapping("/create")
-    public String createSubscription(@PathVariable Long idServer,
-            @ModelAttribute("subscriptionForm") SubscriptionForm subscriptionForm) {
-
-        Optional<FhirServer> optionalServer = fhirServerService.getFhirServer(idServer);
-
-        if (optionalServer.isPresent()) {
-            FhirServer server = optionalServer.get();
-            String urlServer = server.getUrl();
-
-            Long idSubs = subscriptionService.getId();
-
-            // Crea la subscripción en el servidor FHIR
-            Subscription createdSubscription = fhirService.createSubscription(urlServer, idSubs, subscriptionForm);
-
-            // Guarda los datos de la subscripción en BBDD
-            SubscriptionData subscription = new SubscriptionData();
-            subscription.setId(idSubs);
-            subscription.setServer(server);
-            subscription.setSubscription(createdSubscription.getIdElement().getIdPart());
-            subscription.setResource(subscriptionForm.getResource());
-            subscription.setInteraction(subscriptionForm.getInteraction());
-            subscription.setEvents((long) 0);
-            subscriptionService.saveSubscription(subscription);
-        } else {
-            // TODO lanzar error
-        }
-
-        return "redirect:/fhir/servers/" + idServer + "/subscriptions";
+        return "fhir/subscription-detail";
     }
 }

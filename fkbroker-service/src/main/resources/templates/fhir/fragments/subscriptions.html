@@ -1,0 +1,63 @@
+    <div th:fragment="content">
+		<div class="d-flex align-items-center mt-3">
+			<h2>Subscriptions</h2>
+			<button class="btn btn-info ml-3" type="button" data-toggle="collapse" data-target="#subscriptionsTable" aria-expanded="false" aria-controls="subscriptionsTable">
+			    <i id="subscriptionsIcon" class="fas fa-eye-slash"></i>
+			</button>
+		</div>
+        <div id="subscriptionsTable" class="collapse show">
+            <table th:if="${not #lists.isEmpty(subscriptions)}" class="table">
+                <thead>
+                    <tr>
+						<th>ID</th>
+						<th>ID Topic</th>
+                        <th>Estado</th>
+                        <th>Eventos Recibidos</th>
+						<th>Última Actualización</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="subscription : ${subscriptions}">
+						<td th:text="${subscription.id}"></td>
+						<td th:text="${subscription.idTopic}"></td>
+                        <td th:text="${subscription.status}"></td>
+                        <td th:text="${subscription.events}"></td>
+						<td th:text="${subscription.lastUpdate}"></td>
+                        <td>
+							<a class="btn btn-info" title="Ver detalles" 
+								th:href="@{/fhir/servers/{idServer}/subscriptions/{idSubs}(idServer=${fhirServer.id},idSubs=${subscription.id})}">
+									<i class="fas fa-eye"></i>
+							</a>
+                            <form th:action="@{/fhir/servers/{idServer}/subscriptions/{idSubs}/delete(idServer=${fhirServer.id},idSubs=${subscription.id})}"
+								method="post" th:id="'deleteSubscriptionForm-' + ${subscription.id}" style="display:inline;">
+                                	<button type="button" class="btn btn-danger" title="Eliminar Suscripción"
+										th:attr="onclick='messageConfirm(\'' + #{message.confirm.subscription} + '\', \'deleteSubscriptionForm-' + ${subscription.id} + '\')'">
+											<i class="fas fa-trash-alt"></i>
+									</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+			<p th:if="${#lists.isEmpty(subscriptions)}">No hay suscripciones disponibles</p>
+        </div>
+		
+		<!-- Cambio de icono -->
+	    <script>
+	        $('#subscriptionsTable').on('show.bs.collapse', function () {
+	            $('#subscriptionsIcon').removeClass('fa-eye').addClass('fa-eye-slash');
+	        });
+
+	        $('#subscriptionsTable').on('hide.bs.collapse', function () {
+	            $('#subscriptionsIcon').removeClass('fa-eye-slash').addClass('fa-eye');
+	        });
+			
+			function messageConfirm(message, formId) {
+				if (confirm(message)) {
+					const form = document.getElementById(formId);
+					form.submit();
+				}
+			}
+	    </script>
+    </div>
