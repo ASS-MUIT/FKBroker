@@ -38,7 +38,8 @@ Each of these libraries maintains its own license and terms of use.
 Este proyecto es el resultado del trabajo desarrollado por los alumnos que a continuación se mencionan, bajo la supervisión de la profesora Isabel Román Martínez.
 
 **Autores:**
-- [Juan Manuel Brazo Mora](https://github.com/juanmabrazo98): desarrolla en su TFG la versión actual del proyecto
+- [Juan Manuel Brazo Mora](https://github.com/juanmabrazo98): desarrolla en su TFG la versión inicial del proyecto.
+- [José Antonio Pérez Beltrán](https://github.com/josepebe12): desarrolla la V.1.1.0, segunda versión oficial, en la que se amplian las capacidades, principalmente en la interfaz FHIR-Bróker
 
 **Supervisora:**
 - [Isabel Román Martínez](https://github.com/Isabel-Roman), Profesora del Departamento de Ingeniería Telemática de la Universidad de Sevilla
