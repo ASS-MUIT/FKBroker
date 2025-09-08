@@ -23,6 +23,8 @@ Este proyecto está licenciado bajo los términos de la [Licencia Pública Gener
 Este proyecto utiliza las siguientes bibliotecas de terceros:
 
 - jBPM (Apache 2.0) - https://www.jbpm.org/
+- HAPI FHIR (Apache 2.0) - https://github.com/hapifhir/hapi-fhir
+  
 Cada una de estas librerías mantiene su propia licencia y términos de uso.
 
 ## License
@@ -30,7 +32,9 @@ Cada una de estas librerías mantiene su propia licencia y términos de uso.
 This project is licensed under the terms of the [GNU General Public License (GPL) version 3](https://www.gnu.org/licenses/gpl-3.0.html).
 This project uses the following third-party libraries:
 
-    jBPM (Apache 2.0) - https://www.jbpm.org/
+- jBPM (Apache 2.0) - https://www.jbpm.org/
+- HAPI FHIR (Apache 2.0) - https://github.com/hapifhir/hapi-fhir
+  
 Each of these libraries maintains its own license and terms of use.
 
 ## Reconocimientos
