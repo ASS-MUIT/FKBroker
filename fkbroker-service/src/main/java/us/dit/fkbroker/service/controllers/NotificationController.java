@@ -14,12 +14,14 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.controllers;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,57 +30,68 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import us.dit.fkbroker.service.entities.NotificationEP;
-import us.dit.fkbroker.service.services.fhir.FhirClient;
+import us.dit.fkbroker.service.entities.db.SubscriptionData;
+import us.dit.fkbroker.service.services.fhir.FhirService;
+import us.dit.fkbroker.service.services.fhir.NotificationService;
+import us.dit.fkbroker.service.services.fhir.SubscriptionService;
 import us.dit.fkbroker.service.services.kie.KieServerService;
-import us.dit.fkbroker.service.services.kie.NotificationEPService;
+import us.dit.fkbroker.service.services.kie.SignalService;
 
 /**
  * Controlador para manejar las notificaciones.
  * 
  * @author juanmabrazo98
- * @version 1.0
- * @date jul 2024
- * 
+ * @author josperbel - Nueva ubicación de entidades y utilización de nuevo
+ *         servicio {@link FhirService}
+ * @version 1.1
+ * @date Mar 2025
  */
-
 @RestController
 @RequestMapping("/notification")
 public class NotificationController {
 
-    @Autowired
-    private NotificationEPService notificationEPService;
+    private static final Logger logger = LogManager.getLogger();
 
-    @Autowired
-    private KieServerService kieServerService;
-
-    @Autowired
-    private FhirClient fhirClient;
+    private final SubscriptionService subscriptionService;
+    private final NotificationService notificationService;
 
     /**
-     * Método que maneja las notificaciones. Llama al método para enviar las señales a los servidores kie
-     * y responde al servidor FHIR indicando que se ha recibido la notificación
+     * Constructor que inyecta los servicios {@link FhirService},
+     * {@link KieServerService} y {@link SignalService}.
      * 
-     * @param id el ID de la notificación.
-     * @param json el JSON que contiene los detalles de la notificación.
+     * @param subscriptionService servicio para gestionar las operaciones sobre las
+     *                            entidades {@link SubscriptionData}.
+     * @param notificationService servicio para gestionar las notificaciones de
+     *                            subscripciones.
+     */
+    @Autowired
+    public NotificationController(SubscriptionService subscriptionService, NotificationService notificationService) {
+        this.subscriptionService = subscriptionService;
+        this.notificationService = notificationService;
+    }
+
+    /**
+     * Método que maneja las notificaciones. Llama al método para enviar las señales
+     * a los servidores kie y responde al servidor FHIR indicando que se ha recibido
+     * la notificación.
+     * 
+     * @param id      identificador del endpoint de la notificación.
+     * @param message mensaje que contiene los detalles de la notificación.
      * @return una respuesta HTTP con el cuerpo del JSON proporcionado.
      */
     @PostMapping("/{id}")
-    public ResponseEntity<String> sendNotification(@PathVariable Long id, @RequestBody String json) {
-        Optional<NotificationEP> optionalNotificationEP = notificationEPService.findById(id);
-        if (optionalNotificationEP.isPresent()) {
-            // Responder inmediatamente con 200 OK
-            CompletableFuture.runAsync(() -> {
-                NotificationEP notificationEP = optionalNotificationEP.get();
-                String idRecurso = fhirClient.getNotificationResourceId(json);
-                System.out.println("Llamamos a sendsignal. Id del recurso: " + idRecurso);
-                kieServerService.sendSignalToAllKieServers(notificationEP, idRecurso);
-            });
-        } else {
-            // Manejar el caso cuando no se encuentra la entidad
-            throw new RuntimeException("NotificationEP not found with id: " + id);
-        }
+    public ResponseEntity<String> sendNotification(@PathVariable Long id, @RequestBody String message) {
+        logger.info("Se recibe un mensaje de notificación: {}", message);
 
-        return ResponseEntity.ok(json);
+        // Obtiene los datos de la subscripción
+        SubscriptionData subscription = subscriptionService.getSubscriptionData(id);
+
+        // Procesa el mensaje de notificación, obtiene los detalles de la subscripción
+        subscription = notificationService.processNotification(message, subscription);
+
+        // Actualiza la subscripción con los detalles de la notificación
+        subscriptionService.updateSubscription(subscription);
+
+        return ResponseEntity.ok(message);
     }
 }

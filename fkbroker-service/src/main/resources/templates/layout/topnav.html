@@ -1,0 +1,12 @@
+<div th:fragment="topnav" class="topnav">
+    <div class="d-flex justify-content-between">
+        <div>
+			<a href="/"><i class="fa-solid fa-house"></i></a>
+			<a href="/fhir/servers" th:text="#{navbar.fhir}"></a>
+            <a href="/kie" th:text="#{navbar.kie}"></a>
+        </div>
+        <div>
+            <a href="/logout" class="float-right" th:text="#{navbar.logout}"></a>
+        </div>
+    </div>
+</div>

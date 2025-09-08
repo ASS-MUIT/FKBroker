@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Subscription</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<link rel="stylesheet" th:href="@{/form-styles.css}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet"/>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</head>
+<body>
+	<div th:replace="layout/topnav :: topnav"></div>
+	<div class="container">
+		<div th:replace="layout/header :: header('Servidores FHIR y Subcripciones','Administración de Suscripciones')"></div>
+		
+		<h2>
+			<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${fhirServer.id})}" title="Volver">
+				<i class="fas fa-arrow-left"></i>
+			</a>
+			<strong>Subscription</strong>
+		</h2>
+		
+		<p><strong>Mensaje JSON obtenido del Servidor FHIR:</strong></p>
+		<div class="json-box">
+		    <pre><code class="language-json" th:text="${subscription}"></code></pre>
+		</div>
+		
+	</div>
+</body>
+</html>

@@ -14,19 +14,24 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import us.dit.fkbroker.service.entities.KieServer;
+import us.dit.fkbroker.service.entities.db.KieServer;
+
 /**
  * https://spring.io/guides/gs/accessing-data-rest
- * @author Isabel Román
- * @version 1.0
- * @date jul 2024
  * 
+ * @author Isabel Román
+ * @author josperbel - Nueva ubicación de entidades
+ * @version 1.1
+ * @date Mar 2025
  */
 @Repository
 public interface KieServerRepository extends JpaRepository<KieServer, String> {

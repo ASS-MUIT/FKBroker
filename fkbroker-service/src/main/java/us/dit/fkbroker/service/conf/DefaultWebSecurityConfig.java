@@ -1,4 +1,3 @@
-
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
 *  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
@@ -15,6 +14,9 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.conf;
 
@@ -53,60 +55,62 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class DefaultWebSecurityConfig {
 
-@Bean
-SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-            .antMatchers(HttpMethod.POST, "/endpoint").permitAll() 
-            .antMatchers(HttpMethod.POST, "/notification/**").permitAll()  
-            .antMatchers("/*").authenticated()
-            .antMatchers("/img/*").permitAll()
-            .antMatchers("/topics").authenticated())
-            .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/access-denied.html"))
-            .csrf((csrf) -> csrf.disable()).httpBasic(withDefaults()).cors(withDefaults())
-            .formLogin(withDefaults());
-    return http.build();
-	}
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests.antMatchers("/").authenticated()
+                .antMatchers(HttpMethod.POST, "/notification/**").permitAll().antMatchers("/fhir/servers")
+                .authenticated().antMatchers("/fhir/servers/*").authenticated()
+                .antMatchers("/fhir/servers/*/subscriptions").authenticated()
+                .antMatchers("/fhir/servers/*/subscriptions/*").authenticated()
+                .antMatchers("/fhir/servers/*/subscriptions/*/delete").authenticated().antMatchers("/kie")
+                .authenticated().antMatchers("/kie/servers/add").authenticated().antMatchers("/kie/servers/delete")
+                .authenticated().antMatchers("/kie/signals/add").authenticated().antMatchers("/kie/signals/delete")
+                .authenticated().antMatchers("/img/*").permitAll())
+                .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/access-denied.html"))
+                .csrf((csrf) -> csrf.disable()).httpBasic(withDefaults()).cors(withDefaults())
+                .formLogin(withDefaults());
+        return http.build();
+    }
 
-	/**
-	 * Configuración de la autenticación con autenticación en memoria y encriptada
-	 * Muy débil no sirve para producción
-	 **/
+    /**
+     * Configuración de la autenticación con autenticación en memoria y encriptada
+     * Muy débil no sirve para producción
+     **/
+    @Bean
+    UserDetailsService userDetailsService(BCryptPasswordEncoder encoder) {
 
-	@Bean
-	UserDetailsService userDetailsService(BCryptPasswordEncoder encoder) {
+        // codifico las password en https://bcrypt-generator.com/, uso nombre como
+        // password
+        // $2a$12$Pa3IIDS5JhAJpiLt5/lT4O5KVw1pyU.dVGpz/q7kEGUAH.JL85tRC
+        UserDetails user = User.withUsername("user").password(encoder.encode("user")).roles("kie-server").build();
+        // $2a$12$irR0VcP4SdtvAn7cbnXXQ.Cnfk/NlLWZa4mnx0J8EeXFum8Pt1pfm
+        UserDetails wbadmin = User.withUsername("wbadmin").password(encoder.encode("wbadmin")).roles("admin").build();
+        // Este usuario se va a utilizar para el acceso al servidor
+        UserDetails consentimientos = User.withUsername("consentimientos").password(encoder.encode("consentimientos"))
+                .roles("kie-server").build();
+        // $2a$12$1T7IYm0PmxpWyJFjqTSlm.489.s65TvHJbW4R7d1SG0giNHb5bqAm
+        UserDetails kieserver = User.withUsername("kieserver").password(encoder.encode("kieserver")).roles("kie-server")
+                .build();
 
-		// codifico las password en https://bcrypt-generator.com/, uso nombre como
-		// password
-		// $2a$12$Pa3IIDS5JhAJpiLt5/lT4O5KVw1pyU.dVGpz/q7kEGUAH.JL85tRC
-		UserDetails user = User.withUsername("user").password(encoder.encode("user")).roles("kie-server").build();
-		// $2a$12$irR0VcP4SdtvAn7cbnXXQ.Cnfk/NlLWZa4mnx0J8EeXFum8Pt1pfm
-		UserDetails wbadmin = User.withUsername("wbadmin").password(encoder.encode("wbadmin")).roles("admin").build();
-		//Este usuario se va a utilizar para el acceso al servidor
-		UserDetails consentimientos = User.withUsername("consentimientos").password(encoder.encode("consentimientos")).roles("kie-server").build();
-		// $2a$12$1T7IYm0PmxpWyJFjqTSlm.489.s65TvHJbW4R7d1SG0giNHb5bqAm
-		UserDetails kieserver = User.withUsername("kieserver").password(encoder.encode("kieserver")).roles("kie-server").build();
+        return new InMemoryUserDetailsManager(wbadmin, user, kieserver, consentimientos);
+    }
 
-		return new InMemoryUserDetailsManager(wbadmin, user, kieserver, consentimientos);
-	}
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(),
+                HttpMethod.POST.name(), HttpMethod.DELETE.name(), HttpMethod.PUT.name()));
+        corsConfiguration.applyPermitDefaultValues();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+        return source;
+    }
 
-	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	        CorsConfiguration corsConfiguration = new CorsConfiguration();
-	        corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
-	        corsConfiguration.setAllowCredentials(true);
-	        corsConfiguration.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(),
-	                                                          HttpMethod.POST.name(), HttpMethod.DELETE.name(), HttpMethod.PUT.name()));
-	        corsConfiguration.applyPermitDefaultValues();
-	        source.registerCorsConfiguration("/**", corsConfiguration);
-	        return source;
-	}
-
-	@Bean
-	BCryptPasswordEncoder bCryptPasswordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-	
+    @Bean
+    BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 }

@@ -1,7 +1,12 @@
+:root {
+    --color-principal: #ffffff;  /* Amarillo rgb(241, 225, 16)*/
+    --color-secundario: rgb(140, 16, 16); /* Rojo */
+}
+
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background-color: rgb(241, 225, 16);
+  background-color: var(--color-principal);
   color: #343a40; /* Color del texto principal */
 }
 
@@ -26,12 +31,12 @@ body {
 }
 
 .table th {
-  background-color: rgb(140, 16, 16);
+  background-color: var(--color-secundario);
   color: #000000;
 }
 
 .table tbody tr {
-  background-color: rgb(140, 16, 16);
+  background-color: var(--color-secundario);
 }
 
 .nav-link {
@@ -52,12 +57,12 @@ body {
 
 .topnav {
   overflow: hidden;
-  background-color: rgb(140, 16, 16);
+  background-color: var(--color-secundario);
 }
 
 .topnav a {
   float: left;
-  color: rgb(241, 225, 16);
+  color: var(--color-principal);
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
@@ -70,14 +75,14 @@ body {
 }
 
 .topnav a.active {
-  background-color: rgb(241, 225, 16);
-  color: rgb(140, 16, 16);
+  background-color: var(--color-principal);
+  color: var(--color-secundario);
 }
 
 .button {
-  background-color: rgb(140, 16, 16); 
+  background-color: var(--color-secundario); 
   border: none;
-  color: rgb(241, 225, 16);
+  color: var(--color-principal);
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;
@@ -90,8 +95,8 @@ body {
 .box {
   max-width: 500px;
   margin: 0 auto;
-  background-color: rgb(140, 16, 16);
-  color: rgb(241, 225, 16);
+  background-color: var(--color-secundario);
+  color: var(--color-principal);
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -113,4 +118,14 @@ body {
 
 .checkbox-group label input[type=checkbox] {
   margin-right: 5px;
+}
+
+.json-box {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #f8f8f8;
+  max-height: 500px;
+  overflow: auto;
+  font-size: 0.9rem;
 }

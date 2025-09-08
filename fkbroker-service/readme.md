@@ -1,16 +1,16 @@
-# Gestión de Suscripciones
+# Detalles del bróker FHIR-KIE
 
 ## Descripción
 
-Este proyecto es una aplicación para la gestión de suscripciones utilizando FHIR, Kie Server y Spring Boot. La aplicación permite crear, visualizar, modificar y eliminar suscripciones y notificaciones a través de una interfaz web.
+Este servicio facilita la comunicación indirecta entre servidores FHIR que tengan implementado el marco de suscripción y servidores KIE. Está desarrollado como una aplicación Spring Boot y utiliza las apis HAPIFHIR y jBPM para la implementación de los clientes que se comunican con los servidor FHIR y KIE respectivamente. El servicio permite crear, visualizar, modificar y eliminar suscripciones en servidores FHIR, así como recibir las notificaciones de éstos, y enviar señales a servidores KIE. Proporciona una interfaz web para facilitar la administración del servicio.
 
 ## Características
 
-- Gestión de Kie Servers.
-- Gestión de Notification EPs.
-- Creación y eliminación de suscripciones.
-- Visualización y filtrado de suscripciones.
-- Integración con FHIR y Kie Server.
+- Gestión de señales y servidores KIE
+- Gestión de puntos de recepción de notificaciones FHIR
+- Creación y eliminación de suscripciones FHIR
+- Verificación y recuperación de canales de notificación FHIR
+- Visualización y filtrado de suscripciones FHIR
 - Configuración a través de `application.properties`.
 
 ## Requisitos
@@ -53,7 +53,7 @@ Este proyecto es una aplicación para la gestión de suscripciones utilizando FH
    Desde el directorio raiz de la aplicación ejecutar el siguiente comando:
 
    ```bash
-  mvn clean install
-  mvn sprint-boot:run -Ppostgres 
+    mvn clean install
+    mvn sprint-boot:run -Ppostgres 
    ```
  

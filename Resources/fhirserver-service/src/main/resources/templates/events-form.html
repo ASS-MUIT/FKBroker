@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Configuración</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<link rel="stylesheet" th:href="@{/form-styles.css}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<div th:replace="layout/topnav :: topnav"></div>
+<div class="container">
+	<div th:replace="layout/header :: header('Configuración','Generación de eventos')"></div>
+    <h2>Notificación de eventos</h2>
+    <p><b> Identificador de la suscripción: </b><span th:text="${idSubscription}"></span></p>
+	<p><b>Recurso: </b><span th:text="${resource}"></span></p>
+	<p><b>Operación: </b><span th:text="${operation}"></span></p>
+
+    <form th:action="@{/subscriptions/{id}/events/add(id=${idSubscription})}" method="post" th:object="${events}">
+		<h4>Eventos</h4>
+		<table class="table mb-3">
+            <thead>
+                <tr>
+					<th>Número del evento</th>
+                    <th>Identificador del recurso</th>
+                </tr>
+            </thead>
+            <tbody>
+			<tr th:each="event, iterStat : *{events}">
+				<td>
+				    <input type="number" th:field="*{events[__${iterStat.index}__].number}" class="form-control" readonly />
+				</td>
+                <td>
+                    <input type="number" th:field="*{events[__${iterStat.index}__].idResource}" class="form-control" required />
+                </td>
+			</tr>
+            </tbody>
+        </table>
+
+        <button class="btn btn-primary" type="submit">Enviar notificación</button>
+		<a class="btn btn-danger" th:href="@{/subscriptions/{id}/events(id=${idSubscription})}">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>

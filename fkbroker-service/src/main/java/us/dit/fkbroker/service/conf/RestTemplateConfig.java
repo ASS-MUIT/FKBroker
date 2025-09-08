@@ -14,6 +14,9 @@
 *
 *  You should have received a copy of the GNU General Public License along
 *  with FKBroker. If not, see <https://www.gnu.org/licenses/>.
+*
+*  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
+*  See the project documentation for more details on dependency licenses.
 **/
 package us.dit.fkbroker.service.conf;
 
@@ -26,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-
 public class RestTemplateConfig {
 
     @Bean

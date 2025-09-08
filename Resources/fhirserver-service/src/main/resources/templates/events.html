@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+	    <title>Configuración</title>
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+	    <link rel="stylesheet" href="/form-styles.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	</head>
+	<body>
+		<div th:replace="layout/topnav :: topnav"></div>
+		<div class="container">
+			<div th:replace="layout/header :: header('Configuración','Administración de eventos')"></div>
+		
+		    <div class="row">
+				<div class="col-12 mb-3">
+						
+				        <!-- Subscription Topic -->
+						<h2>SubscriptionTopic</h2>
+				        <table class="table mt-3">
+				            <thead>
+				                <tr>
+									<th>ID</th>
+				                    <th>Nombre</th>
+									<th>Recurso</th>
+									<th>Operación</th>
+				                </tr>
+				            </thead>
+				            <tbody>
+				                <tr>
+									<td th:text="${topic.id}"></td>
+				                    <td th:text="${topic.name}"></td>
+									<td th:text="${topic.resource}"></td>
+									<td th:text="${topic.operation}"></td>
+				                </tr>
+				            </tbody>
+				        </table>
+
+				        <!-- Listado de Suscripciones -->
+						<h2 class="mt-3">Subscription</h2>
+						<table class="table mt-3">
+						    <thead>
+						        <tr>
+									<th>ID</th>
+									<th>Estado</th>
+									<th>Último Evento</th>
+									<th>Heartbeat</th>
+									<th>Endpoint</th>
+						        </tr>
+						    </thead>
+						    <tbody>
+						        <tr>
+									<td th:text="${subscription.id}"></td>
+									<td th:text="${subscription.status}"></td>
+									<td th:text="${subscription.lastEvent}"></td>
+									<td th:text="${subscription.heartbeatPeriod}"></td>
+									<td th:text="${subscription.endpoint}"></td>
+						        </tr>
+						    </tbody>
+						</table>
+					
+			        <!-- Listado de Eventos -->
+					<div class="d-flex justify-content-between align-items-center mt-3">
+						<h2>Eventos</h2>
+						<button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalEvent">Simular notificación de eventos</button>
+					</div>
+			        <table th:if="${not #lists.isEmpty(events)}" class="table mt-3">
+			            <thead>
+			                <tr>
+			                    <th>Número del evento</th>
+								<th>Identificador del recurso</th>
+			                </tr>
+			            </thead>
+			            <tbody>
+			                <tr th:each="event : ${events}">
+			                    <td th:text="${event.number}"></td>
+								<td th:text="${event.idResource}"></td>
+			                </tr>
+			            </tbody>
+			        </table>
+					<p th:if="${#lists.isEmpty(events)}">No hay eventos simulados</p>
+				</div>
+		    </div>
+			
+		</div>
+		
+		<!-- Modal para seleccionar cuantas notificaciones se desea enviar  -->
+		<div class="modal fade" id="modalEvent" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+		    <div class="modal-dialog" role="document">
+		        <div class="modal-content">
+		            <form th:action="@{/subscriptions/{id}/events(id=${subscription.id})}" method="post">
+		                <div class="modal-header">
+		                    <h5 class="modal-title" id="modalLabel">Simular notificación de eventos</h5>
+		                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		                        <span aria-hidden="true">&times;</span>
+		                    </button>
+		                </div>
+		                <div class="modal-body">
+		                    <div class="form-group">
+		                        <label for="number">¿Cuántos eventos desea que tenga la notificación?</label>
+		                        <input type="number" class="form-control" id="number" name="number" required>
+		                    </div>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+		                    <button type="submit" class="btn btn-primary">Generar notificación</button>
+		                </div>
+		            </form>
+		        </div>
+		    </div>
+		</div>
+	</body>
+</html>

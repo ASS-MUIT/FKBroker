@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Formulario de Filtros</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<link rel="stylesheet" th:href="@{/form-styles.css}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<div th:replace="layout/topnav :: topnav"></div>
+<div class="container">
+	<div th:replace="layout/header :: header('Servidores FHIR y Suscripciones','Administración de Suscripciones')"></div>
+    
+	<h2>
+		<a class="btn btn-danger" th:href="@{/fhir/servers/{id}/subscriptions(id=${fhirServer.id})}" title="Volver">
+			<i class="fas fa-arrow-left"></i>
+		</a>
+		<strong>Crear nueva Suscripción</strong>
+	</h2>
+	
+    <p>Topic URL: <span th:text="${topic.url}"></span></p>
+
+    <form th:action="@{/fhir/servers/{id}/subscriptions/create(id=${fhirServer.id})}" method="post" th:object="${subscriptionForm}">
+        <input type="hidden" th:field="*{idTopic}" th:value="${topic.id}">
+		<input type="hidden" th:field="*{urlTopic}" th:value="${topic.url}">
+
+		<!-- Campos genérigos de la subscripción -->
+		<div class="form-group">
+		    <label for="payload">Payload:</label>
+		    <select id="payload" th:field="*{payload}" class="form-control" required>
+		        <option value="id-only">ID Only</option>
+		    </select>
+		</div>
+		
+		<!-- Configuración de Filtros -->
+		<h4>Configuración de Filtros</h4>
+		<table th:if="${not #lists.isEmpty(topic.filters)}" class="table mb-3">
+            <thead>
+                <tr>
+					<th>Activo</th>
+					<th>Parámetros</th>
+                    <th>Valores</th>
+					<th>Comparadores</th>
+					<th>Modificadores</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="filter, iterStat : ${topic.filters}">
+					<td>
+						<input type="checkbox" class="form-check-input" th:field="*{filters[__${iterStat.index}__].active}">
+					</td>
+					<td>
+						<input type="text" class="form-control" th:field="*{filters[__${iterStat.index}__].parameter}" readonly />
+					</td>
+                    <td>
+						<input type="text" class="form-control" th:field="*{filters[__${iterStat.index}__].value}">
+					</td>
+					<td>
+						<select class="form-control" th:if="${not #lists.isEmpty(filter.comparators)}" th:field="*{filters[__${iterStat.index}__].comparator}">
+		                    <option value="">null</option> <!-- Opción null -->
+		                    <option th:each="comparator : ${filter.comparators}" th:value="${comparator}" th:text="${comparator}"></option>
+		                </select>
+					</td>
+					<td>
+						<select class="form-control" th:if="${not #lists.isEmpty(filter.modifiers)}" th:field="*{filters[__${iterStat.index}__].comparator}">
+		                    <option value="">null</option> <!-- Opción null -->
+		                    <option th:each="modifier : ${filter.modifiers}" th:value="${modifier}" th:text="${modifier}"></option>
+		                </select>
+					</td>
+                </tr>
+            </tbody>
+        </table>
+		<p th:if="${#lists.isEmpty(topic.filters)}">No hay filtros disponibles</p>
+
+        <button class="btn btn-primary" type="submit">Crear</button>
+    </form>
+</div>
+</body>
+</html>
