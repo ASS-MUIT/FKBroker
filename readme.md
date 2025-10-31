@@ -32,8 +32,8 @@ Each of these libraries maintains its own license and terms of use.
 This project is the result of work developed by the students mentioned below, under the supervision of Professor Isabel Román Martínez.
 
 **Authors:**
-- [Juan Manuel Brazo Mora](https://github.com/juanmabrazo98): develops the initial version of the project in his Bachelor's Thesis.
-- [José Antonio Pérez Beltrán](https://github.com/josepebe12): develops V.1.1.0, the second official version, which expands the capabilities, mainly in the FHIR-Broker interface
+- [Juan Manuel Brazo Mora](https://github.com/juanmabrazo98): developed the initial version of the project in his Bachelor's Thesis.
+- [José Antonio Pérez Beltrán](https://github.com/josepebe12): developed V.1.1.0, the second official version, which expands the capabilities, mainly in the FHIR-Broker interface
 
 **Supervisor:**
 - [Isabel Román Martínez](https://github.com/Isabel-Roman), Professor at the Department of Telematics Engineering, University of Seville
