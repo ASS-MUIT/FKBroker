@@ -45,13 +45,12 @@ public class Topic {
     @Column(name = "ID_TOPIC")
     private String idTopic;
 
+    @Column(name = "KAFKA_TOPIC_NAME")
+    private String kafkaTopicName;
+
     @ManyToOne
     @JoinColumn(name = "ID_SERVER")
     private FhirServer server;
-
-    @ManyToOne
-    @JoinColumn(name = "ID_TRIGGER")
-    private Trigger trigger;
 
     public Long getId() {
         return id;
@@ -77,11 +76,11 @@ public class Topic {
         this.server = server;
     }
 
-    public Trigger getTrigger() {
-        return trigger;
+    public String getKafkaTopicName() {
+        return kafkaTopicName;
     }
 
-    public void setTrigger(Trigger trigger) {
-        this.trigger = trigger;
+    public void setKafkaTopicName(String kafkaTopicName) {
+        this.kafkaTopicName = kafkaTopicName;
     }
 }

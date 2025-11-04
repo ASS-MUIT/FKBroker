@@ -34,8 +34,6 @@ import us.dit.fkbroker.service.entities.db.SubscriptionData;
 import us.dit.fkbroker.service.services.fhir.FhirService;
 import us.dit.fkbroker.service.services.fhir.NotificationService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionService;
-import us.dit.fkbroker.service.services.kie.KieServerService;
-import us.dit.fkbroker.service.services.kie.SignalService;
 
 /**
  * Controlador para manejar las notificaciones.
@@ -56,8 +54,8 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     /**
-     * Constructor que inyecta los servicios {@link FhirService},
-     * {@link KieServerService} y {@link SignalService}.
+     * Constructor que inyecta los servicios {@link SubscriptionService} y
+     * {@link NotificationService}.
      * 
      * @param subscriptionService servicio para gestionar las operaciones sobre las
      *                            entidades {@link SubscriptionData}.
@@ -71,8 +69,8 @@ public class NotificationController {
     }
 
     /**
-     * Método que maneja las notificaciones. Llama al método para enviar las señales
-     * a los servidores kie y responde al servidor FHIR indicando que se ha recibido
+     * Método que maneja las notificaciones. Publica las referencias de recursos
+     * en Kafka y responde al servidor FHIR indicando que se ha recibido
      * la notificación.
      * 
      * @param id      identificador del endpoint de la notificación.

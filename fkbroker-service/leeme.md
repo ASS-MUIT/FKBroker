@@ -1,4 +1,4 @@
-# 🔄 FKBroker Service - Bróker FHIR-KIE
+# 🔄 FKBroker Service - Bróker FHIR-Kafka
 
 ## 📑 Índice
 - [📖 Descripción General](#-descripción-general)
@@ -14,16 +14,16 @@
 
 ## 📖 Descripción General
 
-FKBroker Service es un servicio intermediario (broker) que facilita la comunicación indirecta entre servidores FHIR (Fast Healthcare Interoperability Resources) que implementan el marco de suscripción R5 y servidores KIE (Knowledge Is Everything) para la ejecución de procesos de negocio.
+FKBroker Service es un servicio intermediario (broker) que facilita la comunicación entre servidores FHIR (Fast Healthcare Interoperability Resources) que implementan el marco de suscripción R5 y Apache Kafka para arquitecturas orientadas a eventos y streaming de datos en tiempo real.
 
-Este servicio actúa como puente entre el paradigma de eventos de FHIR y el motor de procesos jBPM, permitiendo que los cambios en recursos sanitarios sean informados automáticamente a procesos de negocio definidos en jBPM.
+Este servicio actúa como puente entre el paradigma de eventos de FHIR y el sistema de mensajería publicación-suscripción de Kafka, permitiendo que los cambios en recursos sanitarios sean automáticamente publicados a topics de Kafka para su consumo por múltiples aplicaciones y servicios downstream.
 
 ### 🎯 ¿Qué hace FKBroker?
 
 1. **📝 Gestiona suscripciones FHIR**: Crea y mantiene suscripciones a eventos en servidores FHIR
 2. **📬 Recibe notificaciones**: Escucha las notificaciones de cambios en recursos FHIR
-3. **🔄 Traduce eventos**: Convierte notificaciones FHIR en señales comprensibles para jBPM
-4. **⚡ Dispara procesos**: Envía señales a servidores KIE para iniciar o continuar procesos de negocio
+3. **🔄 Publica en Kafka**: Convierte notificaciones FHIR en mensajes publicados a topics de Kafka
+4. **⚡ Distribución de eventos**: Permite que múltiples consumidores procesen eventos sanitarios en tiempo real
 5. **💓 Monitoriza**: Verifica el estado de las suscripciones mediante heartbeat
 
 ## 🏗️ Arquitectura
@@ -36,24 +36,23 @@ graph TB
     end
     
     subgraph "FKBroker Service"
-        WEB[Web Interface<br/>Thymeleaf]
-        CTRL[Controllers Layer]
-        SVC[Services Layer]
-        REPO[Repository Layer]
+        WEB[Interfaz Web<br/>Thymeleaf]
+        CTRL[Capa Controllers]
+        SVC[Capa Services]
+        REPO[Capa Repository]
         DB[(PostgreSQL<br/>Database)]
         
-        subgraph "FHIR Module"
+        subgraph "Módulo FHIR"
             FSS[FhirServerService]
             SS[SubscriptionService]
             NS[NotificationService]
             CS[CheckService]
-            TS[TriggerService]
+            STS[SubscriptionTopicService]
         end
         
-        subgraph "KIE Module"
-            KS[KieService]
-            KSS[KieServerService]
-            SIGS[SignalService]
+        subgraph "Módulo Kafka"
+            KPS[KafkaProducerService]
+            KBS[KafkaBrokerService]
         end
         
         WEB --> CTRL
@@ -62,31 +61,45 @@ graph TB
         SVC --> SS
         SVC --> NS
         SVC --> CS
-        SVC --> TS
-        SVC --> KS
-        SVC --> KSS
-        SVC --> SIGS
+        SVC --> STS
+        SVC --> KPS
+        SVC --> KBS
         SVC --> REPO
         REPO --> DB
     end
     
-    subgraph "KIE Servers"
-        KS1[KIE Server 1<br/>jBPM]
-        KS2[KIE Server 2<br/>jBPM]
+    subgraph "Apache Kafka"
+        BROKER[Kafka Broker]
+        TOPIC1[fhir-patient-events]
+        TOPIC2[fhir-observation-events]
+        TOPICN[fhir-other-events]
+        
+        BROKER --> TOPIC1
+        BROKER --> TOPIC2
+        BROKER --> TOPICN
     end
     
-    FS1 -->|Notifications| NS
-    FS2 -->|Notifications| NS
-    SS -->|Subscribe/Unsubscribe| FS1
-    SS -->|Subscribe/Unsubscribe| FS2
-    CS -->|Heartbeat Check| FS1
-    CS -->|Heartbeat Check| FS2
-    SIGS -->|Send Signals| KS1
-    SIGS -->|Send Signals| KS2
+    subgraph "Consumidores de Eventos"
+        CONS1[Servicio de Analítica]
+        CONS2[Servicio de Notificaciones]
+        CONS3[Motor de Procesos de Negocio]
+        CONSN[Otros Servicios...]
+    end
+    
+    FS1 -->|Notificaciones| NS
+    FS2 -->|Notificaciones| NS
+    SS -->|Suscribir/Desuscribir| FS1
+    SS -->|Suscribir/Desuscribir| FS2
+    CS -->|Verificación Heartbeat| FS1
+    CS -->|Verificación Heartbeat| FS2
+    KPS -->|Publicar Mensajes| BROKER
+    TOPIC1 -->|Suscribir| CONS1
+    TOPIC2 -->|Suscribir| CONS2
+    TOPICN -->|Suscribir| CONS3
     
     style FKBroker Service fill:#e1f5ff
-    style FHIR Module fill:#fff4e1
-    style KIE Module fill:#f0e1ff
+    style Módulo FHIR fill:#fff4e1
+    style Módulo Kafka fill:#f0e1ff
 ```
 
 ### 🔀 Flujo de Datos
@@ -97,28 +110,33 @@ sequenceDiagram
     participant Web as Interfaz Web
     participant Broker as FKBroker
     participant FHIR as Servidor FHIR
-    participant KIE as Servidor KIE
+    participant Kafka as Kafka Broker
+    participant Consumer as Consumidor de Eventos
     
-    Admin->>Web: Configura servidor FHIR
-    Web->>Broker: Registra servidor
-    Broker->>FHIR: Verifica conexión
+    Admin->>Web: Configurar servidor FHIR
+    Web->>Broker: Registrar servidor
+    Broker->>FHIR: Verificar conexión
     
-    Admin->>Web: Crea suscripción
+    Admin->>Web: Configurar broker Kafka
+    Web->>Broker: Registrar broker Kafka
+    
+    Admin->>Web: Crear suscripción
     Web->>Broker: POST /subscription
-    Broker->>FHIR: Crea suscripción
+    Broker->>FHIR: Crear suscripción
     FHIR-->>Broker: Confirmación
     
     Note over FHIR: Ocurre un evento<br/>(ej: nuevo paciente)
     
     FHIR->>Broker: POST /notification
-    Broker->>Broker: Procesa notificación
-    Broker->>Broker: Identifica señal
-    Broker->>KIE: Envía señal
-    KIE->>KIE: Dispara proceso
-    KIE-->>Broker: Confirmación
+    Broker->>Broker: Extraer referencia del recurso
+    Broker->>Broker: Identificar topic de Kafka
+    Broker->>Kafka: Publicar mensaje en topic
+    Kafka-->>Broker: Confirmación
+    Kafka->>Consumer: Entregar mensaje
+    Consumer->>Consumer: Procesar evento
     
     loop Heartbeat cada 60s
-        Broker->>FHIR: Verifica estado
+        Broker->>FHIR: Verificar estado
         FHIR-->>Broker: OK/Error
     end
 ```
@@ -130,6 +148,7 @@ sequenceDiagram
   - Spring Web: Para endpoints REST y MVC
   - Spring Data JPA: Para persistencia de datos
   - Spring Security: Para autenticación y autorización
+  - Spring Kafka: Para integración con Kafka
   - Thymeleaf: Motor de plantillas para la interfaz web
 
 ### 🏥 Integración FHIR
@@ -138,11 +157,11 @@ sequenceDiagram
   - `hapi-fhir-client`: Cliente para comunicación con servidores FHIR
   - `hapi-fhir-base`: Funcionalidades base de HAPI FHIR
 
-### 🧠 Integración KIE/jBPM
-- **KIE Server Client 7.74.1.Final**: Cliente para comunicación con servidores jBPM
-  - Permite envío de señales a procesos
-  - Gestión de contenedores KIE
-  - Interacción con la API REST de jBPM
+### 📨 Integración Kafka
+- **Spring Kafka**: Integración de Spring para Apache Kafka
+  - Permite publicar mensajes a topics de Kafka
+  - Configuración y gestión de productores
+  - Envío de mensajes basado en plantillas
 
 ### 💾 Persistencia
 - **PostgreSQL**: Base de datos principal (recomendada para producción)
@@ -168,61 +187,54 @@ fkbroker-service/
 │   │   │
 │   │   ├── conf/                               # Configuración
 │   │   │   ├── BrokerRunner.java              # Inicialización del broker
-│   │   │   ├── SecurityConfiguration.java      # Configuración de seguridad
-│   │   │   └── SystemPropertiesInjector.java   # Inyección de propiedades
+│   │   │   ├── DefaultWebSecurityConfig.java   # Configuración de seguridad
+│   │   │   ├── KafkaConfig.java                # Configuración de Kafka
+│   │   │   ├── SystemPropertiesInjector.java   # Inyección de propiedades
+│   │   │   └── WebConfiguration.java           # Configuración web
 │   │   │
 │   │   ├── controllers/                        # Capa de Controladores
 │   │   │   ├── HomeController.java            # Página principal
 │   │   │   ├── FhirServerController.java      # Gestión de servidores FHIR
-│   │   │   ├── KieController.java             # Gestión de servidores KIE
 │   │   │   ├── SubscriptionController.java    # Gestión de suscripciones
 │   │   │   ├── SubscriptionTopicController.java # Gestión de topics
 │   │   │   ├── NotificationController.java    # Recepción de notificaciones
 │   │   │   └── MyErrorController.java         # Manejo de errores
 │   │   │
 │   │   ├── services/                          # Capa de Servicios
-│   │   │   ├── fhir/                          # Servicios FHIR
-│   │   │   │   ├── FhirService.java          # Servicio principal FHIR
-│   │   │   │   ├── FhirServerService.java    # Gestión de servidores
-│   │   │   │   ├── SubscriptionService.java  # Gestión de suscripciones
-│   │   │   │   ├── SubscriptionTopicService.java # Gestión de topics
-│   │   │   │   ├── NotificationService.java  # Procesamiento de notificaciones
-│   │   │   │   ├── CheckService.java         # Verificación de heartbeat
-│   │   │   │   └── TriggerService.java       # Gestión de triggers
-│   │   │   │
-│   │   │   ├── kie/                           # Servicios KIE
-│   │   │   │   ├── KieService.java           # Servicio principal KIE
-│   │   │   │   ├── KieServerService.java     # Gestión de servidores KIE
-│   │   │   │   └── SignalService.java        # Envío de señales
+│   │   │   ├── FhirService.java              # Servicio principal FHIR
+│   │   │   ├── FhirServerService.java        # Gestión de servidores
+│   │   │   ├── SubscriptionService.java      # Gestión de suscripciones
+│   │   │   ├── SubscriptionTopicService.java # Gestión de topics
+│   │   │   ├── NotificationService.java      # Procesamiento de notificaciones
+│   │   │   ├── CheckService.java             # Verificación de heartbeat
+│   │   │   ├── KafkaProducerService.java     # Publicación mensajes Kafka
+│   │   │   ├── KafkaBrokerService.java       # Gestión de brokers Kafka
 │   │   │   │
 │   │   │   └── mapper/                        # Mappers DTO-Entity
 │   │   │       ├── SubscriptionMapper.java
 │   │   │       ├── SubscriptionTopicMapper.java
-│   │   │       └── SignalMapper.java
+│   │   │       └── FhirServerMapper.java
 │   │   │
 │   │   ├── entities/                          # Capa de Entidades
 │   │   │   ├── db/                            # Entidades de BD
 │   │   │   │   ├── FhirServer.java           # Servidor FHIR
-│   │   │   │   ├── KieServer.java            # Servidor KIE
-│   │   │   │   ├── Signal.java               # Señal KIE
+│   │   │   │   ├── KafkaBroker.java          # Broker Kafka
 │   │   │   │   ├── SubscriptionData.java     # Datos de suscripción
-│   │   │   │   ├── Topic.java                # Topic FHIR
-│   │   │   │   └── Trigger.java              # Trigger de suscripción
+│   │   │   │   ├── Topic.java                # Topic FHIR → Topic Kafka
+│   │   │   │   └── NotificationBundleData.java # Historial notificaciones
 │   │   │   │
 │   │   │   └── domain/                        # DTOs y objetos de dominio
 │   │   │       ├── SubscriptionEntry.java
 │   │   │       ├── SubscriptionForm.java
 │   │   │       ├── SubscriptionTopicEntry.java
-│   │   │       ├── SubscriptionTopicDetails.java
-│   │   │       └── SignalDetails.java
+│   │   │       └── SubscriptionTopicDetails.java
 │   │   │
 │   │   └── repositories/                      # Capa de Repositorios
 │   │       ├── FhirServerRepository.java
-│   │       ├── KieServerRepository.java
-│   │       ├── SignalRepository.java
+│   │       ├── KafkaBrokerRepository.java
 │   │       ├── SubscriptionDataRepository.java
 │   │       ├── TopicRepository.java
-│   │       └── TriggerRepository.java
+│   │       └── NotificationBundleRepository.java
 │   │
 │   └── resources/
 │       ├── application.properties              # Configuración principal
@@ -250,8 +262,6 @@ fkbroker-service/
 │           │   ├── subscription-detail.html
 │           │   ├── subscriptiontopic-detail.html
 │           │   └── fragments/
-│           ├── kie/                            # Vistas KIE
-│           │   └── kie-manager.html
 │           └── layout/                         # Fragmentos comunes
 │               ├── header.html
 │               └── topnav.html
@@ -281,18 +291,13 @@ fkbroker-service/
 - ✅ Recepción de notificaciones FHIR vía REST
 - ✅ Procesamiento asíncrono de notificaciones
 - ✅ Extracción de datos relevantes del bundle FHIR
-- ✅ Mapeo de notificaciones a señales KIE
+- ✅ Publicación automática a topics de Kafka
 
-### 🧠 Gestión de Servidores KIE
-- ✅ Registro de servidores KIE/jBPM
-- ✅ Configuración de contenedores KIE
-- ✅ Gestión de credenciales y autenticación
-
-### ⚡ Envío de Señales
-- ✅ Configuración de señales personalizadas
-- ✅ Mapeo de eventos FHIR a señales jBPM
-- ✅ Envío automático de señales tras notificaciones
-- ✅ Soporte para señales con datos (payloads)
+### 📨 Integración con Kafka
+- ✅ Configuración de conexión a broker Kafka
+- ✅ Generación automática de nombres de topics Kafka
+- ✅ Publicación de eventos FHIR a topics de Kafka
+- ✅ Soporte para mensajes de referencia a recursos
 
 ### 🖥️ Interfaz de Administración
 - ✅ Interfaz web responsive con Thymeleaf
@@ -320,12 +325,13 @@ fkbroker-service/
 ### 🌐 Servicios Externos
 - **🏥 Servidor FHIR R5** compatible con SubscriptionTopic framework
   - Ejemplo: HAPI FHIR Server 6.0+
-- **🧠 Servidor KIE (jBPM) 7.74+** con contenedores desplegados
+- **📨 Apache Kafka** broker de mensajes
+  - Kafka 2.8+ o compatible
 
 ### 🔌 Requisitos de Red
 - Puerto 8090 disponible (configurable)
 - Conectividad HTTP/HTTPS con servidores FHIR
-- Conectividad HTTP/HTTPS con servidores KIE
+- Conectividad de red con broker Kafka (puerto por defecto 9092)
 
 ## 🚀 Instalación y Configuración
 
@@ -346,16 +352,16 @@ sudo -u postgres createdb fkbroker
 
 # Crear usuario
 sudo -u postgres psql
-postgres=# CREATE USER jbpm WITH PASSWORD 'jbpm';
-postgres=# GRANT ALL PRIVILEGES ON DATABASE fkbroker TO jbpm;
+postgres=# CREATE USER fkbroker WITH PASSWORD 'fkbroker';
+postgres=# GRANT ALL PRIVILEGES ON DATABASE fkbroker TO fkbroker;
 postgres=# \q
 ```
 
 Configurar `src/main/resources/application-postgres.properties`:
 
 ```properties
-spring.datasource.username=jbpm
-spring.datasource.password=jbpm
+spring.datasource.username=fkbroker
+spring.datasource.password=fkbroker
 spring.datasource.url=jdbc:postgresql://localhost:5432/fkbroker
 spring.datasource.driver-class-name=org.postgresql.Driver
 ```
@@ -383,6 +389,48 @@ fhir.subscription.heartbeat.check.initial.delay=60000
 
 # Nivel de logging
 logging.level.us.dit.fkbroker=DEBUG
+```
+
+### 3️⃣.1 Configurar Broker Kafka (Opcional - Para Pruebas)
+
+Si no tienes un broker Kafka, puedes configurar uno localmente usando Docker:
+
+```bash
+# Opción 1: Un solo comando (más simple)
+docker run -d --name kafka -p 9092:9092 apache/kafka:latest
+
+# Opción 2: Usando docker-compose (recomendado para persistencia)
+# Crear un archivo docker-compose.yml:
+version: '3'
+services:
+  kafka:
+    image: apache/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+
+# Iniciar Kafka
+docker-compose up -d
+```
+
+La conexión al broker Kafka se configurará en la base de datos después de que arranque la aplicación:
+
+```sql
+-- Ejemplo: Configurar broker Kafka en base de datos
+INSERT INTO kafka_broker (id, name, bootstrap_servers) 
+VALUES (1, 'Kafka Local', 'localhost:9092');
 ```
 
 ### 4️⃣ Compilar y Ejecutar
@@ -426,25 +474,51 @@ Abrir navegador en: `http://localhost:8090`
    - Ver topics disponibles
    - Examinar detalles de cada topic
 
-3. **🧠 Configurar Servidor KIE**
-   - Ir a "KIE Servers" → "Add Server"
-   - Configurar URL, credenciales y contenedor
+3. **📨 Configurar Broker Kafka**
+   - Configurar conexión al broker Kafka en base de datos o vía interfaz web
+   - Establecer bootstrap servers (ej: `localhost:9092`)
+   - Verificar conectividad
 
-4. **⚡ Crear Señal**
-   - Definir nombre de señal
-   - Especificar servidor KIE destino
-   - Configurar payload si es necesario
-
-5. **📝 Crear Suscripción**
+4. **📝 Crear Suscripción**
    - Seleccionar topic FHIR
-   - Asociar señal KIE
+   - El nombre del topic Kafka se generará automáticamente
    - Configurar filtros opcionales
    - Activar suscripción
 
-6. **📊 Monitorizar**
+5. **📊 Monitorizar**
    - Ver suscripciones activas
    - Verificar estado de heartbeat
    - Revisar logs de notificaciones
+   - Monitorizar topics de Kafka para mensajes publicados
+
+### 🔀 Mapeo de Topics FHIR a Kafka
+
+FKBroker genera automáticamente nombres de topics de Kafka a partir de IDs de SubscriptionTopic de FHIR:
+
+**Reglas de Mapeo:**
+- Formato ID Topic FHIR: `http://example.org/SubscriptionTopic/patient-create` o simplemente `patient-create`
+- Formato Nombre Topic Kafka: `fhir-{id-normalizado}`
+- Normalización: Minúsculas, caracteres especiales reemplazados con guiones
+
+**Ejemplos:**
+```
+ID Topic FHIR                               → Nombre Topic Kafka
+───────────────────────────────────────────────────────────────
+patient-create                             → fhir-patient-create
+observation-vital-signs                    → fhir-observation-vital-signs
+SubscriptionTopic/encounter-admission      → fhir-encounter-admission
+http://example.org/patient-update          → fhir-patient-update
+```
+
+**Formato de Mensaje:**
+Cuando se recibe una notificación FHIR, FKBroker publica un mensaje con la referencia del recurso:
+```json
+"Patient/12345"
+"Observation/67890"
+"Encounter/abc-123"
+```
+
+Los consumidores downstream de Kafka pueden usar estos IDs de recurso para obtener el recurso completo del servidor FHIR si es necesario.
 
 ## 🌐 Endpoints
 
@@ -473,20 +547,12 @@ DELETE /fhir/subscriptions/{id}   # Eliminar suscripción
 POST   /notification              # Recibir notificación FHIR
 ```
 
-#### 🧠 Gestión de Servidores KIE
+#### 📨 Gestión de Brokers Kafka
 ```
-GET    /kie/servers               # Listar servidores
-POST   /kie/servers               # Crear servidor
-GET    /kie/servers/{id}          # Obtener servidor
-DELETE /kie/servers/{id}          # Eliminar servidor
-```
-
-#### ⚡ Gestión de Señales
-```
-GET    /kie/signals               # Listar señales
-POST   /kie/signals               # Crear señal
-GET    /kie/signals/{id}          # Obtener señal
-DELETE /kie/signals/{id}          # Eliminar señal
+GET    /kafka/brokers             # Listar brokers (futuro)
+POST   /kafka/brokers             # Crear broker (futuro)
+GET    /kafka/brokers/{id}        # Obtener broker (futuro)
+DELETE /kafka/brokers/{id}        # Eliminar broker (futuro)
 ```
 
 ### 🖥️ Interfaz Web
@@ -495,7 +561,6 @@ DELETE /kie/signals/{id}          # Eliminar señal
 GET    /                          # Página principal
 GET    /fhir/servers              # Gestión de servidores FHIR
 GET    /fhir/subscriptions        # Gestión de suscripciones
-GET    /kie/manager               # Gestión KIE
 GET    /error                     # Página de error
 ```
 
@@ -517,7 +582,20 @@ fhir.subscription.heartbeat.check.fixed.rate=60000
 fhir.subscription.heartbeat.check.initial.delay=60000
 ```
 
-### 📝 Configuración de Logging
+### � Configuración de Kafka
+
+```properties
+# Conexión al broker Kafka (se almacena en base de datos)
+# Se puede configurar vía interfaz web o directamente en base de datos:
+# INSERT INTO kafka_broker (name, bootstrap_servers) 
+# VALUES ('Broker Principal', 'localhost:9092');
+
+# Patrón de nombres de topics Kafka:
+# Se generan automáticamente como: fhir-{id-topic-normalizado}
+# Ejemplo: SubscriptionTopic/patient-create → fhir-patient-create
+```
+
+### �📝 Configuración de Logging
 
 ```properties
 # Nivel general
@@ -531,6 +609,9 @@ logging.level.org.springframework.security=DEBUG
 
 # Nivel HAPI FHIR
 logging.level.ca.uhn.fhir=INFO
+
+# Nivel Kafka
+logging.level.org.springframework.kafka=INFO
 ```
 
 ### 📦 Perfiles de Maven
@@ -710,7 +791,7 @@ ROLE_API: Acceso programático limitado
 - Creación/modificación/eliminación de suscripciones
 - Cambios en configuración de servidores
 - Notificaciones recibidas (origen, timestamp, resultado)
-- Señales enviadas a servidores KIE
+- Mensajes publicados a topics de Kafka
 - Accesos denegados
 ```
 

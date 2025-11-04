@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.Topic;
-import us.dit.fkbroker.service.entities.db.Trigger;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicDetails;
 import us.dit.fkbroker.service.entities.domain.SubscriptionTopicEntry;
 import us.dit.fkbroker.service.repositories.SubscriptionTopicRepository;
@@ -50,29 +49,24 @@ import us.dit.fkbroker.service.services.mapper.SubscriptionTopicMapper;
 public class SubscriptionTopicService {
 
     private final FhirService fhirService;
-    private final TriggerService triggerService;
     private final SubscriptionTopicRepository subscriptionTopicRepository;
     private final SubscriptionTopicMapper subscriptionTopicMapper;
 
     /**
-     * Constructor que inyecta los servicio {@link FhirService} y
-     * {@link TriggerService}, el repositorio {@link SubscriptionTopicRepository} y
-     * el componente {@link SubscriptionTopicMapper}.
+     * Constructor que inyecta los servicio {@link FhirService}, el repositorio 
+     * {@link SubscriptionTopicRepository} y el componente {@link SubscriptionTopicMapper}.
      * 
      * @param fhirService                 servicio que realiza operaciones sobre
      *                                    servidores FHIR.
-     * @param triggerService              servicio utilizado para gestionar los
-     *                                    triggers.
      * @param subscriptionTopicRepository repositorio JPA de la entidad
      *                                    {@link Topic}.
      * @param subscriptionTopicMapper     componente que transforma Subscription
      *                                    Topics.
      */
     @Autowired
-    public SubscriptionTopicService(FhirService fhirService, TriggerService triggerService,
+    public SubscriptionTopicService(FhirService fhirService,
             SubscriptionTopicRepository subscriptionTopicRepository, SubscriptionTopicMapper subscriptionTopicMapper) {
         this.fhirService = fhirService;
-        this.triggerService = triggerService;
         this.subscriptionTopicRepository = subscriptionTopicRepository;
         this.subscriptionTopicMapper = subscriptionTopicMapper;
     }
@@ -155,20 +149,15 @@ public class SubscriptionTopicService {
 
         // Guarda los nuevos SubscriptionTopic en la base de datos
         for (SubscriptionTopic subscriptionTopic : topicsToCreate) {
-            // Para esta implementación se está suponiendo que los Topics tendrán
-            // configurado un único ResourceTrigger con una única SupportedInteraction
-            String resource = subscriptionTopic.getResourceTriggerFirstRep().getResource();
-            String interaction = subscriptionTopic.getResourceTriggerFirstRep().getSupportedInteraction().get(0)
-                    .asStringValue();
-
-            // Comprueba si ya existe este Trigger en base de datos, sino lo crea
-            Trigger trigger = triggerService.getTrigger(resource, interaction);
-
             // Guarda el SubscriptionTopic en la base de datos
             Topic topic = new Topic();
             topic.setIdTopic(subscriptionTopic.getIdPart());
             topic.setServer(server);
-            topic.setTrigger(trigger);
+            
+            // Genera automáticamente el nombre del topic Kafka
+            String kafkaTopicName = generateKafkaTopicName(subscriptionTopic.getIdPart());
+            topic.setKafkaTopicName(kafkaTopicName);
+            
             subscriptionTopicRepository.save(topic);
         }
 
@@ -186,6 +175,32 @@ public class SubscriptionTopicService {
      */
     public void deleteSubscriptionTopics(FhirServer server) {
         subscriptionTopicRepository.deleteAllByServer(server);
+    }
+
+    /**
+     * Genera un nombre de topic Kafka basado en el ID del SubscriptionTopic FHIR
+     * 
+     * @param fhirTopicId ID del SubscriptionTopic FHIR
+     * @return nombre normalizado para topic Kafka
+     */
+    private String generateKafkaTopicName(String fhirTopicId) {
+        if (fhirTopicId == null || fhirTopicId.isEmpty()) {
+            return "fhir-default";
+        }
+        
+        // Si es una URL, extraer la última parte
+        if (fhirTopicId.contains("/")) {
+            String[] parts = fhirTopicId.split("/");
+            fhirTopicId = parts[parts.length - 1];
+        }
+        
+        // Normalizar: minúsculas, reemplazar caracteres no válidos con guiones
+        String normalized = fhirTopicId.toLowerCase()
+                                       .replaceAll("[^a-z0-9-]", "-")
+                                       .replaceAll("-+", "-")  // Múltiples guiones → uno solo
+                                       .replaceAll("^-|-$", ""); // Eliminar guiones al inicio/final
+        
+        return "fhir-" + normalized;
     }
 
 }

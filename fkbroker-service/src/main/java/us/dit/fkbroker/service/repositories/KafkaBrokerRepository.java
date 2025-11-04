@@ -18,52 +18,29 @@
 *  This software uses third-party dependencies, including libraries licensed under Apache 2.0.
 *  See the project documentation for more details on dependency licenses.
 **/
-package us.dit.fkbroker.service.entities.domain;
+package us.dit.fkbroker.service.repositories;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import us.dit.fkbroker.service.entities.db.KafkaBroker;
 
 /**
- * Entidad que representa los detalles de una señal
+ * Repositorio para gestionar las operaciones sobre la entidad KafkaBroker
  * 
  * @author josperbel
  * @version 1.0
- * @date Mar 2025
+ * @date Nov 2025
  */
-public class SignalDetails {
+@Repository
+public interface KafkaBrokerRepository extends JpaRepository<KafkaBroker, Long> {
 
-    private Long id;
-    private String resource;
-    private String interaction;
-    private String name;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getResource() {
-        return resource;
-    }
-
-    public void setResource(String resource) {
-        this.resource = resource;
-    }
-
-    public String getInteraction() {
-        return interaction;
-    }
-
-    public void setInteraction(String interaction) {
-        this.interaction = interaction;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    /**
+     * Obtiene el primer broker Kafka configurado
+     * 
+     * @return el primer broker Kafka si existe
+     */
+    Optional<KafkaBroker> findFirstByOrderByIdAsc();
 }

@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
 import ca.uhn.fhir.parser.IParser;
 import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
-import us.dit.fkbroker.service.services.kie.KieService;
+import us.dit.fkbroker.service.services.kafka.KafkaProducerService;
 
 /**
  * Servicio que procesa los distintos tipos de notificaciones FHIR
@@ -56,25 +56,24 @@ public class NotificationService {
     private static final Logger logger = LogManager.getLogger(FhirService.class);
 
     private final FhirService fhirService;
-    private final KieService kieService;
+    private final KafkaProducerService kafkaProducerService;
     private final IParser jsonParser;
 
     private final Set<SubscriptionNotificationType> validTypes;
 
     /**
      * Constructor que inyecta los servicios {@link FhirService} y
-     * {@link KieService}.
+     * {@link KafkaProducerService}.
      * 
-     * @param fhirService servicio para gestionar operaciones que se realizan sobre
-     *                    elementos FHIR.
-     * @param kieService  servicio para gestionar las operaciones sobre los
-     *                    servidores y las señales KIE.
-     * @param jsonParser
+     * @param fhirService           servicio para gestionar operaciones que se realizan sobre
+     *                              elementos FHIR.
+     * @param kafkaProducerService  servicio para publicar mensajes en Kafka.
+     * @param jsonParser            parser JSON de FHIR.
      */
     @Autowired
-    public NotificationService(FhirService fhirService, KieService kieService, IParser jsonParser) {
+    public NotificationService(FhirService fhirService, KafkaProducerService kafkaProducerService, IParser jsonParser) {
         this.fhirService = fhirService;
-        this.kieService = kieService;
+        this.kafkaProducerService = kafkaProducerService;
         this.jsonParser = jsonParser;
         this.validTypes = EnumSet.of(SubscriptionNotificationType.EVENTNOTIFICATION,
                 SubscriptionNotificationType.HEARTBEAT, SubscriptionNotificationType.HANDSHAKE);
@@ -87,7 +86,7 @@ public class NotificationService {
      * @return la URL completa del recurso de notificación.
      */
     public SubscriptionData processNotification(String mesagge, SubscriptionData subscriptionData) {
-        Long idTrigger = subscriptionData.getTopic().getTrigger().getId();
+        String kafkaTopicName = subscriptionData.getTopic().getKafkaTopicName();
         FhirServer server = subscriptionData.getServer();
 
         // Obtiene el Bundle de la notificación recibida
@@ -131,7 +130,7 @@ public class NotificationService {
                 if (receivedEvent > expectedEvent) {
                     logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
                     CompletableFuture.runAsync(() -> getAndSendLostEvents(server.getUrl(),
-                            subscriptionData.getIdSubscription(), expectedEvent, receivedEvent - 1, idTrigger));
+                            subscriptionData.getIdSubscription(), expectedEvent, receivedEvent - 1, kafkaTopicName));
                 }
             } else {
                 // Si no se trata de una notificación de eventos, recupera el último evento
@@ -141,16 +140,15 @@ public class NotificationService {
                 if (lastEventSent > lastEventReceived) {
                     logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
                     CompletableFuture.runAsync(() -> getAndSendLostEvents(server.getUrl(),
-                            subscriptionData.getIdSubscription(), lastEventReceived + 1, lastEventSent, idTrigger));
+                            subscriptionData.getIdSubscription(), lastEventReceived + 1, lastEventSent, kafkaTopicName));
                 }
             }
         }
 
-        // Si se trata de una notificación de eventos envía las referencia de los
-        // recursos notificados mediante señales a los servidores KIE
+        // Si se trata de una notificación de eventos publica las referencias en Kafka
         if (notificationType == SubscriptionNotificationType.EVENTNOTIFICATION) {
             CompletableFuture
-                    .runAsync(() -> kieService.sendSignal(idTrigger, getReferenceNotifications(subscriptionStatus)));
+                    .runAsync(() -> publishToKafka(kafkaTopicName, getReferenceNotifications(subscriptionStatus)));
         }
 
         // Guarda el último evento recibido
@@ -179,14 +177,14 @@ public class NotificationService {
             status = subscriptionStatus.getStatus();
 
             // Comprueba que no se haya perdido ningún evento y, en caso de detectar
-            // perdida, recupera estos eventos y se notifica al servidor KIE correspondiente
+            // perdida, recupera estos eventos y se notifica a Kafka
             Long lastEventSent = subscriptionStatus.getEventsSinceSubscriptionStart();
             Long lastEventReceived = subscriptionData.getEvents();
-            Long idTrigger = subscriptionData.getTopic().getTrigger().getId();
+            String kafkaTopicName = subscriptionData.getTopic().getKafkaTopicName();
             if (lastEventSent > lastEventReceived) {
                 logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
                 CompletableFuture.runAsync(() -> getAndSendLostEvents(server.getUrl(),
-                        subscriptionData.getIdSubscription(), lastEventReceived + 1, lastEventSent, idTrigger));
+                        subscriptionData.getIdSubscription(), lastEventReceived + 1, lastEventSent, kafkaTopicName));
             }
 
             subscriptionData.setEvents(lastEventSent);
@@ -236,21 +234,42 @@ public class NotificationService {
      * Obtiene el listado de referencias de recursos notificados que contiene un
      * SubscriptionStatus.
      * 
+    /**
+     * Obtiene el listado de referencias de recursos notificados que contiene un
+     * SubscriptionStatus.
+     * 
      * @param urlServer         URL del servidor FHIR.
      * @param idSubscription    identificador de la subscripción FHIR.
      * @param eventsSinceNumber número del primer evento perdido.
      * @param eventsUntilNumber número del último evento perdido.
-     * @param idTrigger         identificador del trigger.
+     * @param kafkaTopicName    nombre del topic de Kafka.
      */
     private void getAndSendLostEvents(String urlServer, String idSubscription, Long eventsSinceNumber,
-            Long eventsUntilNumber, Long idTrigger) {
+            Long eventsUntilNumber, String kafkaTopicName) {
         // Recupera los eventos perdidos
         SubscriptionStatus lostEvents = fhirService.getLostEvents(urlServer, idSubscription, eventsSinceNumber,
                 eventsUntilNumber);
 
-        // Envía las referencia de los recursos notificados mediante señales a los
-        // servidores KIE configurados.
-        kieService.sendSignal(idTrigger, getReferenceNotifications(lostEvents));
+        // Publica las referencias de los recursos notificados en Kafka
+        publishToKafka(kafkaTopicName, getReferenceNotifications(lostEvents));
+    }
+
+    /**
+     * Publica una lista de referencias de recursos FHIR en un topic de Kafka
+     * 
+     * @param kafkaTopicName nombre del topic de Kafka
+     * @param references     lista de referencias de recursos FHIR
+     */
+    private void publishToKafka(String kafkaTopicName, List<String> references) {
+        if (kafkaTopicName == null || kafkaTopicName.isEmpty()) {
+            logger.warn("No hay topic de Kafka configurado para esta subscripción");
+            return;
+        }
+        
+        for (String reference : references) {
+            logger.info("Publicando en Kafka topic '{}': {}", kafkaTopicName, reference);
+            kafkaProducerService.publishMessage(kafkaTopicName, reference);
+        }
     }
 
 }

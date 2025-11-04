@@ -27,23 +27,33 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
- * Entidad que representa los datos de los disparadores de eventos
+ * Entidad que representa los datos de un broker Kafka
  * 
  * @author josperbel
  * @version 1.0
- * @date Abr 2025
+ * @date Nov 2025
  */
-@Entity(name = "TRIGGERS")
-public class Trigger {
+@Entity(name = "KAFKA_BROKERS")
+public class KafkaBroker {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
     private Long id;
-    @Column(name = "RESOURCE")
-    private String resource;
-    @Column(name = "INTERACTION")
-    private String interaction;
+
+    @Column(name = "NAME")
+    private String name;
+
+    @Column(name = "BOOTSTRAP_SERVERS")
+    private String bootstrapServers;
+
+    public KafkaBroker() {
+    }
+
+    public KafkaBroker(String name, String bootstrapServers) {
+        this.name = name;
+        this.bootstrapServers = bootstrapServers;
+    }
 
     public Long getId() {
         return id;
@@ -53,19 +63,19 @@ public class Trigger {
         this.id = id;
     }
 
-    public String getResource() {
-        return resource;
+    public String getName() {
+        return name;
     }
 
-    public void setResource(String resource) {
-        this.resource = resource;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getInteraction() {
-        return interaction;
+    public String getBootstrapServers() {
+        return bootstrapServers;
     }
 
-    public void setInteraction(String interaction) {
-        this.interaction = interaction;
+    public void setBootstrapServers(String bootstrapServers) {
+        this.bootstrapServers = bootstrapServers;
     }
 }
