@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -22,8 +22,8 @@ package us.dit.fkbroker.service.controllers;
 
 import java.net.ConnectException;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import us.dit.fkbroker.service.services.fhir.FhirService;
 
 /**
- * Controlador que gestiona las llamadas a los métodos necesarios al navegar por
+ * Controlador que gestiona las llamadas a los mÃ©todos necesarios al navegar por
  * la interfaz web.
  * 
  * @author juanmabrazo98
@@ -60,7 +60,7 @@ public class MyErrorController implements ErrorController {
             Throwable root = getRootCause((Throwable) exception);
 
             if (root instanceof ConnectException) {
-                error = "No se pudo establecer la conexión con el servidor FHIR";
+                error = "No se pudo establecer la conexiÃ³n con el servidor FHIR";
             } else {
                 error = "Error desconocido: " + root.getClass().getSimpleName();
             }

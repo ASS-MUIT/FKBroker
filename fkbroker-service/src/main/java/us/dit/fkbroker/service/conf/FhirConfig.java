@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -27,8 +27,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 /**
- * Permite definir un bean único para FhirContext, asegurando que toda la
- * aplicación use la misma instancia y se beneficie de las optimizaciones
+ * Permite definir un bean Ãºnico para FhirContext, asegurando que toda la
+ * aplicaciÃ³n use la misma instancia y se beneficie de las optimizaciones
  * internas del contexto.
  * 
  * @author josperbel

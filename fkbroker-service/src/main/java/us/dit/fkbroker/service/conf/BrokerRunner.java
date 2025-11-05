@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -36,7 +36,7 @@ import us.dit.fkbroker.service.services.fhir.NotificationService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionService;
 
 /**
- * Componente ejecutado al iniciar la aplicación.
+ * Componente ejecutado al iniciar la aplicaciÃ³n.
  * 
  *
  * @author josperbel
@@ -83,12 +83,12 @@ public class BrokerRunner implements ApplicationRunner {
             List<SubscriptionData> subscriptionDatas = subscriptionService.getSubscriptions(fhirServer.getId());
 
             for (SubscriptionData subscriptionData : subscriptionDatas) {
-                // Actualiza la información de la subscripción
+                // Actualiza la informaciÃ³n de la subscripciÃ³n
                 try {
                     subscriptionData = notificationService.updateSubscriptionStatus(fhirServer, subscriptionData);
                     subscriptionService.updateSubscription(subscriptionData);
                 } catch (Exception e) {
-                    logger.warn("No se ha podido actualizar la subscripción {} del servidor {}.",
+                    logger.warn("No se ha podido actualizar la subscripciÃ³n {} del servidor {}.",
                             subscriptionData.getIdSubscription(), fhirServer.getId());
                 }
             }

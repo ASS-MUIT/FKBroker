@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -23,7 +23,7 @@ package us.dit.fkbroker.service.conf;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

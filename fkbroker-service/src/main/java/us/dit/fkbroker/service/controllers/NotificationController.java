@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -39,7 +39,7 @@ import us.dit.fkbroker.service.services.fhir.SubscriptionService;
  * Controlador para manejar las notificaciones.
  * 
  * @author juanmabrazo98
- * @author josperbel - Nueva ubicación de entidades y utilización de nuevo
+ * @author josperbel - Nueva ubicaciÃ³n de entidades y utilizaciÃ³n de nuevo
  *         servicio {@link FhirService}
  * @version 1.1
  * @date Mar 2025
@@ -69,25 +69,25 @@ public class NotificationController {
     }
 
     /**
-     * Método que maneja las notificaciones. Publica las referencias de recursos
+     * MÃ©todo que maneja las notificaciones. Publica las referencias de recursos
      * en Kafka y responde al servidor FHIR indicando que se ha recibido
-     * la notificación.
+     * la notificaciÃ³n.
      * 
-     * @param id      identificador del endpoint de la notificación.
-     * @param message mensaje que contiene los detalles de la notificación.
+     * @param id      identificador del endpoint de la notificaciÃ³n.
+     * @param message mensaje que contiene los detalles de la notificaciÃ³n.
      * @return una respuesta HTTP con el cuerpo del JSON proporcionado.
      */
     @PostMapping("/{id}")
     public ResponseEntity<String> sendNotification(@PathVariable Long id, @RequestBody String message) {
-        logger.info("Se recibe un mensaje de notificación: {}", message);
+        logger.info("Se recibe un mensaje de notificaciÃ³n: {}", message);
 
-        // Obtiene los datos de la subscripción
+        // Obtiene los datos de la subscripciÃ³n
         SubscriptionData subscription = subscriptionService.getSubscriptionData(id);
 
-        // Procesa el mensaje de notificación, obtiene los detalles de la subscripción
+        // Procesa el mensaje de notificaciÃ³n, obtiene los detalles de la subscripciÃ³n
         subscription = notificationService.processNotification(message, subscription);
 
-        // Actualiza la subscripción con los detalles de la notificación
+        // Actualiza la subscripciÃ³n con los detalles de la notificaciÃ³n
         subscriptionService.updateSubscription(subscription);
 
         return ResponseEntity.ok(message);

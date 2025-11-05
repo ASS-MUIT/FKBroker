@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -74,11 +74,11 @@ public class SubscriptionService {
     }
 
     /**
-     * Obtiene una subscripción de la base de datos por su identificador.
+     * Obtiene una subscripciÃ³n de la base de datos por su identificador.
      * 
-     * @param idEndpoint identificador de la subscripción.
-     * @return la subscripción obtenida.
-     * @throws RuntimeException si no encuentra la subscripción.
+     * @param idEndpoint identificador de la subscripciÃ³n.
+     * @return la subscripciÃ³n obtenida.
+     * @throws RuntimeException si no encuentra la subscripciÃ³n.
      */
     public SubscriptionData getSubscriptionData(Long id) {
         Optional<SubscriptionData> optionalSubscription = subscriptionRepository.findById(id);
@@ -91,11 +91,11 @@ public class SubscriptionService {
     }
 
     /**
-     * Obtiene los detalles de una subscripción de un servidor FHIR.
+     * Obtiene los detalles de una subscripciÃ³n de un servidor FHIR.
      * 
      * @param server datos del servidor FHIR.
-     * @param id     identificador de la subscripción.
-     * @return los detalles de la subscripción obtenida.
+     * @param id     identificador de la subscripciÃ³n.
+     * @return los detalles de la subscripciÃ³n obtenida.
      */
     public String getSubscriptionDetails(FhirServer server, String id) {
         Subscription subscription = fhirService.getSubscription(server.getUrl(), id);
@@ -114,9 +114,9 @@ public class SubscriptionService {
 
     /**
      * Obtiene todas las subscripciones de un servidor FHIR y actualiza la
-     * información de base de datos si ha ocurrido algún cambio.
+     * informaciÃ³n de base de datos si ha ocurrido algÃºn cambio.
      * 
-     * @param server información del servidor FHIR.
+     * @param server informaciÃ³n del servidor FHIR.
      * @return el listado de subscripciones actualizado.
      */
     public List<SubscriptionEntry> getAndUpdateSubscriptions(FhirServer server) {
@@ -128,23 +128,23 @@ public class SubscriptionService {
         // Obtiene los datos de las subscripciones guardadas en la base de datos
         List<SubscriptionData> databaseSubscriptions = subscriptionRepository.findByServerId(server.getId());
 
-        // Convierte la lista en mapa por su identificador para facilitar las búsquedas
+        // Convierte la lista en mapa por su identificador para facilitar las bÃºsquedas
         Map<String, Subscription> serverSubscriptionsMap = serverSubscriptions.stream()
                 .collect(Collectors.toMap(Subscription::getIdPart, obj -> obj));
 
         for (SubscriptionData subscriptionData : databaseSubscriptions) {
             if (!serverSubscriptionsMap.containsKey(subscriptionData.getIdSubscription())) {
-                // Si no se encuentra la subscripción en el servidor FHIR, se actualiza el
-                // estado de la subscripción en base de datos a NULL
+                // Si no se encuentra la subscripciÃ³n en el servidor FHIR, se actualiza el
+                // estado de la subscripciÃ³n en base de datos a NULL
                 subscriptionData.setStatus(SubscriptionStatusCodes.NULL.toCode());
                 subscriptionData.setUpdated(new Date());
                 subscriptionData = subscriptionRepository.save(subscriptionData);
             } else {
-                // Si se encuentra, obtiene el estado de la subscripción
+                // Si se encuentra, obtiene el estado de la subscripciÃ³n
                 Subscription subscription = serverSubscriptionsMap.get(subscriptionData.getIdSubscription());
                 String status = subscription.getStatus().toCode();
 
-                // Actualiza el estado de la subscripción de base de datos si hay algún cambio
+                // Actualiza el estado de la subscripciÃ³n de base de datos si hay algÃºn cambio
                 if (!status.equals(subscriptionData.getStatus())) {
                     subscriptionData.setStatus(status);
                     subscriptionData.setUpdated(new Date());
@@ -161,28 +161,28 @@ public class SubscriptionService {
     }
 
     /**
-     * Crea una nueva subscripción con los datos pasados en el servidor FHIR y
+     * Crea una nueva subscripciÃ³n con los datos pasados en el servidor FHIR y
      * guarda los detalles de la misma en la base de datos.
      * 
-     * @param server           información del servidor FHIR donde se debe crear la
-     *                         subscripción.
-     * @param server           información del Subscription Topic para el que se
-     *                         debe crear la subscipción.
-     * @param subscriptionForm datos de la subscripción que se desea crear.
+     * @param server           informaciÃ³n del servidor FHIR donde se debe crear la
+     *                         subscripciÃ³n.
+     * @param server           informaciÃ³n del Subscription Topic para el que se
+     *                         debe crear la subscipciÃ³n.
+     * @param subscriptionForm datos de la subscripciÃ³n que se desea crear.
      */
     public void createSubscription(FhirServer server, Topic topic, SubscriptionForm subscriptionForm) {
-        // Crea en base de datos la subscripción
+        // Crea en base de datos la subscripciÃ³n
         SubscriptionData subscriptionData = new SubscriptionData(server, topic);
         subscriptionData = subscriptionRepository.save(subscriptionData);
 
-        // Obtiene la dirección del endpoint de la subscripción
+        // Obtiene la direcciÃ³n del endpoint de la subscripciÃ³n
         String endpoint = applicationAddress + "notification/" + subscriptionData.getId();
 
-        // Crea la subscripción en el servidor FHIR
+        // Crea la subscripciÃ³n en el servidor FHIR
         Subscription subscription = subscriptionMapper.toSubscription(subscriptionForm, endpoint);
         Subscription createdSubscription = fhirService.createSubscription(server.getUrl(), subscription);
 
-        // Actualiza la subscripción con el identificador y el estado de la subscripción
+        // Actualiza la subscripciÃ³n con el identificador y el estado de la subscripciÃ³n
         // que se acaba de crear en el servidor FHIR
         subscriptionData.setIdSubscription(createdSubscription.getIdElement().getIdPart());
         subscriptionData.setStatus(createdSubscription.getStatus().toCode());
@@ -190,10 +190,10 @@ public class SubscriptionService {
     }
 
     /**
-     * Actualiza los datos de una subscripción en la base de datos.
+     * Actualiza los datos de una subscripciÃ³n en la base de datos.
      * 
-     * @param subscriptionData datos de la subscripción a actualizar.
-     * @return los datos de la subscripción actualizada.
+     * @param subscriptionData datos de la subscripciÃ³n a actualizar.
+     * @return los datos de la subscripciÃ³n actualizada.
      */
     public SubscriptionData updateSubscription(SubscriptionData subscriptionData) {
         subscriptionData.setUpdated(new Date());
@@ -201,17 +201,17 @@ public class SubscriptionService {
     }
 
     /**
-     * Elimina una subscripción de un servidor FHIR y de la base de datos.
+     * Elimina una subscripciÃ³n de un servidor FHIR y de la base de datos.
      * 
-     * @param server         datos del servidor FHIR de la subscripción a eliminar.
-     * @param idSubscription identificador de la subscripción a eliminar.
+     * @param server         datos del servidor FHIR de la subscripciÃ³n a eliminar.
+     * @param idSubscription identificador de la subscripciÃ³n a eliminar.
      */
     @Transactional
     public void deleteSubscription(FhirServer server, String idSubscription) {
-        // Elimina la subscripción del servidor FHIR
+        // Elimina la subscripciÃ³n del servidor FHIR
         fhirService.deleteSubscription(server.getUrl(), idSubscription);
 
-        // Elimina la subscripción de la base de datos
+        // Elimina la subscripciÃ³n de la base de datos
         subscriptionRepository.deleteByServerAndIdSubscription(server, idSubscription);
     }
 }

@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -74,7 +74,7 @@ public class SubscriptionTopicService {
     /**
      * Obtiene un topic de la base de datos.
      * 
-     * @param server información del servidor FHIR..
+     * @param server informaciÃ³n del servidor FHIR..
      * @param id     identificador del Subscription Topic a obtener.
      * @return la entidad Topic de la base de datos.
      */
@@ -114,7 +114,7 @@ public class SubscriptionTopicService {
 
     /**
      * Obtiene los datos de los Subscription Topic de un servidor FHIR y actualiza
-     * la base de datos con dicha información si es necesario.
+     * la base de datos con dicha informaciÃ³n si es necesario.
      * 
      * @param server datos del servidor FHIR.
      * @return el listado de Subscription Topics disponibles en el servidor.
@@ -123,7 +123,7 @@ public class SubscriptionTopicService {
         // Obtiene los SubscriptionTopic del servidor FHIR
         List<SubscriptionTopic> serverTopics = fhirService.getSubscriptionTopics(server.getUrl());
 
-        // Obtiene los SubscriptionTopic que están guardados en base de datos
+        // Obtiene los SubscriptionTopic que estÃ¡n guardados en base de datos
         List<Topic> databaseTopics = subscriptionTopicRepository.findByServer(server);
 
         // Convierte las listas en mapas por su identificador
@@ -136,13 +136,13 @@ public class SubscriptionTopicService {
         Set<String> serverIds = serverTopicsMap.keySet();
         Set<String> databaseIds = databaseTopicsMap.keySet();
 
-        // Topics que están en el servidor pero no en la base de datos
+        // Topics que estÃ¡n en el servidor pero no en la base de datos
         Set<String> idsToCreate = new HashSet<>(serverIds);
         idsToCreate.removeAll(databaseIds);
         List<SubscriptionTopic> topicsToCreate = idsToCreate.stream().map(serverTopicsMap::get)
                 .collect(Collectors.toList());
 
-        // Topics que están en la base de datos pero no en el servidor
+        // Topics que estÃ¡n en la base de datos pero no en el servidor
         Set<String> idsToDelete = new HashSet<>(databaseIds);
         idsToDelete.removeAll(serverIds);
         List<Topic> topicsToDelete = idsToDelete.stream().map(databaseTopicsMap::get).collect(Collectors.toList());
@@ -154,7 +154,7 @@ public class SubscriptionTopicService {
             topic.setIdTopic(subscriptionTopic.getIdPart());
             topic.setServer(server);
             
-            // Genera automáticamente el nombre del topic Kafka
+            // Genera automÃ¡ticamente el nombre del topic Kafka
             String kafkaTopicName = generateKafkaTopicName(subscriptionTopic.getIdPart());
             topic.setKafkaTopicName(kafkaTopicName);
             
@@ -169,9 +169,9 @@ public class SubscriptionTopicService {
     }
 
     /**
-     * Elimina todos los temas de subscripción de la base de datos de un servidor.
+     * Elimina todos los temas de subscripciÃ³n de la base de datos de un servidor.
      * 
-     * @param server información del servidor FHIR.
+     * @param server informaciÃ³n del servidor FHIR.
      */
     public void deleteSubscriptionTopics(FhirServer server) {
         subscriptionTopicRepository.deleteAllByServer(server);
@@ -188,16 +188,16 @@ public class SubscriptionTopicService {
             return "fhir-default";
         }
         
-        // Si es una URL, extraer la última parte
+        // Si es una URL, extraer la Ãºltima parte
         if (fhirTopicId.contains("/")) {
             String[] parts = fhirTopicId.split("/");
             fhirTopicId = parts[parts.length - 1];
         }
         
-        // Normalizar: minúsculas, reemplazar caracteres no válidos con guiones
+        // Normalizar: minÃºsculas, reemplazar caracteres no vÃ¡lidos con guiones
         String normalized = fhirTopicId.toLowerCase()
                                        .replaceAll("[^a-z0-9-]", "-")
-                                       .replaceAll("-+", "-")  // Múltiples guiones → uno solo
+                                       .replaceAll("-+", "-")  // MÃºltiples guiones â†’ uno solo
                                        .replaceAll("^-|-$", ""); // Eliminar guiones al inicio/final
         
         return "fhir-" + normalized;

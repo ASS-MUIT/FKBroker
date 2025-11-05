@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -82,14 +82,14 @@ public class NotificationService {
     /**
      * Obtiene las referencia de los recursos que se han notificado.
      * 
-     * @param notification el JSON que contiene la notificación.
-     * @return la URL completa del recurso de notificación.
+     * @param notification el JSON que contiene la notificaciÃ³n.
+     * @return la URL completa del recurso de notificaciÃ³n.
      */
     public SubscriptionData processNotification(String mesagge, SubscriptionData subscriptionData) {
         String kafkaTopicName = subscriptionData.getTopic().getKafkaTopicName();
         FhirServer server = subscriptionData.getServer();
 
-        // Obtiene el Bundle de la notificación recibida
+        // Obtiene el Bundle de la notificaciÃ³n recibida
         Bundle bundle = jsonParser.parseResource(Bundle.class, mesagge);
 
         // Comprueba que tenga SubscriptionStatus y lo extrae
@@ -101,109 +101,109 @@ public class NotificationService {
             subscriptionStatus = (SubscriptionStatus) bundle.getEntryFirstRep().getResource();
         }
 
-        // Comprueba que sea un tipo de notificación válido, sino lanza una excepción
+        // Comprueba que sea un tipo de notificaciÃ³n vÃ¡lido, sino lanza una excepciÃ³n
         SubscriptionNotificationType notificationType = subscriptionStatus.getType();
         if (!validTypes.contains(notificationType)) {
             throw new RuntimeException("Invalid NotificationType");
         }
 
-        // Comprueba el estado de la subscripción, actualizandolo si es necesario
+        // Comprueba el estado de la subscripciÃ³n, actualizandolo si es necesario
         SubscriptionStatusCodes status = subscriptionStatus.getStatus();
         if (status == SubscriptionStatusCodes.ERROR) {
-            // Si detecta un error, vuelve a activar la subscripción y actualiza el estado
-            logger.warn("Se detecta estado de ERROR. Se inicia proceso de actualización.");
+            // Si detecta un error, vuelve a activar la subscripciÃ³n y actualiza el estado
+            logger.warn("Se detecta estado de ERROR. Se inicia proceso de actualizaciÃ³n.");
             CompletableFuture.runAsync(
                     () -> fhirService.updateSubscriptionStatus(server.getUrl(), subscriptionData.getIdSubscription()));
             subscriptionData.setStatus(SubscriptionStatusCodes.REQUESTED.toCode());
         } else {
-            // Si no, guarda el estado de la notificación en la subscripción
+            // Si no, guarda el estado de la notificaciÃ³n en la subscripciÃ³n
             subscriptionData.setStatus(status.toCode());
         }
 
-        // Comprueba si tiene la operación $events activada
+        // Comprueba si tiene la operaciÃ³n $events activada
         if (server.getQueryOperations()) {
-            // Comprueba si se trata de una notificación de eventos
+            // Comprueba si se trata de una notificaciÃ³n de eventos
             if (notificationType == SubscriptionNotificationType.EVENTNOTIFICATION) {
                 // En este caso recupera el primer evento recibido y el esperado
                 Long receivedEvent = subscriptionStatus.getNotificationEventFirstRep().getEventNumber();
                 Long expectedEvent = subscriptionData.getEvents() + 1;
                 if (receivedEvent > expectedEvent) {
-                    logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
+                    logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperaciÃ³n.");
                     CompletableFuture.runAsync(() -> getAndSendLostEvents(server.getUrl(),
                             subscriptionData.getIdSubscription(), expectedEvent, receivedEvent - 1, kafkaTopicName));
                 }
             } else {
-                // Si no se trata de una notificación de eventos, recupera el último evento
-                // enviado y el último evento recibido
+                // Si no se trata de una notificaciÃ³n de eventos, recupera el Ãºltimo evento
+                // enviado y el Ãºltimo evento recibido
                 Long lastEventSent = subscriptionStatus.getEventsSinceSubscriptionStart();
                 Long lastEventReceived = subscriptionData.getEvents();
                 if (lastEventSent > lastEventReceived) {
-                    logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
+                    logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperaciÃ³n.");
                     CompletableFuture.runAsync(() -> getAndSendLostEvents(server.getUrl(),
                             subscriptionData.getIdSubscription(), lastEventReceived + 1, lastEventSent, kafkaTopicName));
                 }
             }
         }
 
-        // Si se trata de una notificación de eventos publica las referencias en Kafka
+        // Si se trata de una notificaciÃ³n de eventos publica las referencias en Kafka
         if (notificationType == SubscriptionNotificationType.EVENTNOTIFICATION) {
             CompletableFuture
                     .runAsync(() -> publishToKafka(kafkaTopicName, getReferenceNotifications(subscriptionStatus)));
         }
 
-        // Guarda el último evento recibido
+        // Guarda el Ãºltimo evento recibido
         subscriptionData.setEvents(subscriptionStatus.getEventsSinceSubscriptionStart());
 
         return subscriptionData;
     }
 
     /**
-     * Actualiza los datos de una subscripción en la base de datos comprobando su
+     * Actualiza los datos de una subscripciÃ³n en la base de datos comprobando su
      * estado actual en el servidor FHIR. Si el servidor tiene activadas las
-     * operaciones $status y $events, también comprueba que no se haya perdido
-     * ningún evento.
+     * operaciones $status y $events, tambiÃ©n comprueba que no se haya perdido
+     * ningÃºn evento.
      * 
-     * @param server           información del servidor FHIR.
-     * @param subscriptionData datos de la subscripción a actualizar.
+     * @param server           informaciÃ³n del servidor FHIR.
+     * @param subscriptionData datos de la subscripciÃ³n a actualizar.
      */
     public SubscriptionData updateSubscriptionStatus(FhirServer server, SubscriptionData subscriptionData) {
         SubscriptionStatusCodes status;
 
         // Comprueba si tiene las operaciones $status y $events activadas
         if (server.getQueryOperations()) {
-            // Obtiene el estado de la subscripción
+            // Obtiene el estado de la subscripciÃ³n
             SubscriptionStatus subscriptionStatus = fhirService.getStatus(server.getUrl(),
                     subscriptionData.getIdSubscription());
             status = subscriptionStatus.getStatus();
 
-            // Comprueba que no se haya perdido ningún evento y, en caso de detectar
+            // Comprueba que no se haya perdido ningÃºn evento y, en caso de detectar
             // perdida, recupera estos eventos y se notifica a Kafka
             Long lastEventSent = subscriptionStatus.getEventsSinceSubscriptionStart();
             Long lastEventReceived = subscriptionData.getEvents();
             String kafkaTopicName = subscriptionData.getTopic().getKafkaTopicName();
             if (lastEventSent > lastEventReceived) {
-                logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperación.");
+                logger.warn("Se detectan eventos perdidos. Se inicia proceso de recuperaciÃ³n.");
                 CompletableFuture.runAsync(() -> getAndSendLostEvents(server.getUrl(),
                         subscriptionData.getIdSubscription(), lastEventReceived + 1, lastEventSent, kafkaTopicName));
             }
 
             subscriptionData.setEvents(lastEventSent);
         } else {
-            // Obtiene el estado de la subscripción
+            // Obtiene el estado de la subscripciÃ³n
             Subscription subscription = fhirService.getSubscription(server.getUrl(),
                     subscriptionData.getIdSubscription());
             status = subscription.getStatus();
         }
 
-        // Comprueba el estado de la subscripción, actualizandolo si es necesario
+        // Comprueba el estado de la subscripciÃ³n, actualizandolo si es necesario
         if (status == SubscriptionStatusCodes.ERROR) {
-            // Si detecta un error, vuelve a activar la subscripción y actualiza el estado
-            logger.warn("Se detecta estado de ERROR. Se inicia proceso de actualización.");
+            // Si detecta un error, vuelve a activar la subscripciÃ³n y actualiza el estado
+            logger.warn("Se detecta estado de ERROR. Se inicia proceso de actualizaciÃ³n.");
             CompletableFuture.runAsync(
                     () -> fhirService.updateSubscriptionStatus(server.getUrl(), subscriptionData.getIdSubscription()));
             subscriptionData.setStatus(SubscriptionStatusCodes.REQUESTED.toCode());
         } else {
-            // Si no, guarda el estado de la notificación en la subscripción
+            // Si no, guarda el estado de la notificaciÃ³n en la subscripciÃ³n
             subscriptionData.setStatus(status.toCode());
         }
 
@@ -214,8 +214,8 @@ public class NotificationService {
      * Obtiene el listado de referencias de recursos notificados que contiene un
      * SubscriptionStatus.
      * 
-     * @param subscriptionStatus recurso FHIR con la información del estado de la
-     *                           subscribción.
+     * @param subscriptionStatus recurso FHIR con la informaciÃ³n del estado de la
+     *                           subscribciÃ³n.
      * @return el listado de recursos que contiene el SubscriptionStatus.
      */
     private List<String> getReferenceNotifications(SubscriptionStatus subscriptionStatus) {
@@ -239,9 +239,9 @@ public class NotificationService {
      * SubscriptionStatus.
      * 
      * @param urlServer         URL del servidor FHIR.
-     * @param idSubscription    identificador de la subscripción FHIR.
-     * @param eventsSinceNumber número del primer evento perdido.
-     * @param eventsUntilNumber número del último evento perdido.
+     * @param idSubscription    identificador de la subscripciÃ³n FHIR.
+     * @param eventsSinceNumber nÃºmero del primer evento perdido.
+     * @param eventsUntilNumber nÃºmero del Ãºltimo evento perdido.
      * @param kafkaTopicName    nombre del topic de Kafka.
      */
     private void getAndSendLostEvents(String urlServer, String idSubscription, Long eventsSinceNumber,
@@ -262,7 +262,7 @@ public class NotificationService {
      */
     private void publishToKafka(String kafkaTopicName, List<String> references) {
         if (kafkaTopicName == null || kafkaTopicName.isEmpty()) {
-            logger.warn("No hay topic de Kafka configurado para esta subscripción");
+            logger.warn("No hay topic de Kafka configurado para esta subscripciÃ³n");
             return;
         }
         

@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -48,7 +48,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
  * Esta clase desarrolla las distintas operaciones que se realizan sobre
  * elementos FHIR.
  * 
- * Esta clase está desarrollada partiendo de la base de la clase FhirClient de
+ * Esta clase estÃ¡ desarrollada partiendo de la base de la clase FhirClient de
  * juanmabrazo98, optimizando el uso de recursos y clientes de HAPI FHIR en
  * lugar de RestTemplate y JSONObject.
  * 
@@ -102,7 +102,7 @@ public class FhirService {
         IGenericClient client = getClient(fhirUrl);
         Bundle bundle = client.search().forResource(SubscriptionTopic.class).returnBundle(Bundle.class).execute();
 
-        // Comprueba si obtengo respuesta y no está vacía
+        // Comprueba si obtengo respuesta y no estÃ¡ vacÃ­a
         if (bundle == null || bundle.getEntry().isEmpty()) {
             return Collections.emptyList();
         } else {
@@ -134,7 +134,7 @@ public class FhirService {
         IGenericClient client = getClient(fhirUrl);
         Bundle bundle = client.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
 
-        // Comprueba si obtengo respuesta y no está vacía
+        // Comprueba si obtengo respuesta y no estÃ¡ vacÃ­a
         if (bundle == null || bundle.getEntry().isEmpty()) {
             return Collections.emptyList();
         } else {
@@ -157,32 +157,32 @@ public class FhirService {
     }
 
     /**
-     * Crea una nueva suscripción en el servidor FHIR.
+     * Crea una nueva suscripciÃ³n en el servidor FHIR.
      * 
      * @param topicUrl la URL del SubscriptionTopic.
-     * @param payload  el payload de la suscripción.
-     * @param filters  la lista de filtros de la suscripción.
+     * @param payload  el payload de la suscripciÃ³n.
+     * @param filters  la lista de filtros de la suscripciÃ³n.
      * @param fhirUrl  la URL del servidor FHIR.
-     * @param endpoint el endpoint de la suscripción.
+     * @param endpoint el endpoint de la suscripciÃ³n.
      */
     public Subscription createSubscription(String fhirUrl, Subscription subscription) {
         logger.debug("Entro en createSubscription del fhirClient");
 
-        // Envía el recurso Subscription al servidor FHIR
+        // EnvÃ­a el recurso Subscription al servidor FHIR
         IGenericClient client = getClient(fhirUrl);
         Subscription createdSubscription = (Subscription) client.create().resource(subscription).execute()
                 .getResource();
 
-        logger.info("Suscripción creada: {}",
+        logger.info("SuscripciÃ³n creada: {}",
                 jsonParser.setPrettyPrint(true).encodeResourceToString(createdSubscription));
 
         return createdSubscription;
     }
 
     /**
-     * Elimina una suscripción en el servidor FHIR.
+     * Elimina una suscripciÃ³n en el servidor FHIR.
      * 
-     * @param subscriptionId el ID de la suscripción a eliminar.
+     * @param subscriptionId el ID de la suscripciÃ³n a eliminar.
      * @param fhirUrl        la URL del servidor FHIR.
      */
     public void deleteSubscription(String fhirUrl, String id) {
@@ -194,14 +194,14 @@ public class FhirService {
      * Obtiene las referencia de las notificaciones que se han perdido.
      * 
      * @param fhirUrl           la URL del servidor FHIR.
-     * @param subscriptionId    el identificador de la subscripción.
-     * @param eventsSinceNumber el número del primer evento perdido.
-     * @param eventsUntilNumber el número del último evento perdido.
+     * @param subscriptionId    el identificador de la subscripciÃ³n.
+     * @param eventsSinceNumber el nÃºmero del primer evento perdido.
+     * @param eventsUntilNumber el nÃºmero del Ãºltimo evento perdido.
      * @return la respuesta del servidor.
      */
     public SubscriptionStatus getLostEvents(String fhirUrl, String subscriptionId, Long eventsSinceNumber,
             Long eventsUntilNumber) {
-        // Prepara los parámetros de entrada para realizar la consulta
+        // Prepara los parÃ¡metros de entrada para realizar la consulta
         Parameters inputParams = new Parameters();
         inputParams.addParameter().setName("eventsSinceNumber").setValue(new Integer64Type(eventsSinceNumber));
         inputParams.addParameter().setName("eventsUntilNumber").setValue(new Integer64Type(eventsUntilNumber));
@@ -223,10 +223,10 @@ public class FhirService {
     }
 
     /**
-     * Obtiene el estado de la subscripción.
+     * Obtiene el estado de la subscripciÃ³n.
      * 
      * @param fhirUrl        la URL del servidor FHIR.
-     * @param subscriptionId el identificador de la subscripción.
+     * @param subscriptionId el identificador de la subscripciÃ³n.
      * @return la respuesta del servidor.
      */
     public SubscriptionStatus getStatus(String fhirUrl, String subscriptionId) {
@@ -252,7 +252,7 @@ public class FhirService {
 
         String patchBody = "[{ \"op\": \"replace\", \"path\": \"/status\", \"value\": \"requested\" }]";
 
-        // Realizar la operación PATCH
+        // Realizar la operaciÃ³n PATCH
         MethodOutcome methodOutcome = client.patch().withBody(patchBody)
                 .withId(new IdType("Subscription", subscriptionId)).encodedJson().preferResponseType(Subscription.class)
                 .execute();

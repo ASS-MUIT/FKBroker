@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -67,7 +67,7 @@ public class SubscriptionMapper {
      * Transforma una entidad {@link SubscriptionData} en un objeto de dominio
      * {@link SubscriptionEntry}
      * 
-     * @param subscription entidad con datos de la subscripción que se desea
+     * @param subscription entidad con datos de la subscripciÃ³n que se desea
      *                     transformar en {@link SubscriptionEntry}.
      * @return el objeto {@link SubscriptionEntry}.
      */
@@ -87,9 +87,9 @@ public class SubscriptionMapper {
      * Transforma un objeto de dominio {@link SubscriptionForm} en el objeto FHIR
      * {@link Subscription}
      * 
-     * @param subscription objeto del dominio con datos de la subscripción que se
+     * @param subscription objeto del dominio con datos de la subscripciÃ³n que se
      *                     desea transformar en el objeto FHIR {@link Subscription}.
-     * @param endpoint     cadena de texto con el endpoint de la subscripción.
+     * @param endpoint     cadena de texto con el endpoint de la subscripciÃ³n.
      * @return el objeto {@link Subscription}.
      */
     public Subscription toSubscription(SubscriptionForm subscriptionForm, String endpoint) {
@@ -130,8 +130,8 @@ public class SubscriptionMapper {
     /**
      * Transforma un objeto FHIR {@link Subscription} en una cadena de texto.
      * 
-     * @param subscription objeto FHIR con los datos de la subscripción.
-     * @return la cadena de texto con los datos de la subscripción.
+     * @param subscription objeto FHIR con los datos de la subscripciÃ³n.
+     * @return la cadena de texto con los datos de la subscripciÃ³n.
      */
     public String toString(Subscription subscription) {
         return jsonParser.setPrettyPrint(true).encodeResourceToString(subscription);

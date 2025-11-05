@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -23,7 +23,7 @@ package us.dit.fkbroker.service.entities.domain;
 import java.util.Date;
 
 /**
- * Entidad que representa los detalles de una señal
+ * Entidad que representa los detalles de una seÃ±al
  * 
  * @author josperbel
  * @version 1.0

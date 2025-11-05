@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -39,15 +39,15 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * Versión nueva de seguridad, sustituye la ocnfiguración por defecto que se
- * genera con el arquetipo maven utilizando convenciones de seguridad más
- * actuales ahora está basada en beans, más información en:
+ * VersiÃ³n nueva de seguridad, sustituye la ocnfiguraciÃ³n por defecto que se
+ * genera con el arquetipo maven utilizando convenciones de seguridad mÃ¡s
+ * actuales ahora estÃ¡ basada en beans, mÃ¡s informaciÃ³n en:
  * https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter
  * Esto va bien cuando se utiliza el spring boot starter 2.6.15 y el kie server
- * 7.74.1.Final fecha de la revisión 6/10/2023
+ * 7.74.1.Final fecha de la revisiÃ³n 6/10/2023
  * 
- * TO DO: Utilizar la autenticación basada en oauth o en SAML (SSO) contra un
- * servidor de autenticación externo REF:
+ * TO DO: Utilizar la autenticaciÃ³n basada en oauth o en SAML (SSO) contra un
+ * servidor de autenticaciÃ³n externo REF:
  * https://is.docs.wso2.com/en/latest/sdks/spring-boot/ para hacerlo con el
  * identity server de WSO2 usando oauth
  */
@@ -57,15 +57,15 @@ public class DefaultWebSecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests.antMatchers("/").authenticated()
-                .antMatchers(HttpMethod.POST, "/notification/**").permitAll().antMatchers("/fhir/servers")
-                .authenticated().antMatchers("/fhir/servers/*").authenticated()
-                .antMatchers("/fhir/servers/*/subscriptions").authenticated()
-                .antMatchers("/fhir/servers/*/subscriptions/*").authenticated()
-                .antMatchers("/fhir/servers/*/subscriptions/*/delete").authenticated()
-                .antMatchers("/kafka").authenticated().antMatchers("/kafka/brokers/add").authenticated()
-                .antMatchers("/kafka/brokers/delete").authenticated()
-                .antMatchers("/img/*").permitAll())
+        http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/").authenticated()
+                .requestMatchers(HttpMethod.POST, "/notification/**").permitAll().requestMatchers("/fhir/servers")
+                .authenticated().requestMatchers("/fhir/servers/*").authenticated()
+                .requestMatchers("/fhir/servers/*/subscriptions").authenticated()
+                .requestMatchers("/fhir/servers/*/subscriptions/*").authenticated()
+                .requestMatchers("/fhir/servers/*/subscriptions/*/delete").authenticated()
+                .requestMatchers("/kafka").authenticated().requestMatchers("/kafka/brokers/add").authenticated()
+                .requestMatchers("/kafka/brokers/delete").authenticated()
+                .requestMatchers("/img/*").permitAll())
                 .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/access-denied.html"))
                 .csrf((csrf) -> csrf.disable()).httpBasic(withDefaults()).cors(withDefaults())
                 .formLogin(withDefaults());
@@ -73,8 +73,8 @@ public class DefaultWebSecurityConfig {
     }
 
     /**
-     * Configuración de la autenticación con autenticación en memoria y encriptada
-     * Muy débil no sirve para producción
+     * ConfiguraciÃ³n de la autenticaciÃ³n con autenticaciÃ³n en memoria y encriptada
+     * Muy dÃ©bil no sirve para producciÃ³n
      **/
     @Bean
     UserDetailsService userDetailsService(BCryptPasswordEncoder encoder) {

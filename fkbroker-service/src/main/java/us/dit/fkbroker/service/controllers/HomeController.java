@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -25,7 +25,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Controlador que gestiona las llamadas a los métodos principales.
+ * Controlador que gestiona las llamadas a los mÃ©todos principales.
  * 
  * @author josperbel
  * @version 1.0
@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
 
     /**
-     * Maneja las solicitudes GET para obtener la página principal.
+     * Maneja las solicitudes GET para obtener la pÃ¡gina principal.
      * 
-     * @param model el modelo de Spring para añadir atributos.
-     * @return el nombre de la vista de la página principal.
+     * @param model el modelo de Spring para aÃ±adir atributos.
+     * @return el nombre de la vista de la pÃ¡gina principal.
      */
     @GetMapping("/")
     public String getHomePage(Model model) {

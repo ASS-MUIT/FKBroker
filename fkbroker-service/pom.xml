@@ -11,21 +11,22 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.15</version>
+		<version>3.3.5</version>
 	</parent>
 	<properties>
 		<hapifhir.version>7.2.0</hapifhir.version>
 		<jackson.version>2.17.0</jackson.version>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<java.version>21</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<narayana.version>5.9.0.Final</narayana.version>
 		<fabric8.version>3.5.40</fabric8.version>
-		<version.com.h2database>1.4.197</version.com.h2database>
-		<version.io.swagger>1.6.2</version.io.swagger>
-		<version.org.apache.cxf>3.4.10</version.org.apache.cxf>
-		<version.org.webjars.swagger-ui>2.2.10</version.org.webjars.swagger-ui>
+		<version.com.h2database>2.2.224</version.com.h2database>
+		<version.io.swagger>1.6.14</version.io.swagger>
+		<version.org.apache.cxf>4.0.3</version.org.apache.cxf>
+		<version.org.webjars.swagger-ui>5.10.3</version.org.webjars.swagger-ui>
 	</properties>
 
 	<dependencies>
@@ -57,6 +58,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Spring Kafka Test -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -75,6 +83,9 @@
 		</dependency>
 
 		<!-- Swagger -->
+		<!-- NOTA: cxf-rt-rs-service-description-swagger ha sido deprecado en CXF 4.x -->
+		<!-- Considera migrar a SpringDoc OpenAPI 2.x para Spring Boot 3 -->
+		<!--
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-rs-service-description-swagger</artifactId>
@@ -84,8 +95,22 @@
 					<groupId>javax.validation</groupId>
 					<artifactId>validation-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>jakarta.validation</groupId>
+					<artifactId>jakarta.validation-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
+		-->
+		
+		<!-- Alternativa moderna: SpringDoc OpenAPI para Spring Boot 3 -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		
+		<!--
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-jaxrs</artifactId>
@@ -99,6 +124,10 @@
 					<groupId>javax.validation</groupId>
 					<artifactId>validation-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>jakarta.validation</groupId>
+					<artifactId>jakarta.validation-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -106,6 +135,7 @@
 			<artifactId>swagger-ui</artifactId>
 			<version>${version.org.webjars.swagger-ui}</version>
 		</dependency>
+		-->
 	
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
@@ -182,16 +212,10 @@
             <version>${jackson.version}</version>
         </dependency>
         <!-- PERSISTENCIA -->
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>javax.persistence-api</artifactId>
-			<version>2.2</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api -->
+		<!-- Jakarta Persistence API (reemplaza javax.persistence) -->
 		<dependency>
   		  <groupId>jakarta.persistence</groupId>
    		  <artifactId>jakarta.persistence-api</artifactId>
-   		  <version>3.2.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
@@ -202,33 +226,24 @@
 
 		
 
-		<!-- JAXB Dependencies -->
+		<!-- Jakarta JAXB Dependencies (reemplaza javax.xml.bind) -->
 		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>2.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
-			<version>2.3.1</version>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>2.3.1</version>
 		</dependency>
 
 		<!--loggin-->
 		    <dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.30</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
-				<version>1.7.30</version>
 			</dependency>
 
 	</dependencies>
@@ -324,7 +339,7 @@
 									<name>
 										apps/${project.artifactId}:${project.version}</name>
 									<build>
-										<from>fabric8/java-jboss-openjdk8-jdk</from>
+										<from>eclipse-temurin:21-jdk</from>
 										<assembly>
 											<targetDir>/</targetDir>
 											<inline>
@@ -409,7 +424,7 @@
 									<name>
 										apps/${project.artifactId}:${project.version}</name>
 									<build>
-										<from>fabric8/java-jboss-openjdk8-jdk</from>
+										<from>eclipse-temurin:21-jdk</from>
 										<assembly>
 											<targetDir>/</targetDir>
 											<inline>

@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -35,7 +35,7 @@ import us.dit.fkbroker.service.entities.db.FhirServer;
 import us.dit.fkbroker.service.entities.db.SubscriptionData;
 
 /**
- * Servicio para comprobar que no se haya perdido la conexión en las
+ * Servicio para comprobar que no se haya perdido la conexiÃ³n en las
  * suscripciones que se encuentran en servidores con Heartbeat configurado.
  * 
  * @author josperbel
@@ -77,7 +77,7 @@ public class CheckService {
 
     @Scheduled(fixedRateString = "${fhir.subscription.heartbeat.check.fixed.rate}", initialDelayString = "${fhir.subscription.heartbeat.check.initial.delay}")
     public void checkSystem() {
-        logger.debug("Se inicia proceso de comprobación de heartbeats");
+        logger.debug("Se inicia proceso de comprobaciÃ³n de heartbeats");
 
         // Obtiene todos los servidores con heartbeats activados
         List<FhirServer> fhirServers = fhirServerService.getFhirServersWithHeartbeat();
@@ -87,16 +87,16 @@ public class CheckService {
             List<SubscriptionData> subscriptionDatas = subscriptionService.getSubscriptions(fhirServer.getId());
 
             for (SubscriptionData subscriptionData : subscriptionDatas) {
-                // Comprueda cuanto tiempo hace desde que recibió la última actualización
+                // Comprueda cuanto tiempo hace desde que recibiÃ³ la Ãºltima actualizaciÃ³n
                 Instant lastUpdate = subscriptionData.getUpdated().toInstant();
                 Long secondsElapsed = Duration.between(lastUpdate, Instant.now()).getSeconds();
 
-                // En caso de que haya pasado pasado más tiempo del configurado
+                // En caso de que haya pasado pasado mÃ¡s tiempo del configurado
                 if (secondsElapsed > heartbeatPeriod * heartbeatErrors) {
                     logger.warn(
-                            "Se detecta periodo de inactividad mayor al permitido para la subscripción {} del servidor {}.",
+                            "Se detecta periodo de inactividad mayor al permitido para la subscripciÃ³n {} del servidor {}.",
                             subscriptionData.getIdSubscription(), fhirServer.getId());
-                    // Se actualiza la información de la subscripción
+                    // Se actualiza la informaciÃ³n de la subscripciÃ³n
                     notificationService.updateSubscriptionStatus(fhirServer, subscriptionData);
                     subscriptionService.updateSubscription(subscriptionData);
                 }

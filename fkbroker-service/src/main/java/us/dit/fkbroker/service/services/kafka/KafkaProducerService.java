@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -32,7 +32,7 @@ import us.dit.fkbroker.service.entities.db.KafkaBroker;
 import us.dit.fkbroker.service.repositories.KafkaBrokerRepository;
 
 /**
- * Servicio para gestionar la publicación de mensajes en Kafka
+ * Servicio para gestionar la publicaciÃ³n de mensajes en Kafka
  * 
  * @author josperbel
  * @version 1.0
@@ -70,11 +70,11 @@ public class KafkaProducerService {
             // Verifica que exista un broker configurado
             Optional<KafkaBroker> broker = kafkaBrokerRepository.findFirstByOrderByIdAsc();
             if (!broker.isPresent()) {
-                logger.error("No hay ningún broker Kafka configurado");
+                logger.error("No hay ningÃºn broker Kafka configurado");
                 return;
             }
 
-            // Configura dinámicamente el bootstrap servers
+            // Configura dinÃ¡micamente el bootstrap servers
             kafkaTemplate.getProducerFactory().getConfigurationProperties()
                     .put("bootstrap.servers", broker.get().getBootstrapServers());
 

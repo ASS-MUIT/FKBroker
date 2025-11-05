@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -32,7 +32,7 @@ import us.dit.fkbroker.service.services.fhir.FhirServerService;
 import us.dit.fkbroker.service.services.fhir.SubscriptionTopicService;
 
 /**
- * Controlador que gestiona las llamadas a los métodos necesarios al navegar por
+ * Controlador que gestiona las llamadas a los mÃ©todos necesarios al navegar por
  * la interfaz web.
  * 
  * @author josperbel
@@ -63,23 +63,23 @@ public class SubscriptionTopicController {
     }
 
     /**
-     * Maneja las solicitudes GET para obtener la página de detalles de un tema de
-     * subscripción. Obtiene los datos del servidor FHIR y el SubscriptionTopic.
+     * Maneja las solicitudes GET para obtener la pÃ¡gina de detalles de un tema de
+     * subscripciÃ³n. Obtiene los datos del servidor FHIR y el SubscriptionTopic.
      * 
-     * @param model    el modelo de Spring para añadir atributos.
+     * @param model    el modelo de Spring para aÃ±adir atributos.
      * @param idServer identificador del servidor FHIR.
      * @param idTopic  identificador del SubscriptionTopic.
-     * @return el nombre de la vista la página de detalles de un tema de
-     *         subscripción.
+     * @return el nombre de la vista la pÃ¡gina de detalles de un tema de
+     *         subscripciÃ³n.
      * 
      */
     @GetMapping("/{idTopic}")
     public String getTopic(Model model, @PathVariable Long idServer, @PathVariable String idTopic) {
-        // Obtiene los datos del servidor FHIR y los añade al modelo
+        // Obtiene los datos del servidor FHIR y los aÃ±ade al modelo
         FhirServer server = fhirServerService.getFhirServer(idServer);
         model.addAttribute("fhirServer", server);
 
-        // Obtiene los detalles del SubscriptionTopic y los añade al modelo
+        // Obtiene los detalles del SubscriptionTopic y los aÃ±ade al modelo
         String topic = subscriptionTopicService.getSubscriptionTopicString(server.getUrl(), idTopic);
         model.addAttribute("topic", topic);
 

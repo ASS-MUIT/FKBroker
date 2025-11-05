@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -32,7 +32,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
 /**
- * Configuración de Kafka Producer
+ * ConfiguraciÃ³n de Kafka Producer
  * 
  * @author josperbel
  * @version 1.0
@@ -42,15 +42,15 @@ import org.springframework.kafka.core.ProducerFactory;
 public class KafkaConfig {
 
     /**
-     * Crea la factoría de productores de Kafka con configuración dinámica.
-     * La dirección del broker se obtendrá de la base de datos.
+     * Crea la factorÃ­a de productores de Kafka con configuraciÃ³n dinÃ¡mica.
+     * La direcciÃ³n del broker se obtendrÃ¡ de la base de datos.
      * 
-     * @return la factoría de productores configurada
+     * @return la factorÃ­a de productores configurada
      */
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        // Configuración por defecto, se puede sobrescribir dinámicamente
+        // ConfiguraciÃ³n por defecto, se puede sobrescribir dinÃ¡micamente
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");

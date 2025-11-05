@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -58,7 +58,7 @@ public class SubscriptionTopicMapper {
      * Transforma un objeto FHIR {@link SubscriptionTopic} en el objeto de dominio
      * {@link SubscriptionTopicEntry}
      * 
-     * @param subscriptionTopic objeto FHIR con datos del tema de la subscripción
+     * @param subscriptionTopic objeto FHIR con datos del tema de la subscripciÃ³n
      *                          que se desea transformar en el objeto de dominio
      *                          {@link SubscriptionTopicEntry}.
      * @return el objeto {@link SubscriptionTopicEntry}.
@@ -69,8 +69,8 @@ public class SubscriptionTopicMapper {
         subscriptionTopicEntry.setId(subscriptionTopic.getIdElement().getIdPart());
         subscriptionTopicEntry.setName(subscriptionTopic.getTitle());
 
-        // Para esta implementación se está suponiendo que los Topics tendrán
-        // configurado un único ResourceTrigger con una única SupportedInteraction
+        // Para esta implementaciÃ³n se estÃ¡ suponiendo que los Topics tendrÃ¡n
+        // configurado un Ãºnico ResourceTrigger con una Ãºnica SupportedInteraction
         subscriptionTopicEntry.setResource(subscriptionTopic.getResourceTriggerFirstRep().getResource());
         subscriptionTopicEntry.setInteraction(
                 subscriptionTopic.getResourceTriggerFirstRep().getSupportedInteraction().get(0).asStringValue());
@@ -82,7 +82,7 @@ public class SubscriptionTopicMapper {
      * Transforma un objeto FHIR {@link SubscriptionTopic} en el objeto de dominio
      * {@link SubscriptionTopicDetails}
      * 
-     * @param subscriptionTopic objeto FHIR con datos del tema de la subscripción
+     * @param subscriptionTopic objeto FHIR con datos del tema de la subscripciÃ³n
      *                          que se desea transformar en el objeto de dominio
      *                          {@link SubscriptionTopicDetails}.
      * @return el objeto {@link SubscriptionTopicDetails}.
@@ -94,8 +94,8 @@ public class SubscriptionTopicMapper {
         subscriptionTopicDetails.setName(subscriptionTopic.getTitle());
         subscriptionTopicDetails.setUrl(subscriptionTopic.getUrl());
 
-        // Para esta implementación se está suponiendo que los Topics tendrán
-        // configurado un único ResourceTrigger con una única SupportedInteraction
+        // Para esta implementaciÃ³n se estÃ¡ suponiendo que los Topics tendrÃ¡n
+        // configurado un Ãºnico ResourceTrigger con una Ãºnica SupportedInteraction
         subscriptionTopicDetails.setResource(subscriptionTopic.getResourceTriggerFirstRep().getResource());
         subscriptionTopicDetails.setInteraction(
                 subscriptionTopic.getResourceTriggerFirstRep().getSupportedInteraction().get(0).asStringValue());
@@ -118,8 +118,8 @@ public class SubscriptionTopicMapper {
     /**
      * Transforma un objeto FHIR {@link SubscriptionTopic} en una cadena de texto.
      * 
-     * @param subscriptionTopic objeto FHIR con los datos del tema de subscripción.
-     * @return la cadena de texto con los datos del tema de subscripción.
+     * @param subscriptionTopic objeto FHIR con los datos del tema de subscripciÃ³n.
+     * @return la cadena de texto con los datos del tema de subscripciÃ³n.
      */
     public String toString(SubscriptionTopic subscriptionTopic) {
         return jsonParser.setPrettyPrint(true).encodeResourceToString(subscriptionTopic);

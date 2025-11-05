@@ -1,6 +1,6 @@
 /**
 *  This file is part of FKBroker - Broker sending signals to KIEServers from FHIR notifications.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de IngenierÃ­a TelemÃ¡tica
 *
 *  FKBroker is free software: you can redistribute it and/or
 *  modify it under the terms of the GNU General Public License as published
@@ -64,7 +64,7 @@ public class FhirServerService {
 
     /**
      * Obtiene un servidor FHIR de la base de datos por su identificador. Si no
-     * existe ningún servidor con ese identificador lanza una excepción.
+     * existe ningÃºn servidor con ese identificador lanza una excepciÃ³n.
      * 
      * @param id identificador del servidor FHIR a obtener.
      * @return el servidor FHIR obtenido.
@@ -109,9 +109,9 @@ public class FhirServerService {
     }
 
     /**
-     * Elimina un servidor FHIR de la base de datos. También elimina todas las
+     * Elimina un servidor FHIR de la base de datos. TambiÃ©n elimina todas las
      * subscripciones del servidor FHIR y de la base de datos y todos los temas de
-     * subscripción de la base de datos.
+     * subscripciÃ³n de la base de datos.
      * 
      * @param id identificador del servidor FHIR a eliminar.
      */
@@ -128,7 +128,7 @@ public class FhirServerService {
             subscriptionService.deleteSubscription(fhirServer, subscriptionData.getIdSubscription());
         }
 
-        // Elimina todos los temas de subscripción de la base de datos
+        // Elimina todos los temas de subscripciÃ³n de la base de datos
         subscriptionTopicService.deleteSubscriptionTopics(fhirServer);
 
         // Elimina los datos del servidor de la base de datos
